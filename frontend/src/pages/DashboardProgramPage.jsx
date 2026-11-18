@@ -104,22 +104,24 @@ export function DashboardProgramPage() {
         <ErrorState message={error} onRetry={fetchData} />
       ) : (
         <>
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
-            <h3 className="text-base font-bold text-slate-900 mb-1">
-              Komparasi Pelaksanaan & Rata-rata Skor per Program
-            </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Rasio pelaksanaan Ya (%) dan rata-rata skor konversi (0–100)
-            </p>
-            <div className="h-72">
+          <div className="rounded-2xl border border-slate-200/80 bg-white shadow-md overflow-hidden">
+            <div className="bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 px-5 py-3.5 text-white">
+              <h3 className="text-base font-extrabold">
+                Komparasi Pelaksanaan & Rata-rata Skor per Program
+              </h3>
+              <p className="text-xs text-sky-100">
+                Rasio pelaksanaan Ya (%) dan rata-rata skor konversi (0–100)
+              </p>
+            </div>
+            <div className="p-5 h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={rows}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="nama_program" tick={{ fontSize: 11 }} />
+                  <XAxis dataKey="nama_program" tick={{ fontSize: 11, fontWeight: 600 }} />
                   <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="rasio_pelaksanaan" name="Rasio Ya (%)" fill="#059669" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="rasio_pelaksanaan" name="Rasio Ya (%)" fill="#10b981" radius={[6, 6, 0, 0]} />
                   <Bar dataKey="rata_skor" name="Rata Skor (0-100)" fill="#f59e0b" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

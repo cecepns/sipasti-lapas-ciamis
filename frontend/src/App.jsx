@@ -15,6 +15,8 @@ import { DashboardProgramPage } from '@/pages/DashboardProgramPage';
 import { DashboardAsesorPage } from '@/pages/DashboardAsesorPage';
 import { AssessmentsPage } from '@/pages/AssessmentsPage';
 import { AttendancesPage } from '@/pages/AttendancesPage';
+import { RekapPeriodikPage } from '@/pages/RekapPeriodikPage';
+import { PanduanPage } from '@/pages/PanduanPage';
 import { WbpPage } from '@/pages/WbpPage';
 import { ProgramsPage } from '@/pages/ProgramsPage';
 import { MitraPage } from '@/pages/MitraPage';
@@ -50,6 +52,7 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/absensi-kiosk" element={<PublicAbsensiPage />} />
           <Route path="/registrasi-mitra" element={<PublicMitraRegisterPage />} />
+          <Route path="/panduan" element={<PanduanPage isPublic />} />
 
           {/* Authenticated Portal Routes */}
           <Route
@@ -66,7 +69,9 @@ export default function App() {
             <Route path="dasbor-program" element={<DashboardProgramPage />} />
             <Route path="dasbor-asesor" element={<DashboardAsesorPage />} />
             <Route path="penilaian" element={<AssessmentsPage />} />
+            <Route path="rekap-penilaian" element={<RekapPeriodikPage />} />
             <Route path="absensi" element={<AttendancesPage />} />
+            <Route path="panduan" element={<PanduanPage />} />
             <Route
               path="wbp"
               element={

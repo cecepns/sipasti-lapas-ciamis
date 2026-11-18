@@ -59,6 +59,8 @@ const EMPTY_FORM = {
   ekspirasi: null,
   wali_pas: null,
   status: STATUS_OPTIONS[0],
+  foto_file: null,
+  foto_preview: null,
 };
 
 export function WbpPage() {
@@ -140,6 +142,8 @@ export function WbpPage() {
       ekspirasi: item.ekspirasi ? new Date(item.ekspirasi) : null,
       wali_pas: item.wali_pas_id ? { value: item.wali_pas_id, label: item.wali_pas_nama || 'Wali PAS' } : null,
       status: STATUS_OPTIONS.find((s) => s.value === item.status) || STATUS_OPTIONS[0],
+      foto_file: null,
+      foto_preview: item.foto_wajah ? getAssetUrl(item.foto_wajah) : null,
     });
     setModalOpen(true);
   };
@@ -151,26 +155,29 @@ export function WbpPage() {
     }
     setSaving(true);
     try {
-      const payload = {
-        no_registrasi: form.no_registrasi.trim(),
-        nama: form.nama.trim(),
-        nik: form.nik,
-        tempat_lahir: form.tempat_lahir,
-        tanggal_lahir: toIsoDate(form.tanggal_lahir) || null,
-        agama: form.agama?.value || 'Islam',
-        blok_kamar: form.blok_kamar,
-        perkara: form.perkara,
-        lama_pidana: form.lama_pidana,
-        tanggal_masuk: toIsoDate(form.tanggal_masuk) || null,
-        ekspirasi: toIsoDate(form.ekspirasi) || null,
-        wali_pas_id: form.wali_pas?.value || null,
-        status: form.status?.value || 'aktif',
-      };
+      const fd = new FormData();
+      fd.append('no_registrasi', form.no_registrasi.trim());
+      fd.append('nama', form.nama.trim());
+      fd.append('nik', form.nik || '');
+      fd.append('tempat_lahir', form.tempat_lahir || '');
+      if (form.tanggal_lahir) fd.append('tanggal_lahir', toIsoDate(form.tanggal_lahir));
+      fd.append('agama', form.agama?.value || 'Islam');
+      fd.append('blok_kamar', form.blok_kamar || '');
+      fd.append('perkara', form.perkara || '');
+      fd.append('lama_pidana', form.lama_pidana || '');
+      if (form.tanggal_masuk) fd.append('tanggal_masuk', toIsoDate(form.tanggal_masuk));
+      if (form.ekspirasi) fd.append('ekspirasi', toIsoDate(form.ekspirasi));
+      if (form.wali_pas?.value) fd.append('wali_pas_id', form.wali_pas.value);
+      fd.append('status', form.status?.value || 'aktif');
+      if (form.foto_file) {
+        fd.append('foto_wajah', form.foto_file);
+      }
+
       if (form.id) {
-        await request.put(API_ENDPOINTS.WBP.DETAIL(form.id), payload);
+        await request.upload(API_ENDPOINTS.WBP.DETAIL(form.id), fd, 'put');
         toast.success('Data WBP berhasil diperbarui');
       } else {
-        await request.post(API_ENDPOINTS.WBP.LIST, payload);
+        await request.upload(API_ENDPOINTS.WBP.LIST, fd, 'post');
         toast.success('Data WBP baru berhasil ditambahkan');
       }
       setModalOpen(false);
@@ -573,6 +580,34 @@ export function WbpPage() {
                 value={form.wali_pas}
                 onChange={(v) => setForm({ ...form, wali_pas: v })}
                 placeholder="Cari Wali PAS..."
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              Pas Foto Profil WBP 3x4 (Ditampilkan pada Laporan Profil PDF)
+            </label>
+            <div className="flex items-center gap-4">
+              {form.foto_preview && (
+                <img
+                  src={form.foto_preview}
+                  alt="Preview Foto WBP"
+                  className="h-16 w-14 rounded-xl object-cover border border-emerald-200 shrink-0"
+                />
+              )}
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setForm({
+                    ...form,
+                    foto_file: file,
+                    foto_preview: file ? URL.createObjectURL(file) : form.foto_preview,
+                  });
+                }}
+                className="block w-full text-xs text-slate-500 file:mr-3 file:rounded-xl file:border-0 file:bg-emerald-50 file:px-3.5 file:py-2 file:text-xs file:font-semibold file:text-emerald-700 hover:file:bg-emerald-100"
               />
             </div>
           </div>

@@ -1,7 +1,7 @@
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { CalendarDays, X } from 'lucide-react';
-import { startOfMonth, subDays } from 'date-fns';
+import { startOfMonth, startOfQuarter, startOfWeek, subDays } from 'date-fns';
 
 export function DateRangeFilter({
   startDate,
@@ -20,12 +20,14 @@ export function DateRangeFilter({
     const today = new Date();
     if (type === 'today') {
       onChange?.({ startDate: today, endDate: today });
-    } else if (type === '7d') {
-      onChange?.({ startDate: subDays(today, 6), endDate: today });
-    } else if (type === '30d') {
-      onChange?.({ startDate: subDays(today, 29), endDate: today });
+    } else if (type === 'week') {
+      onChange?.({ startDate: startOfWeek(today, { weekStartsOn: 1 }), endDate: today });
     } else if (type === 'month') {
       onChange?.({ startDate: startOfMonth(today), endDate: today });
+    } else if (type === 'quarter') {
+      onChange?.({ startDate: startOfQuarter(today), endDate: today });
+    } else if (type === '90d') {
+      onChange?.({ startDate: subDays(today, 89), endDate: today });
     } else {
       onChange?.({ startDate: null, endDate: null });
     }
@@ -62,17 +64,17 @@ export function DateRangeFilter({
       {showPresets && (
         <div className="flex flex-wrap items-center gap-1">
           {[
-            { key: 'today', label: 'Hari Ini' },
-            { key: '7d', label: '7 Hari' },
-            { key: '30d', label: '30 Hari' },
-            { key: 'month', label: 'Bulan Ini' },
+            { key: 'today', label: 'Harian' },
+            { key: 'week', label: 'Mingguan' },
+            { key: 'month', label: 'Bulanan' },
+            { key: 'quarter', label: 'Triwulan (3 Bln)' },
             { key: 'all', label: 'Semua' },
           ].map((preset) => (
             <button
               key={preset.key}
               type="button"
               onClick={() => applyPreset(preset.key)}
-              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
             >
               {preset.label}
             </button>

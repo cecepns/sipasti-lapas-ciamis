@@ -114,20 +114,25 @@ export function DashboardAsesorPage() {
         <ErrorState message={error} onRetry={fetchData} />
       ) : (
         <>
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
-            <h3 className="text-base font-bold text-slate-900 mb-4">
-              Produktivitas Input Penilaian SPPN & PPKS per Asesor
-            </h3>
-            <div className="h-72">
+          <div className="rounded-2xl border border-slate-200/80 bg-white shadow-md overflow-hidden">
+            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 px-5 py-3.5 text-white">
+              <h3 className="text-base font-extrabold">
+                Produktivitas Input Penilaian SPPN & PPKS per Asesor
+              </h3>
+              <p className="text-xs text-purple-100">
+                Perbandingan kontribusi input penilaian Wali PAS dan Mitra Keagamaan
+              </p>
+            </div>
+            <div className="p-5 h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={rows.slice(0, 10)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="nama" tick={{ fontSize: 10 }} />
+                  <XAxis dataKey="nama" tick={{ fontSize: 10, fontWeight: 600 }} />
                   <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="total_sppn" name="SPPN" stackId="a" fill="#059669" />
-                  <Bar dataKey="total_ppks" name="PPKS" stackId="a" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="total_sppn" name="SPPN (Utama)" stackId="a" fill="#10b981" />
+                  <Bar dataKey="total_ppks" name="PPKS (Pendukung)" stackId="a" fill="#f59e0b" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

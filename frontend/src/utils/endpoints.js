@@ -56,5 +56,6 @@ export const API_ENDPOINTS = {
 
   REPORTS: {
     EXPORT_DATA: '/reports/export-data',
+    REKAP_PERIODIK: '/reports/rekap-periodik',
   },
 };

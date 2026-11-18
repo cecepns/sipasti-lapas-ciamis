@@ -110,12 +110,104 @@ function computeAssessmentScore({ pelaksanaan, nilai_karakter, aspek_ibadah, asp
   return Number((avg * 20).toFixed(2));
 }
 
-function getPredikat(score) {
-  const s = Number(score || 0);
-  if (s >= 85) return { label: 'Sangat Baik', rekomendasi: 'Direkomendasikan Penuh', color: 'emerald' };
-  if (s >= 70) return { label: 'Baik', rekomendasi: 'Memenuhi Syarat', color: 'blue' };
-  if (s >= 55) return { label: 'Cukup', rekomendasi: 'Perlu Pembinaan Lanjutan', color: 'amber' };
-  return { label: 'Kurang', rekomendasi: 'Belum Memenuhi Syarat', color: 'rose' };
+const PASSING_THRESHOLD = 70;
+
+function evaluateSppnPpks(assessments = []) {
+  const sppnAll = assessments.filter((a) => a.jenis_penilaian === 'SPPN');
+  const ppksAll = assessments.filter((a) => a.jenis_penilaian === 'PPKS');
+
+  const calcBucket = (list) => {
+    const count = list.length;
+    const ya = list.filter((a) => a.pelaksanaan === 'Ya').length;
+    const tidak = count - ya;
+    const avgSkor = count
+      ? Number((list.reduce((sum, a) => sum + Number(a.skor_akhir || 0), 0) / count).toFixed(2))
+      : 0;
+    const karakterList = list.map((a) => Number(a.nilai_karakter)).filter((v) => v >= 1 && v <= 5);
+    const avgKarakter = karakterList.length
+      ? Number((karakterList.reduce((sum, v) => sum + v, 0) / karakterList.length).toFixed(2))
+      : 0;
+    const memenuhi = count > 0 && avgSkor >= PASSING_THRESHOLD;
+    return { count, ya, tidak, avgSkor, avgKarakter, memenuhi };
+  };
+
+  const sppn = calcBucket(sppnAll);
+  const ppks = calcBucket(ppksAll);
+
+  let rekomendasi;
+  if (!sppn.memenuhi) {
+    rekomendasi = {
+      code: 'tidak_direkomendasikan',
+      label: 'Tidak Direkomendasikan',
+      shortLabel: 'Tidak Direkomendasikan',
+      color: 'rose',
+      keterangan:
+        sppn.count === 0
+          ? 'Belum terdapat nilai utama SPPN pada periode evaluasi ini.'
+          : `Nilai utama SPPN (${sppn.avgSkor}) belum mencapai ambang batas minimal (${PASSING_THRESHOLD}). Wajib pembinaan lanjutan.`,
+    };
+  } else if (ppks.memenuhi) {
+    rekomendasi = {
+      code: 'direkomendasikan',
+      label: 'Direkomendasikan',
+      shortLabel: 'Direkomendasikan',
+      color: 'emerald',
+      keterangan: `Nilai utama SPPN (${sppn.avgSkor}) dan pendukung monitoring PPKS (${ppks.avgSkor}) memenuhi syarat (>= ${PASSING_THRESHOLD}).`,
+    };
+  } else {
+    rekomendasi = {
+      code: 'direkomendasikan_dengan_catatan',
+      label: 'Direkomendasikan dengan Catatan',
+      shortLabel: 'Dengan Catatan',
+      color: 'amber',
+      keterangan:
+        ppks.count === 0
+          ? `Nilai utama SPPN (${sppn.avgSkor}) memenuhi syarat, namun nilai pendukung PPKS belum tersedia (perlu monitoring pembinaan spiritual lanjutan).`
+          : `Nilai utama SPPN (${sppn.avgSkor}) memenuhi syarat, namun nilai pendukung PPKS (${ppks.avgSkor}) belum mencapai ${PASSING_THRESHOLD} — perlu didikan spiritual lanjutan.`,
+    };
+  }
+
+  return {
+    sppn: {
+      ...sppn,
+      status: sppn.count === 0 ? 'Belum Dinilai' : sppn.memenuhi ? 'Memenuhi Syarat' : 'Belum Memenuhi Syarat',
+    },
+    ppks: {
+      ...ppks,
+      status: ppks.count === 0 ? 'Belum Dinilai' : ppks.memenuhi ? 'Memenuhi Syarat' : 'Perlu Didikan Lanjutan',
+    },
+    rekomendasi,
+  };
+}
+
+function getPeriodGrouping(period = 'bulanan') {
+  switch (String(period || 'bulanan').toLowerCase()) {
+    case 'harian':
+      return {
+        period: 'harian',
+        keyExpr: "DATE_FORMAT(a.tanggal, '%Y-%m-%d')",
+        labelExpr: "DATE_FORMAT(a.tanggal, '%d %b %Y')",
+      };
+    case 'mingguan':
+      return {
+        period: 'mingguan',
+        keyExpr: "DATE_FORMAT(a.tanggal, '%x-W%v')",
+        labelExpr: "CONCAT('Minggu ', WEEK(a.tanggal, 3), ' (', DATE_FORMAT(DATE_SUB(DATE(a.tanggal), INTERVAL WEEKDAY(a.tanggal) DAY), '%d %b %Y'), ')')",
+      };
+    case 'triwulan':
+      return {
+        period: 'triwulan',
+        keyExpr: "CONCAT(YEAR(a.tanggal), '-Q', QUARTER(a.tanggal))",
+        labelExpr: "CONCAT('Triwulan ', ELT(QUARTER(a.tanggal), 'I (Jan-Mar)', 'II (Apr-Jun)', 'III (Jul-Sep)', 'IV (Okt-Des)'), ' ', YEAR(a.tanggal))",
+      };
+    case 'bulanan':
+    default:
+      return {
+        period: 'bulanan',
+        keyExpr: "DATE_FORMAT(a.tanggal, '%Y-%m')",
+        labelExpr: "DATE_FORMAT(a.tanggal, '%M %Y')",
+      };
+  }
 }
 
 function computePeriodMonthFactor(startDate, endDate) {
@@ -1011,51 +1103,42 @@ app.get('/api/wbp/:id', authenticate, async (req, res, next) => {
     );
 
     const monthFactor = computePeriodMonthFactor(startDate, endDate);
-    let totalWeightedScore = 0;
-    let totalBobot = 0;
+    const evalResult = evaluateSppnPpks(assessments);
 
-    const programSummary = programs.map((prog) => {
-      const pLogs = assessments.filter((a) => a.program_id === prog.id);
-      const yaCount = pLogs.filter((a) => a.pelaksanaan === 'Ya').length;
-      const tidakCount = pLogs.filter((a) => a.pelaksanaan === 'Tidak').length;
-      const karakterVals = pLogs.map((a) => Number(a.nilai_karakter)).filter((v) => v >= 1 && v <= 5);
-      const avgKarakter = karakterVals.length
-        ? Number((karakterVals.reduce((s, v) => s + v, 0) / karakterVals.length).toFixed(2))
-        : 0;
-      const scaledTarget = Math.max(1, Math.round(Number(prog.target_bulanan || 1) * monthFactor));
-      const capaianPersen = Number(Math.min(100, (yaCount / scaledTarget) * 100).toFixed(1));
-      const skorProgram = Number(((capaianPersen * 0.5) + (avgKarakter * 20 * 0.5)).toFixed(2));
-      const kontribusiBobot = Number(((skorProgram * Number(prog.bobot)) / 100).toFixed(2));
+    const buildProgramBreakdown = (subset) =>
+      programs.map((prog) => {
+        const pLogs = subset.filter((a) => a.program_id === prog.id);
+        const yaCount = pLogs.filter((a) => a.pelaksanaan === 'Ya').length;
+        const tidakCount = pLogs.filter((a) => a.pelaksanaan === 'Tidak').length;
+        const karakterVals = pLogs.map((a) => Number(a.nilai_karakter)).filter((v) => v >= 1 && v <= 5);
+        const avgKarakter = karakterVals.length
+          ? Number((karakterVals.reduce((s, v) => s + v, 0) / karakterVals.length).toFixed(2))
+          : 0;
+        const avgSkor = pLogs.length
+          ? Number((pLogs.reduce((s, a) => s + Number(a.skor_akhir || 0), 0) / pLogs.length).toFixed(2))
+          : 0;
+        const scaledTarget = Math.max(1, Math.round(Number(prog.target_bulanan || 1) * monthFactor));
+        const capaianPersen = Number(Math.min(100, (yaCount / scaledTarget) * 100).toFixed(1));
+        return {
+          program_id: prog.id,
+          kode_program: prog.kode_program,
+          nama_program: prog.nama_program,
+          kategori: prog.kategori,
+          bobot: Number(prog.bobot),
+          target_periode: scaledTarget,
+          jumlah_ya: yaCount,
+          jumlah_tidak: tidakCount,
+          total_log: pLogs.length,
+          capaian_persen: capaianPersen,
+          rata_karakter: avgKarakter,
+          rata_skor: avgSkor,
+        };
+      });
 
-      totalWeightedScore += kontribusiBobot;
-      totalBobot += Number(prog.bobot);
-
-      return {
-        program_id: prog.id,
-        kode_program: prog.kode_program,
-        nama_program: prog.nama_program,
-        kategori: prog.kategori,
-        bobot: Number(prog.bobot),
-        target_periode: scaledTarget,
-        jumlah_ya: yaCount,
-        jumlah_tidak: tidakCount,
-        total_log: pLogs.length,
-        capaian_persen: capaianPersen,
-        rata_karakter: avgKarakter,
-        skor_program: skorProgram,
-        kontribusi_bobot: kontribusiBobot,
-      };
-    });
-
-    const normalizedTotal = totalBobot > 0 ? Number(((totalWeightedScore / totalBobot) * 100).toFixed(2)) : 0;
-    const sppnLogs = assessments.filter((a) => a.jenis_penilaian === 'SPPN' && a.pelaksanaan === 'Ya');
-    const ppksLogs = assessments.filter((a) => a.jenis_penilaian === 'PPKS' && a.pelaksanaan === 'Ya');
-    const sppnAvg = sppnLogs.length
-      ? Number((sppnLogs.reduce((s, a) => s + Number(a.skor_akhir || 0), 0) / sppnLogs.length).toFixed(2))
-      : 0;
-    const ppksAvg = ppksLogs.length
-      ? Number((ppksLogs.reduce((s, a) => s + Number(a.skor_akhir || 0), 0) / ppksLogs.length).toFixed(2))
-      : 0;
+    const sppnAssessments = assessments.filter((a) => a.jenis_penilaian === 'SPPN');
+    const ppksAssessments = assessments.filter((a) => a.jenis_penilaian === 'PPKS');
+    const sppnProgramSummary = buildProgramBreakdown(sppnAssessments);
+    const ppksProgramSummary = buildProgramBreakdown(ppksAssessments);
 
     return res.json({
       success: true,
@@ -1064,18 +1147,22 @@ app.get('/api/wbp/:id', authenticate, async (req, res, next) => {
         face_descriptor: wbpRow.face_descriptor ? JSON.parse(wbpRow.face_descriptor) : null,
         has_face_id: Boolean(wbpRow.face_descriptor),
         ringkasan: {
-          skor_total_berbobot: normalizedTotal,
-          predikat: getPredikat(normalizedTotal),
-          sppn_avg: sppnAvg,
-          sppn_count: assessments.filter((a) => a.jenis_penilaian === 'SPPN').length,
-          ppks_avg: ppksAvg,
-          ppks_count: assessments.filter((a) => a.jenis_penilaian === 'PPKS').length,
+          sppn: evalResult.sppn,
+          ppks: evalResult.ppks,
+          rekomendasi: evalResult.rekomendasi,
+          sppn_avg: evalResult.sppn.avgSkor,
+          sppn_count: evalResult.sppn.count,
+          ppks_avg: evalResult.ppks.avgSkor,
+          ppks_count: evalResult.ppks.count,
           total_penilaian: assessments.length,
           total_ya: assessments.filter((a) => a.pelaksanaan === 'Ya').length,
           total_absensi: attendances.length,
           total_face_verified: attendances.filter((a) => a.face_verified === 1).length,
         },
-        program_summary: programSummary,
+        sppn_program_summary: sppnProgramSummary,
+        ppks_program_summary: ppksProgramSummary,
+        sppn_assessments: sppnAssessments,
+        ppks_assessments: ppksAssessments,
         assessments,
         attendances,
       },
@@ -1709,10 +1796,10 @@ app.delete('/api/attendances/:id', authenticate, authorize('admin', 'wali_pas', 
 // 9. DASHBOARDS & ANALYTICS (4 DASBOR ARSITEKTUR SI PASTI)
 // ============================================================================
 
-// 9A. DASBOR UMUM
+// 9A. DASBOR UMUM (PEMISAHAN SPPN & PPKS + TREN PERIODIK + DISTRIBUSI REKOMENDASI)
 app.get('/api/dashboard/umum', authenticate, async (req, res, next) => {
   try {
-    const { startDate, endDate, program_id, jenis_penilaian } = req.query;
+    const { startDate, endDate, program_id, jenis_penilaian, period = 'bulanan' } = req.query;
     const where = [];
     const params = [];
     appendDateRange(where, params, 'a.tanggal', startDate, endDate);
@@ -1742,9 +1829,11 @@ app.get('/api/dashboard/umum', authenticate, async (req, res, next) => {
         SUM(CASE WHEN a.pelaksanaan = 'Tidak' THEN 1 ELSE 0 END) AS total_tidak,
         SUM(CASE WHEN a.jenis_penilaian = 'SPPN' THEN 1 ELSE 0 END) AS total_sppn,
         SUM(CASE WHEN a.jenis_penilaian = 'PPKS' THEN 1 ELSE 0 END) AS total_ppks,
-        SUM(CASE WHEN a.verifikasi_kasubsi = 'menunggu' THEN 1 ELSE 0 END) AS menunggu_verifikasi,
-        ROUND(AVG(CASE WHEN a.nilai_karakter IS NOT NULL THEN a.nilai_karakter END), 2) AS rata_karakter,
-        ROUND(AVG(CASE WHEN a.pelaksanaan = 'Ya' THEN a.skor_akhir END), 2) AS rata_skor
+        ROUND(AVG(CASE WHEN a.jenis_penilaian = 'SPPN' THEN a.skor_akhir END), 2) AS rata_sppn,
+        ROUND(AVG(CASE WHEN a.jenis_penilaian = 'PPKS' THEN a.skor_akhir END), 2) AS rata_ppks,
+        ROUND(AVG(CASE WHEN a.jenis_penilaian = 'SPPN' AND a.nilai_karakter IS NOT NULL THEN a.nilai_karakter END), 2) AS karakter_sppn,
+        ROUND(AVG(CASE WHEN a.jenis_penilaian = 'PPKS' AND a.nilai_karakter IS NOT NULL THEN a.nilai_karakter END), 2) AS karakter_ppks,
+        SUM(CASE WHEN a.verifikasi_kasubsi = 'menunggu' THEN 1 ELSE 0 END) AS menunggu_verifikasi
        FROM assessments a ${whereSql}`,
       params
     );
@@ -1763,25 +1852,31 @@ app.get('/api/dashboard/umum', authenticate, async (req, res, next) => {
       attParams
     );
 
-    const [monthlyTrend] = await pool.query(
-      `SELECT DATE_FORMAT(a.tanggal, '%Y-%m') AS bulan,
+    const grouping = getPeriodGrouping(period);
+    const [periodTrend] = await pool.query(
+      `SELECT ${grouping.keyExpr} AS period_key,
+        ${grouping.labelExpr} AS period_label,
         COUNT(*) AS total,
         SUM(CASE WHEN a.pelaksanaan = 'Ya' THEN 1 ELSE 0 END) AS terlaksana,
         SUM(CASE WHEN a.jenis_penilaian = 'SPPN' THEN 1 ELSE 0 END) AS sppn,
         SUM(CASE WHEN a.jenis_penilaian = 'PPKS' THEN 1 ELSE 0 END) AS ppks,
-        ROUND(AVG(CASE WHEN a.nilai_karakter IS NOT NULL THEN a.nilai_karakter END), 2) AS rata_karakter
+        ROUND(AVG(CASE WHEN a.jenis_penilaian = 'SPPN' THEN a.skor_akhir END), 2) AS rata_sppn,
+        ROUND(AVG(CASE WHEN a.jenis_penilaian = 'PPKS' THEN a.skor_akhir END), 2) AS rata_ppks
        FROM assessments a
        ${whereSql}
-       GROUP BY DATE_FORMAT(a.tanggal, '%Y-%m')
-       ORDER BY bulan ASC`,
+       GROUP BY period_key, period_label
+       ORDER BY period_key ASC`,
       params
     );
 
     const [programBreakdown] = await pool.query(
-      `SELECT p.id, p.nama_program, p.bobot, p.target_bulanan,
+      `SELECT p.id, p.nama_program, p.bobot, p.target_bulanan, p.kategori,
         COUNT(a.id) AS total_log,
+        SUM(CASE WHEN a.jenis_penilaian = 'SPPN' AND a.pelaksanaan = 'Ya' THEN 1 ELSE 0 END) AS sppn_ya,
+        SUM(CASE WHEN a.jenis_penilaian = 'PPKS' AND a.pelaksanaan = 'Ya' THEN 1 ELSE 0 END) AS ppks_ya,
         SUM(CASE WHEN a.pelaksanaan = 'Ya' THEN 1 ELSE 0 END) AS jumlah_ya,
-        ROUND(AVG(CASE WHEN a.nilai_karakter IS NOT NULL THEN a.nilai_karakter END), 2) AS rata_karakter
+        ROUND(AVG(CASE WHEN a.jenis_penilaian = 'SPPN' THEN a.skor_akhir END), 2) AS rata_sppn,
+        ROUND(AVG(CASE WHEN a.jenis_penilaian = 'PPKS' THEN a.skor_akhir END), 2) AS rata_ppks
        FROM programs p
        LEFT JOIN assessments a ON a.program_id = p.id ${where.length ? `AND ${where.join(' AND ')}` : ''}
        WHERE p.status = 'aktif'
@@ -1790,21 +1885,42 @@ app.get('/api/dashboard/umum', authenticate, async (req, res, next) => {
       params
     );
 
-    const [topWbp] = await pool.query(
-      `SELECT w.id, w.no_registrasi, w.nama, w.blok_kamar, u.nama AS wali_pas_nama,
-        COUNT(a.id) AS total_penilaian,
-        SUM(CASE WHEN a.pelaksanaan = 'Ya' THEN 1 ELSE 0 END) AS jumlah_ya,
-        ROUND(AVG(CASE WHEN a.nilai_karakter IS NOT NULL THEN a.nilai_karakter END), 2) AS rata_karakter,
-        ROUND(AVG(CASE WHEN a.pelaksanaan = 'Ya' THEN a.skor_akhir END), 2) AS rata_skor
+    // Evaluate all active WBP for recommendation distribution & Top WBP (strictly separated SPPN vs PPKS)
+    const [activeWbpList] = await pool.query(
+      `SELECT w.id, w.no_registrasi, w.nama, w.blok_kamar, w.foto_wajah, u.nama AS wali_pas_nama
        FROM wbp w
        LEFT JOIN users u ON u.id = w.wali_pas_id
-       LEFT JOIN assessments a ON a.wbp_id = w.id ${where.length ? `AND ${where.join(' AND ')}` : ''}
-       WHERE w.status = 'aktif'
-       GROUP BY w.id
-       ORDER BY rata_skor DESC, jumlah_ya DESC
-       LIMIT 8`,
+       WHERE w.status = 'aktif'`
+    );
+    const [allAssessPeriod] = await pool.query(
+      `SELECT a.wbp_id, a.jenis_penilaian, a.pelaksanaan, a.nilai_karakter, a.skor_akhir
+       FROM assessments a ${whereSql}`,
       params
     );
+
+    const rekomendasiCount = {
+      direkomendasikan: 0,
+      direkomendasikan_dengan_catatan: 0,
+      tidak_direkomendasikan: 0,
+    };
+
+    const evaluatedWbp = activeWbpList.map((w) => {
+      const wLogs = allAssessPeriod.filter((a) => a.wbp_id === w.id);
+      const ev = evaluateSppnPpks(wLogs);
+      rekomendasiCount[ev.rekomendasi.code] += 1;
+      return {
+        ...w,
+        sppn_skor: ev.sppn.avgSkor,
+        sppn_count: ev.sppn.count,
+        sppn_status: ev.sppn.status,
+        ppks_skor: ev.ppks.avgSkor,
+        ppks_count: ev.ppks.count,
+        ppks_status: ev.ppks.status,
+        rekomendasi: ev.rekomendasi,
+      };
+    });
+
+    evaluatedWbp.sort((a, b) => (b.sppn_skor - a.sppn_skor) || (b.ppks_skor - a.ppks_skor));
 
     const [recentActivities] = await pool.query(
       `SELECT a.id, a.tanggal, a.jenis_penilaian, a.pelaksanaan, a.nilai_karakter, a.skor_akhir, a.keterangan, a.verifikasi_kasubsi,
@@ -1825,6 +1941,7 @@ app.get('/api/dashboard/umum', authenticate, async (req, res, next) => {
     return res.json({
       success: true,
       data: {
+        period: grouping.period,
         kpi: {
           total_wbp: Number(wbpKpi.total_wbp || 0),
           wbp_aktif: Number(wbpKpi.wbp_aktif || 0),
@@ -1835,20 +1952,22 @@ app.get('/api/dashboard/umum', authenticate, async (req, res, next) => {
           tingkat_pelaksanaan: totalP > 0 ? Number(((totalYa / totalP) * 100).toFixed(1)) : 0,
           total_sppn: Number(kpi.total_sppn || 0),
           total_ppks: Number(kpi.total_ppks || 0),
+          rata_sppn: Number(kpi.rata_sppn || 0),
+          rata_ppks: Number(kpi.rata_ppks || 0),
+          karakter_sppn: Number(kpi.karakter_sppn || 0),
+          karakter_ppks: Number(kpi.karakter_ppks || 0),
           menunggu_verifikasi: Number(kpi.menunggu_verifikasi || 0),
-          rata_karakter: Number(kpi.rata_karakter || 0),
-          rata_skor: Number(kpi.rata_skor || 0),
           total_absensi: Number(attKpi.total_absensi || 0),
           face_verified_count: Number(attKpi.face_verified_count || 0),
         },
-        monthly_trend: monthlyTrend,
+        rekomendasi_distribution: [
+          { key: 'direkomendasikan', name: 'Direkomendasikan', value: rekomendasiCount.direkomendasikan, color: '#059669' },
+          { key: 'direkomendasikan_dengan_catatan', name: 'Direkomendasikan dgn Catatan', value: rekomendasiCount.direkomendasikan_dengan_catatan, color: '#f59e0b' },
+          { key: 'tidak_direkomendasikan', name: 'Tidak Direkomendasikan', value: rekomendasiCount.tidak_direkomendasikan, color: '#e11d48' },
+        ],
+        period_trend: periodTrend,
         program_breakdown: programBreakdown,
-        top_wbp: topWbp.map((row) => ({
-          ...row,
-          rata_skor: Number(row.rata_skor || 0),
-          rata_karakter: Number(row.rata_karakter || 0),
-          predikat: getPredikat(row.rata_skor || 0),
-        })),
+        top_wbp: evaluatedWbp.slice(0, 8),
         recent_activities: recentActivities,
       },
     });
@@ -1857,14 +1976,14 @@ app.get('/api/dashboard/umum', authenticate, async (req, res, next) => {
   }
 });
 
-// 9B. DASBOR WBP (AGREGASI BOBOT, TARGET, KUMULASI PER WBP)
+// 9B. DASBOR WBP (EVALUASI TERPISAH SPPN UTAMA & PPKS PENDUKUNG MONITORING)
 app.get('/api/dashboard/wbp', authenticate, async (req, res, next) => {
   try {
     const { page, limit, offset } = parsePagination(req.query);
     const { startDate, endDate } = req.query;
     const search = sanitizeStr(req.query.search, 120);
     const wali_pas_id = parseInt(req.query.wali_pas_id, 10) || null;
-    const jenis_penilaian = sanitizeStr(req.query.jenis_penilaian, 10);
+    const rekomendasiFilter = sanitizeStr(req.query.rekomendasi, 40);
 
     const wbpWhere = [];
     const wbpParams = [];
@@ -1882,10 +2001,6 @@ app.get('/api/dashboard/wbp', authenticate, async (req, res, next) => {
     const aWhere = [];
     const aParams = [];
     appendDateRange(aWhere, aParams, 'a.tanggal', startDate, endDate);
-    if (['SPPN', 'PPKS'].includes(jenis_penilaian)) {
-      aWhere.push('a.jenis_penilaian = ?');
-      aParams.push(jenis_penilaian);
-    }
     const aWhereSql = aWhere.length ? `WHERE ${aWhere.join(' AND ')}` : '';
 
     const attWhere = [];
@@ -1904,7 +2019,6 @@ app.get('/api/dashboard/wbp', authenticate, async (req, res, next) => {
       wbpParams
     );
 
-    const [programs] = await pool.query(`SELECT id, nama_program, bobot, target_bulanan FROM programs WHERE status = 'aktif'`);
     const [assessments] = await pool.query(
       `SELECT a.wbp_id, a.program_id, a.jenis_penilaian, a.pelaksanaan, a.nilai_karakter, a.skor_akhir
        FROM assessments a ${aWhereSql}`,
@@ -1915,55 +2029,37 @@ app.get('/api/dashboard/wbp', authenticate, async (req, res, next) => {
       attParams
     );
 
-    const monthFactor = computePeriodMonthFactor(startDate, endDate);
-    const totalBobot = programs.reduce((s, p) => s + Number(p.bobot || 0), 0);
-
-    const scored = allWbp.map((w) => {
+    let scored = allWbp.map((w) => {
       const wLogs = assessments.filter((a) => a.wbp_id === w.id);
       const wAtts = attendances.filter((att) => att.wbp_id === w.id);
-
-      let weightedSum = 0;
-      let totalTarget = 0;
-      let totalYa = 0;
-
-      programs.forEach((p) => {
-        const pLogs = wLogs.filter((a) => a.program_id === p.id);
-        const yaCount = pLogs.filter((a) => a.pelaksanaan === 'Ya').length;
-        const scaledTarget = Math.max(1, Math.round(Number(p.target_bulanan || 1) * monthFactor));
-        const capaian = Math.min(100, (yaCount / scaledTarget) * 100);
-        const kVals = pLogs.map((a) => Number(a.nilai_karakter)).filter((v) => v >= 1 && v <= 5);
-        const avgK = kVals.length ? kVals.reduce((s, v) => s + v, 0) / kVals.length : 0;
-        const skorP = (capaian * 0.5) + (avgK * 20 * 0.5);
-        weightedSum += (skorP * Number(p.bobot)) / 100;
-        totalTarget += scaledTarget;
-        totalYa += yaCount;
-      });
-
-      const skorTotal = totalBobot > 0 ? Number(((weightedSum / totalBobot) * 100).toFixed(2)) : 0;
-      const allKarakter = wLogs.map((a) => Number(a.nilai_karakter)).filter((v) => v >= 1 && v <= 5);
-      const rataKarakter = allKarakter.length
-        ? Number((allKarakter.reduce((s, v) => s + v, 0) / allKarakter.length).toFixed(2))
-        : 0;
-      const sppnLogs = wLogs.filter((a) => a.jenis_penilaian === 'SPPN' && a.pelaksanaan === 'Ya');
-      const ppksLogs = wLogs.filter((a) => a.jenis_penilaian === 'PPKS' && a.pelaksanaan === 'Ya');
+      const ev = evaluateSppnPpks(wLogs);
 
       return {
         ...w,
         total_penilaian: wLogs.length,
-        jumlah_ya: totalYa,
-        target_total: totalTarget,
-        capaian_persen: totalTarget > 0 ? Number(Math.min(100, (totalYa / totalTarget) * 100).toFixed(1)) : 0,
-        rata_karakter: rataKarakter,
-        sppn_avg: sppnLogs.length ? Number((sppnLogs.reduce((s, a) => s + Number(a.skor_akhir || 0), 0) / sppnLogs.length).toFixed(2)) : 0,
-        ppks_avg: ppksLogs.length ? Number((ppksLogs.reduce((s, a) => s + Number(a.skor_akhir || 0), 0) / ppksLogs.length).toFixed(2)) : 0,
-        skor_total: skorTotal,
-        predikat: getPredikat(skorTotal),
+        sppn_count: ev.sppn.count,
+        sppn_ya: ev.sppn.ya,
+        sppn_karakter: ev.sppn.avgKarakter,
+        sppn_skor: ev.sppn.avgSkor,
+        sppn_memenuhi: ev.sppn.memenuhi,
+        sppn_status: ev.sppn.status,
+        ppks_count: ev.ppks.count,
+        ppks_ya: ev.ppks.ya,
+        ppks_karakter: ev.ppks.avgKarakter,
+        ppks_skor: ev.ppks.avgSkor,
+        ppks_memenuhi: ev.ppks.memenuhi,
+        ppks_status: ev.ppks.status,
+        rekomendasi: ev.rekomendasi,
         total_absensi: wAtts.length,
         absensi_face_verified: wAtts.filter((a) => a.face_verified === 1).length,
       };
     });
 
-    const sortBy = req.query.sortBy || 'skor_total';
+    if (rekomendasiFilter && ['direkomendasikan', 'direkomendasikan_dengan_catatan', 'tidak_direkomendasikan'].includes(rekomendasiFilter)) {
+      scored = scored.filter((item) => item.rekomendasi.code === rekomendasiFilter);
+    }
+
+    const sortBy = req.query.sortBy || 'sppn_skor';
     const sortDir = String(req.query.sortOrder || 'DESC').toUpperCase() === 'ASC' ? 1 : -1;
     scored.sort((a, b) => {
       if (sortBy === 'nama') return a.nama.localeCompare(b.nama) * sortDir;
@@ -2099,7 +2195,105 @@ app.get('/api/dashboard/asesor', authenticate, async (req, res, next) => {
   }
 });
 
-// 9E. EXPORT DATA FOR OFFICIAL PDF REPORTS
+// 9E. REKAP PENILAIAN PERIODIK (HARIAN, MINGGUAN, BULANAN, PER 3 BULANAN / TRIWULAN)
+app.get('/api/reports/rekap-periodik', authenticate, async (req, res, next) => {
+  try {
+    const period = ['harian', 'mingguan', 'bulanan', 'triwulan'].includes(req.query.period)
+      ? req.query.period
+      : 'bulanan';
+    const { startDate, endDate } = req.query;
+    const wbp_id = parseInt(req.query.wbp_id, 10) || null;
+    const program_id = parseInt(req.query.program_id, 10) || null;
+    const asesor_id = parseInt(req.query.asesor_id, 10) || null;
+
+    const where = [];
+    const params = [];
+    appendDateRange(where, params, 'a.tanggal', startDate, endDate);
+    if (wbp_id) { where.push('a.wbp_id = ?'); params.push(wbp_id); }
+    if (program_id) { where.push('a.program_id = ?'); params.push(program_id); }
+    if (asesor_id) { where.push('a.asesor_id = ?'); params.push(asesor_id); }
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+    const grouping = getPeriodGrouping(period);
+
+    const [buckets] = await pool.query(
+      `SELECT ${grouping.keyExpr} AS period_key,
+        ${grouping.labelExpr} AS period_label,
+        COUNT(*) AS total_penilaian,
+        COUNT(DISTINCT a.wbp_id) AS wbp_dinilai,
+        SUM(CASE WHEN a.jenis_penilaian = 'SPPN' THEN 1 ELSE 0 END) AS total_sppn,
+        SUM(CASE WHEN a.jenis_penilaian = 'SPPN' AND a.pelaksanaan = 'Ya' THEN 1 ELSE 0 END) AS sppn_ya,
+        ROUND(AVG(CASE WHEN a.jenis_penilaian = 'SPPN' THEN a.skor_akhir END), 2) AS rata_sppn,
+        ROUND(AVG(CASE WHEN a.jenis_penilaian = 'SPPN' AND a.nilai_karakter IS NOT NULL THEN a.nilai_karakter END), 2) AS karakter_sppn,
+        SUM(CASE WHEN a.jenis_penilaian = 'PPKS' THEN 1 ELSE 0 END) AS total_ppks,
+        SUM(CASE WHEN a.jenis_penilaian = 'PPKS' AND a.pelaksanaan = 'Ya' THEN 1 ELSE 0 END) AS ppks_ya,
+        ROUND(AVG(CASE WHEN a.jenis_penilaian = 'PPKS' THEN a.skor_akhir END), 2) AS rata_ppks,
+        ROUND(AVG(CASE WHEN a.jenis_penilaian = 'PPKS' AND a.nilai_karakter IS NOT NULL THEN a.nilai_karakter END), 2) AS karakter_ppks
+       FROM assessments a
+       ${whereSql}
+       GROUP BY period_key, period_label
+       ORDER BY period_key DESC`,
+      params
+    );
+
+    // Compute per-period recommendation counts by evaluating each WBP within each period bucket
+    const [rawLogs] = await pool.query(
+      `SELECT ${grouping.keyExpr} AS period_key, a.wbp_id, a.jenis_penilaian, a.pelaksanaan, a.nilai_karakter, a.skor_akhir
+       FROM assessments a
+       ${whereSql}`,
+      params
+    );
+
+    const byPeriodWbp = new Map();
+    rawLogs.forEach((row) => {
+      if (!byPeriodWbp.has(row.period_key)) byPeriodWbp.set(row.period_key, new Map());
+      const wMap = byPeriodWbp.get(row.period_key);
+      if (!wMap.has(row.wbp_id)) wMap.set(row.wbp_id, []);
+      wMap.get(row.wbp_id).push(row);
+    });
+
+    const enriched = buckets.map((b) => {
+      const wMap = byPeriodWbp.get(b.period_key) || new Map();
+      let direkomendasikan = 0;
+      let denganCatatan = 0;
+      let tidakDirekomendasikan = 0;
+
+      wMap.forEach((logs) => {
+        const ev = evaluateSppnPpks(logs);
+        if (ev.rekomendasi.code === 'direkomendasikan') direkomendasikan += 1;
+        else if (ev.rekomendasi.code === 'direkomendasikan_dengan_catatan') denganCatatan += 1;
+        else tidakDirekomendasikan += 1;
+      });
+
+      return {
+        ...b,
+        total_penilaian: Number(b.total_penilaian || 0),
+        wbp_dinilai: Number(b.wbp_dinilai || 0),
+        total_sppn: Number(b.total_sppn || 0),
+        sppn_ya: Number(b.sppn_ya || 0),
+        rata_sppn: Number(b.rata_sppn || 0),
+        karakter_sppn: Number(b.karakter_sppn || 0),
+        total_ppks: Number(b.total_ppks || 0),
+        ppks_ya: Number(b.ppks_ya || 0),
+        rata_ppks: Number(b.rata_ppks || 0),
+        karakter_ppks: Number(b.karakter_ppks || 0),
+        direkomendasikan,
+        dengan_catatan: denganCatatan,
+        tidak_direkomendasikan: tidakDirekomendasikan,
+      };
+    });
+
+    return res.json({
+      success: true,
+      period,
+      data: enriched,
+    });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// 9F. EXPORT DATA FOR OFFICIAL PDF REPORTS
 app.get('/api/reports/export-data', authenticate, async (req, res, next) => {
   try {
     const type = sanitizeStr(req.query.type, 30) || 'assessments';

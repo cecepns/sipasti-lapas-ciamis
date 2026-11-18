@@ -3,15 +3,27 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from 'recharts';
-import { Award, Eye, FileDown, ScanFace, ShieldCheck } from 'lucide-react';
+import {
+  AlertTriangle,
+  Award,
+  CheckCircle2,
+  Eye,
+  FileDown,
+  ScanFace,
+  ShieldCheck,
+  UserCircle2,
+  XCircle,
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 import { request, extractErrorMessage } from '@/utils/request';
 import { API_ENDPOINTS } from '@/utils/endpoints';
+import { getAssetUrl } from '@/utils/api';
 import { usePagination } from '@/hooks/usePagination';
 import { DateRangeFilter } from '@/components/common/DateRangeFilter';
 import { SearchInput } from '@/components/common/SearchInput';
@@ -23,19 +35,26 @@ import { StatusBadge } from '@/components/common/StatusBadge';
 import { EmptyState } from '@/components/common/EmptyState';
 import { LoadingSpinner, TableSkeleton } from '@/components/common/LoadingSpinner';
 import { ErrorState } from '@/components/common/ErrorState';
-import { formatDate, formatDateTime, toIsoDate } from '@/utils/formatters';
+import {
+  formatDate,
+  formatDateTime,
+  INSTRUMEN_INFO,
+  REKOMENDASI_RULES,
+  toIsoDate,
+} from '@/utils/formatters';
 import { exportWbpProfilePdf, exportWbpRankingPdf } from '@/utils/pdfGenerator';
 
 const SORT_OPTIONS = [
-  { value: 'skor_total:DESC', label: 'Skor Tertinggi' },
-  { value: 'skor_total:ASC', label: 'Skor Terendah' },
-  { value: 'capaian_persen:DESC', label: 'Capaian Tertinggi' },
-  { value: 'nama:ASC', label: 'Nama (A-Z)' },
+  { value: 'sppn_skor:DESC', label: 'Skor SPPN (Utama) Tertinggi' },
+  { value: 'sppn_skor:ASC', label: 'Skor SPPN (Utama) Terendah' },
+  { value: 'ppks_skor:DESC', label: 'Skor PPKS (Pendukung) Tertinggi' },
+  { value: 'nama:ASC', label: 'Nama WBP (A-Z)' },
 ];
 
-const JENIS_OPTIONS = [
-  { value: 'SPPN', label: 'Khusus SPPN' },
-  { value: 'PPKS', label: 'Khusus PPKS' },
+const REKOMENDASI_OPTIONS = [
+  { value: 'direkomendasikan', label: 'Direkomendasikan' },
+  { value: 'direkomendasikan_dengan_catatan', label: 'Direkomendasikan dengan Catatan' },
+  { value: 'tidak_direkomendasikan', label: 'Tidak Direkomendasikan' },
 ];
 
 export function DashboardWbpPage() {
@@ -44,7 +63,7 @@ export function DashboardWbpPage() {
   const [search, setSearch] = useState('');
   const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
   const [selectedWali, setSelectedWali] = useState(null);
-  const [selectedJenis, setSelectedJenis] = useState(null);
+  const [selectedRek, setSelectedRek] = useState(null);
   const [sortOption, setSortOption] = useState(SORT_OPTIONS[0]);
 
   const [rows, setRows] = useState([]);
@@ -55,6 +74,7 @@ export function DashboardWbpPage() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileData, setProfileData] = useState(null);
+  const [profileTab, setProfileTab] = useState('sppn');
 
   const loadWaliOptions = useCallback(async (q) => {
     const res = await request.get(API_ENDPOINTS.USERS.LIST, { search: q, role: 'wali_pas', limit: 25 });
@@ -65,7 +85,7 @@ export function DashboardWbpPage() {
     setLoading(true);
     setError('');
     try {
-      const [sortBy, sortOrder] = (sortOption?.value || 'skor_total:DESC').split(':');
+      const [sortBy, sortOrder] = (sortOption?.value || 'sppn_skor:DESC').split(':');
       const res = await request.get(API_ENDPOINTS.DASHBOARD.WBP, {
         page,
         limit,
@@ -73,7 +93,7 @@ export function DashboardWbpPage() {
         startDate: toIsoDate(dateRange.startDate),
         endDate: toIsoDate(dateRange.endDate),
         wali_pas_id: selectedWali?.value,
-        jenis_penilaian: selectedJenis?.value,
+        rekomendasi: selectedRek?.value,
         sortBy,
         sortOrder,
       });
@@ -84,7 +104,7 @@ export function DashboardWbpPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, limit, search, dateRange, selectedWali, selectedJenis, sortOption, setPagination]);
+  }, [page, limit, search, dateRange, selectedWali, selectedRek, sortOption, setPagination]);
 
   useEffect(() => {
     fetchData();
@@ -94,6 +114,7 @@ export function DashboardWbpPage() {
     setProfileOpen(true);
     setProfileLoading(true);
     setProfileData(null);
+    setProfileTab('sppn');
     try {
       const res = await request.get(API_ENDPOINTS.WBP.DETAIL(wbpId), {
         startDate: toIsoDate(dateRange.startDate),
@@ -117,10 +138,10 @@ export function DashboardWbpPage() {
         startDate: toIsoDate(dateRange.startDate),
         endDate: toIsoDate(dateRange.endDate),
         wali_pas_id: selectedWali?.value,
-        jenis_penilaian: selectedJenis?.value,
+        rekomendasi: selectedRek?.value,
       });
       await exportWbpRankingPdf(res.data || [], dateRange);
-      toast.success('Rekap PDF Akumulasi WBP berhasil diunduh');
+      toast.success('Rekap PDF Evaluasi WBP (SPPN & PPKS Terpisah) berhasil diunduh');
     } catch (err) {
       toast.error(extractErrorMessage(err, 'Gagal mengunduh PDF'));
     }
@@ -129,16 +150,23 @@ export function DashboardWbpPage() {
   const handleExportSinglePdf = async () => {
     if (!profileData) return;
     await exportWbpProfilePdf(profileData, dateRange);
-    toast.success(`Rapor PDF ${profileData.nama} berhasil diunduh`);
+    toast.success(`Rapor Profil PDF ${profileData.nama} berhasil diunduh`);
+  };
+
+  const getRekIcon = (code) => {
+    if (code === 'direkomendasikan') return CheckCircle2;
+    if (code === 'direkomendasikan_dengan_catatan') return AlertTriangle;
+    return XCircle;
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Dasbor & Profil WBP</h1>
+          <h1 className="text-2xl font-extrabold text-slate-900">Dasbor & Profil Kelayakan WBP</h1>
           <p className="text-sm text-slate-500 mt-0.5">
-            Akumulasi skor berbobot, capaian target program, predikat kelayakan & rapor PDF individu WBP
+            Penilaian terpisah <strong>SPPN</strong> (Sistem Penilaian Pembinaan Narapidana — Utama) &{' '}
+            <strong>PPKS</strong> (Penilaian Pembinaan Kepribadian Spiritual — Monitoring)
           </p>
         </div>
         <button
@@ -149,6 +177,27 @@ export function DashboardWbpPage() {
           <FileDown className="h-4 w-4" />
           Download Rekap WBP (PDF)
         </button>
+      </div>
+
+      {/* Decision Matrix Legend — Vibrant Full-Color Cards */}
+      <div className="grid gap-4 md:grid-cols-3">
+        {REKOMENDASI_RULES.map((rule) => {
+          const colors =
+            rule.color === 'emerald'
+              ? 'bg-gradient-to-br from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-500/20'
+              : rule.color === 'amber'
+              ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/20'
+              : 'bg-gradient-to-br from-rose-600 to-pink-600 text-white shadow-md shadow-rose-500/20';
+          return (
+            <div key={rule.code} className={`rounded-2xl p-4 ${colors}`}>
+              <p className="text-sm font-black">{rule.label}</p>
+              <p className="text-[11px] font-bold bg-white/20 rounded-lg px-2.5 py-1 mt-1.5 inline-block">
+                {rule.syarat}
+              </p>
+              <p className="text-xs text-white/90 mt-1.5 leading-relaxed">{rule.arti}</p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Filters */}
@@ -172,6 +221,7 @@ export function DashboardWbpPage() {
                 setDateRange(r);
                 resetPage();
               }}
+              showPresets={false}
             />
           </div>
           <div className="md:col-span-4">
@@ -188,13 +238,13 @@ export function DashboardWbpPage() {
         </div>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <SelectInput
-            options={JENIS_OPTIONS}
-            value={selectedJenis}
+            options={REKOMENDASI_OPTIONS}
+            value={selectedRek}
             onChange={(v) => {
-              setSelectedJenis(v);
+              setSelectedRek(v);
               resetPage();
             }}
-            placeholder="Semua Jenis (SPPN & PPKS)"
+            placeholder="Filter Keputusan Rekomendasi..."
             isSearchable={false}
           />
           <SelectInput
@@ -219,7 +269,7 @@ export function DashboardWbpPage() {
           <EmptyState
             icon={Award}
             title="Belum ada data evaluasi WBP"
-            description="Sesuaikan filter pencarian atau rentang tanggal untuk melihat akumulasi nilai WBP."
+            description="Sesuaikan filter pencarian, rekomendasi, atau rentang tanggal."
           />
         ) : (
           <>
@@ -229,39 +279,67 @@ export function DashboardWbpPage() {
                   <tr>
                     <th className="px-4 py-3.5">Warga Binaan</th>
                     <th className="px-4 py-3.5">Wali PAS</th>
-                    <th className="px-4 py-3.5 text-center">Capaian Target</th>
-                    <th className="px-4 py-3.5 text-center">Karakter / SPPN / PPKS</th>
-                    <th className="px-4 py-3.5 text-center">Absensi Face ID</th>
-                    <th className="px-4 py-3.5 text-center">Skor & Predikat</th>
-                    <th className="px-4 py-3.5 text-right">Rapor</th>
+                    <th className="px-4 py-3.5 text-center bg-emerald-50/50 text-emerald-800">
+                      SPPN (Nilai Utama)
+                    </th>
+                    <th className="px-4 py-3.5 text-center bg-amber-50/50 text-amber-800">
+                      PPKS (Pendukung Monitoring)
+                    </th>
+                    <th className="px-4 py-3.5 text-center">Face ID</th>
+                    <th className="px-4 py-3.5 text-center">Keputusan Rekomendasi</th>
+                    <th className="px-4 py-3.5 text-right">Profil & PDF</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {rows.map((w) => (
                     <tr key={w.id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="px-4 py-3.5">
-                        <p className="font-bold text-slate-900">{w.nama}</p>
-                        <p className="text-xs text-slate-500">
-                          {w.no_registrasi} • {w.blok_kamar || '-'}
-                        </p>
+                        <div className="flex items-center gap-3">
+                          {w.foto_wajah ? (
+                            <img
+                              src={getAssetUrl(w.foto_wajah)}
+                              alt={w.nama}
+                              className="h-10 w-10 rounded-xl object-cover border border-emerald-200 shrink-0"
+                            />
+                          ) : (
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 font-bold text-sm shrink-0">
+                              {w.nama.charAt(0)}
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-bold text-slate-900">{w.nama}</p>
+                            <p className="text-xs text-slate-500">
+                              {w.no_registrasi} • {w.blok_kamar || '-'}
+                            </p>
+                          </div>
+                        </div>
                       </td>
                       <td className="px-4 py-3.5 text-xs font-medium text-slate-700">
                         {w.wali_pas_nama || '-'}
                       </td>
-                      <td className="px-4 py-3.5 text-center">
-                        <div className="inline-flex flex-col items-center">
-                          <span className="text-xs font-bold text-slate-900">{w.capaian_persen}%</span>
-                          <span className="text-[11px] text-slate-400">
-                            {w.jumlah_ya} / {w.target_total} sesi
-                          </span>
-                        </div>
+                      <td className="px-4 py-3.5 text-center bg-emerald-50/20">
+                        <span className="block text-base font-extrabold text-emerald-800">
+                          {w.sppn_skor}
+                        </span>
+                        <span
+                          className={`text-[10px] font-bold ${
+                            w.sppn_memenuhi ? 'text-emerald-600' : 'text-rose-600'
+                          }`}
+                        >
+                          {w.sppn_status} ({w.sppn_count}x)
+                        </span>
                       </td>
-                      <td className="px-4 py-3.5 text-center text-xs">
-                        <span className="font-bold text-amber-600">{w.rata_karakter || '-'}</span>
-                        <span className="text-slate-400"> / </span>
-                        <span className="font-semibold text-emerald-700">{w.sppn_avg || '-'}</span>
-                        <span className="text-slate-400"> / </span>
-                        <span className="font-semibold text-sky-700">{w.ppks_avg || '-'}</span>
+                      <td className="px-4 py-3.5 text-center bg-amber-50/20">
+                        <span className="block text-base font-extrabold text-amber-800">
+                          {w.ppks_skor}
+                        </span>
+                        <span
+                          className={`text-[10px] font-bold ${
+                            w.ppks_memenuhi ? 'text-emerald-600' : 'text-amber-700'
+                          }`}
+                        >
+                          {w.ppks_status} ({w.ppks_count}x)
+                        </span>
                       </td>
                       <td className="px-4 py-3.5 text-center">
                         <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-semibold text-indigo-700">
@@ -270,13 +348,11 @@ export function DashboardWbpPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3.5 text-center">
-                        <div className="flex flex-col items-center gap-1">
-                          <span className="text-sm font-extrabold text-slate-900">{w.skor_total}</span>
-                          <StatusBadge
-                            label={w.predikat?.label || '-'}
-                            variant={w.predikat?.color || 'slate'}
-                          />
-                        </div>
+                        <StatusBadge
+                          label={w.rekomendasi?.label || '-'}
+                          variant={w.rekomendasi?.color || 'slate'}
+                          icon={getRekIcon(w.rekomendasi?.code)}
+                        />
                       </td>
                       <td className="px-4 py-3.5 text-right">
                         <button
@@ -306,7 +382,7 @@ export function DashboardWbpPage() {
       <Modal
         isOpen={profileOpen}
         onClose={() => setProfileOpen(false)}
-        title={profileData ? `Profil Pembinaan — ${profileData.nama}` : 'Memuat Profil WBP'}
+        title={profileData ? `Profil & Evaluasi WBP — ${profileData.nama}` : 'Memuat Profil WBP'}
         subtitle={profileData ? `${profileData.no_registrasi} • ${profileData.blok_kamar || '-'}` : ''}
         size="2xl"
         footer={
@@ -325,135 +401,191 @@ export function DashboardWbpPage() {
               className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
             >
               <FileDown className="h-4 w-4" />
-              Download PDF Rapor WBP
+              Download PDF Profil (Dengan Foto & Kop Kementerian)
             </button>
           </>
         }
       >
         {profileLoading ? (
-          <LoadingSpinner label="Menyusun rapor penilaian WBP..." />
+          <LoadingSpinner label="Menyusun profil terpisah SPPN & PPKS..." />
         ) : profileData ? (
-          <div className="space-y-6">
-            {/* Top summary banner */}
-            <div className="grid gap-4 sm:grid-cols-4">
-              <div className="rounded-2xl bg-emerald-50 border border-emerald-100 p-4">
-                <span className="text-[11px] font-bold uppercase text-emerald-700">Skor Berbobot</span>
-                <p className="text-2xl font-extrabold text-emerald-900 mt-1">
-                  {profileData.ringkasan?.skor_total_berbobot ?? 0}
-                </p>
-                <p className="text-[11px] text-emerald-700 mt-0.5">
-                  {profileData.ringkasan?.predikat?.rekomendasi}
-                </p>
-              </div>
-              <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4">
-                <span className="text-[11px] font-bold uppercase text-slate-500">Rata-rata SPPN</span>
-                <p className="text-2xl font-extrabold text-slate-900 mt-1">
-                  {profileData.ringkasan?.sppn_avg ?? 0}
-                </p>
-                <p className="text-[11px] text-slate-500">{profileData.ringkasan?.sppn_count ?? 0} penilaian</p>
-              </div>
-              <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4">
-                <span className="text-[11px] font-bold uppercase text-slate-500">Rata-rata PPKS</span>
-                <p className="text-2xl font-extrabold text-slate-900 mt-1">
-                  {profileData.ringkasan?.ppks_avg ?? 0}
-                </p>
-                <p className="text-[11px] text-slate-500">{profileData.ringkasan?.ppks_count ?? 0} penilaian</p>
-              </div>
-              <div className="rounded-2xl bg-indigo-50 border border-indigo-100 p-4">
-                <span className="text-[11px] font-bold uppercase text-indigo-700">Absensi Face ID</span>
-                <p className="text-2xl font-extrabold text-indigo-900 mt-1">
-                  {profileData.ringkasan?.total_face_verified ?? 0}/{profileData.ringkasan?.total_absensi ?? 0}
-                </p>
-                <p className="text-[11px] text-indigo-700 flex items-center gap-1 mt-0.5">
+          <div className="space-y-5">
+            {/* WBP Photo + Biodata + Recommendation Banner */}
+            <div className="grid gap-4 sm:grid-cols-12 items-start">
+              <div className="sm:col-span-3 flex flex-col items-center">
+                {profileData.foto_wajah ? (
+                  <img
+                    src={getAssetUrl(profileData.foto_wajah)}
+                    alt={profileData.nama}
+                    className="h-40 w-32 rounded-2xl object-cover border-2 border-emerald-200 shadow-md"
+                  />
+                ) : (
+                  <div className="flex h-40 w-32 flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400">
+                    <UserCircle2 className="h-12 w-12" />
+                    <span className="mt-1 text-[11px] font-semibold">Pas Foto 3x4</span>
+                  </div>
+                )}
+                <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-700">
                   <ShieldCheck className="h-3.5 w-3.5" />
                   {profileData.has_face_id ? 'Face ID Terdaftar' : 'Belum Enroll Face ID'}
-                </p>
+                </span>
+              </div>
+
+              <div className="sm:col-span-9 space-y-3">
+                <div
+                  className={`rounded-2xl border p-4 ${
+                    profileData.ringkasan?.rekomendasi?.color === 'emerald'
+                      ? 'border-emerald-300 bg-emerald-50 text-emerald-950'
+                      : profileData.ringkasan?.rekomendasi?.color === 'amber'
+                      ? 'border-amber-300 bg-amber-50 text-amber-950'
+                      : 'border-rose-300 bg-rose-50 text-rose-950'
+                  }`}
+                >
+                  <p className="text-[11px] font-bold uppercase tracking-wider opacity-80">
+                    Keputusan Rekomendasi Kelayakan
+                  </p>
+                  <p className="text-lg font-extrabold mt-0.5">
+                    {profileData.ringkasan?.rekomendasi?.label}
+                  </p>
+                  <p className="text-xs mt-1 opacity-90">
+                    {profileData.ringkasan?.rekomendasi?.keterangan}
+                  </p>
+                </div>
+
+                {/* Separated SPPN vs PPKS Cards */}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border-2 border-emerald-200 bg-white p-3.5">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">
+                      SPPN — {INSTRUMEN_INFO.SPPN.kepanjangan} (Utama)
+                    </span>
+                    <div className="mt-1.5 flex items-baseline justify-between">
+                      <span className="text-2xl font-extrabold text-emerald-800">
+                        {profileData.ringkasan?.sppn?.avgSkor ?? 0}
+                        <span className="text-xs font-medium text-slate-400"> / 100</span>
+                      </span>
+                      <StatusBadge
+                        label={profileData.ringkasan?.sppn?.status || '-'}
+                        variant={profileData.ringkasan?.sppn?.memenuhi ? 'emerald' : 'rose'}
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Terlaksana: {profileData.ringkasan?.sppn?.ya ?? 0}/{profileData.ringkasan?.sppn?.count ?? 0} sesi • Karakter: {profileData.ringkasan?.sppn?.avgKarakter || '-'}/5
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border-2 border-amber-200 bg-white p-3.5">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">
+                      PPKS — {INSTRUMEN_INFO.PPKS.kepanjangan} (Monitoring)
+                    </span>
+                    <div className="mt-1.5 flex items-baseline justify-between">
+                      <span className="text-2xl font-extrabold text-amber-800">
+                        {profileData.ringkasan?.ppks?.avgSkor ?? 0}
+                        <span className="text-xs font-medium text-slate-400"> / 100</span>
+                      </span>
+                      <StatusBadge
+                        label={profileData.ringkasan?.ppks?.status || '-'}
+                        variant={profileData.ringkasan?.ppks?.memenuhi ? 'emerald' : 'amber'}
+                      />
+                    </div>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Terlaksana: {profileData.ringkasan?.ppks?.ya ?? 0}/{profileData.ringkasan?.ppks?.count ?? 0} sesi • Karakter: {profileData.ringkasan?.ppks?.avgKarakter || '-'}/5
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            {/* Chart Capaian Program */}
+            {/* Chart comparing SPPN vs PPKS per program */}
             <div className="rounded-2xl border border-slate-200 p-4">
               <h4 className="text-sm font-bold text-slate-900 mb-3">
-                Capaian & Skor per Program Pembinaan Spiritual
+                Perbandingan Skor SPPN (Utama) vs PPKS (Monitoring) per Program
               </h4>
-              <div className="h-56">
+              <div className="h-52">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={profileData.program_summary || []}>
+                  <BarChart
+                    data={(profileData.sppn_program_summary || []).map((s, i) => ({
+                      nama_program: s.nama_program,
+                      skor_sppn: s.rata_skor,
+                      skor_ppks: profileData.ppks_program_summary?.[i]?.rata_skor || 0,
+                    }))}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                     <XAxis dataKey="nama_program" tick={{ fontSize: 11 }} />
                     <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
                     <Tooltip />
-                    <Bar dataKey="capaian_persen" name="Capaian (%)" fill="#059669" radius={[6, 6, 0, 0]} />
-                    <Bar dataKey="skor_program" name="Skor Program" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                    <Legend />
+                    <Bar dataKey="skor_sppn" name="Skor SPPN (Utama)" fill="#059669" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="skor_ppks" name="Skor PPKS (Monitoring)" fill="#f59e0b" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
-            {/* Program breakdown table */}
-            <div className="overflow-x-auto rounded-xl border border-slate-200">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 font-bold uppercase text-slate-500">
-                  <tr>
-                    <th className="px-3 py-2.5">Program</th>
-                    <th className="px-3 py-2.5 text-center">Bobot</th>
-                    <th className="px-3 py-2.5 text-center">Target</th>
-                    <th className="px-3 py-2.5 text-center">Ya</th>
-                    <th className="px-3 py-2.5 text-center">Capaian</th>
-                    <th className="px-3 py-2.5 text-center">Karakter</th>
-                    <th className="px-3 py-2.5 text-right">Kontribusi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {(profileData.program_summary || []).map((p) => (
-                    <tr key={p.program_id}>
-                      <td className="px-3 py-2.5 font-semibold text-slate-800">{p.nama_program}</td>
-                      <td className="px-3 py-2.5 text-center">{p.bobot}%</td>
-                      <td className="px-3 py-2.5 text-center">{p.target_periode}x</td>
-                      <td className="px-3 py-2.5 text-center font-bold text-emerald-700">{p.jumlah_ya}x</td>
-                      <td className="px-3 py-2.5 text-center">{p.capaian_persen}%</td>
-                      <td className="px-3 py-2.5 text-center">{p.rata_karakter || '-'}</td>
-                      <td className="px-3 py-2.5 text-right font-bold">{p.kontribusi_bobot}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Recent assessments */}
+            {/* Separated Tabs: SPPN | PPKS | Absensi Face ID */}
             <div>
-              <h4 className="text-sm font-bold text-slate-900 mb-2">
-                Riwayat Penilaian Terbaru ({(profileData.assessments || []).length})
-              </h4>
-              <div className="max-h-52 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
-                {(profileData.assessments || []).slice(0, 15).map((a) => (
-                  <div key={a.id} className="px-3.5 py-2.5 flex items-center justify-between gap-2 text-xs">
-                    <div>
-                      <span className="font-bold text-slate-800">{a.nama_program}</span>
-                      <span className="text-slate-400"> • {formatDate(a.tanggal)} • {a.asesor_nama}</span>
-                      {a.keterangan && <p className="text-slate-500 mt-0.5">{a.keterangan}</p>}
-                    </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      <StatusBadge label={a.jenis_penilaian} variant={a.jenis_penilaian === 'SPPN' ? 'emerald' : 'amber'} />
-                      <StatusBadge label={`${a.pelaksanaan} (${a.skor_akhir})`} variant={a.pelaksanaan === 'Ya' ? 'blue' : 'rose'} />
-                    </div>
-                  </div>
+              <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-2 mb-3">
+                {[
+                  { key: 'sppn', label: `Penilaian SPPN Utama (${(profileData.sppn_assessments || []).length})` },
+                  { key: 'ppks', label: `Monitoring PPKS (${(profileData.ppks_assessments || []).length})` },
+                  { key: 'absensi', label: `Absensi Face ID (${(profileData.attendances || []).length})` },
+                ].map((t) => (
+                  <button
+                    key={t.key}
+                    type="button"
+                    onClick={() => setProfileTab(t.key)}
+                    className={`rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
+                      profileTab === t.key
+                        ? t.key === 'ppks'
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-emerald-600 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
                 ))}
-                {(profileData.assessments || []).length === 0 && (
-                  <p className="p-4 text-center text-xs text-slate-400">Belum ada riwayat penilaian pada periode ini.</p>
-                )}
               </div>
-            </div>
 
-            {/* Recent Face ID Attendances */}
-            {(profileData.attendances || []).length > 0 && (
-              <div>
-                <h4 className="text-sm font-bold text-slate-900 mb-2">
-                  Riwayat Absensi Face ID ({profileData.attendances.length})
-                </h4>
-                <div className="max-h-40 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
-                  {profileData.attendances.slice(0, 10).map((att) => (
-                    <div key={att.id} className="px-3.5 py-2 flex items-center justify-between text-xs">
+              {profileTab === 'sppn' && (
+                <div className="max-h-56 overflow-y-auto rounded-xl border border-emerald-200 divide-y divide-slate-100">
+                  {(profileData.sppn_assessments || []).map((a) => (
+                    <div key={a.id} className="px-3.5 py-2.5 flex items-center justify-between gap-2 text-xs">
+                      <div>
+                        <span className="font-bold text-slate-900">{a.nama_program}</span>
+                        <span className="text-slate-400"> • {formatDate(a.tanggal)} • {a.asesor_nama}</span>
+                        {a.keterangan && <p className="text-slate-500 mt-0.5">{a.keterangan}</p>}
+                      </div>
+                      <StatusBadge label={`SPPN ${a.skor_akhir} (${a.pelaksanaan})`} variant={a.pelaksanaan === 'Ya' ? 'emerald' : 'rose'} />
+                    </div>
+                  ))}
+                  {(profileData.sppn_assessments || []).length === 0 && (
+                    <p className="p-4 text-center text-xs text-slate-400">Belum ada penilaian SPPN pada periode ini.</p>
+                  )}
+                </div>
+              )}
+
+              {profileTab === 'ppks' && (
+                <div className="max-h-56 overflow-y-auto rounded-xl border border-amber-200 divide-y divide-slate-100">
+                  {(profileData.ppks_assessments || []).map((a) => (
+                    <div key={a.id} className="px-3.5 py-2.5 flex items-center justify-between gap-2 text-xs">
+                      <div>
+                        <span className="font-bold text-slate-900">{a.nama_program}</span>
+                        <span className="text-slate-400"> • {formatDate(a.tanggal)} • {a.asesor_nama}</span>
+                        {a.keterangan && <p className="text-slate-500 mt-0.5">{a.keterangan}</p>}
+                      </div>
+                      <StatusBadge label={`PPKS ${a.skor_akhir} (${a.pelaksanaan})`} variant={a.pelaksanaan === 'Ya' ? 'amber' : 'rose'} />
+                    </div>
+                  ))}
+                  {(profileData.ppks_assessments || []).length === 0 && (
+                    <p className="p-4 text-center text-xs text-slate-400">Belum ada penilaian PPKS pada periode ini (perlu monitoring pembinaan spiritual).</p>
+                  )}
+                </div>
+              )}
+
+              {profileTab === 'absensi' && (
+                <div className="max-h-56 overflow-y-auto rounded-xl border border-slate-200 divide-y divide-slate-100">
+                  {(profileData.attendances || []).map((att) => (
+                    <div key={att.id} className="px-3.5 py-2.5 flex items-center justify-between text-xs">
                       <div>
                         <span className="font-semibold text-slate-800">{att.nama_program}</span>
                         <span className="text-slate-400"> • {formatDateTime(att.tanggal_absen)}</span>
@@ -464,9 +596,12 @@ export function DashboardWbpPage() {
                       />
                     </div>
                   ))}
+                  {(profileData.attendances || []).length === 0 && (
+                    <p className="p-4 text-center text-xs text-slate-400">Belum ada riwayat absensi Face ID pada periode ini.</p>
+                  )}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         ) : null}
       </Modal>

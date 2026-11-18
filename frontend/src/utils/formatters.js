@@ -1,6 +1,54 @@
 import { format, isValid, parseISO } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 
+export const INSTRUMEN_INFO = {
+  SPPN: {
+    singkatan: 'SPPN',
+    kepanjangan: 'Sistem Penilaian Pembinaan Narapidana',
+    peran: 'Penilaian Utama (Penentu Kelayakan)',
+    deskripsi:
+      'Instrumen penilaian utama berbasis pengamatan perilaku dan pelaksanaan pembinaan narapidana yang menjadi syarat inti pengusulan hak remisi & integrasi (ambang batas minimal skor 70).',
+  },
+  PPKS: {
+    singkatan: 'PPKS',
+    kepanjangan: 'Penilaian Pembinaan Kepribadian Spiritual',
+    peran: 'Penilaian Pendukung (Monitoring Didikan Lanjutan)',
+    deskripsi:
+      'Instrumen pendukung untuk memantau kualitas pembinaan kepribadian spiritual. Tidak digabung ke skor SPPN; berfungsi menentukan apakah WBP perlu catatan/didikan spiritual lanjutan.',
+  },
+};
+
+export const REKOMENDASI_RULES = [
+  {
+    code: 'direkomendasikan',
+    label: 'Direkomendasikan',
+    color: 'emerald',
+    syarat: 'SPPN >= 70 (Memenuhi Syarat) DAN PPKS >= 70 (Memenuhi Syarat)',
+    arti: 'Layak diusulkan hak remisi/integrasi tanpa catatan pembinaan lanjutan.',
+  },
+  {
+    code: 'direkomendasikan_dengan_catatan',
+    label: 'Direkomendasikan dengan Catatan',
+    color: 'amber',
+    syarat: 'SPPN >= 70 (Memenuhi Syarat) NAMUN PPKS < 70 / Belum Dinilai',
+    arti: 'Syarat utama SPPN terpenuhi, namun diberi catatan monitoring agar mengikuti didikan/pembinaan spiritual lanjutan.',
+  },
+  {
+    code: 'tidak_direkomendasikan',
+    label: 'Tidak Direkomendasikan',
+    color: 'rose',
+    syarat: 'SPPN < 70 (Belum Memenuhi Syarat)',
+    arti: 'Nilai inti SPPN belum memenuhi ambang batas minimal. Wajib pembinaan lanjutan sebelum pengusulan hak.',
+  },
+];
+
+export const PERIOD_LABELS = {
+  harian: 'Harian',
+  mingguan: 'Mingguan',
+  bulanan: 'Bulanan',
+  triwulan: 'Per 3 Bulan (Triwulan)',
+};
+
 export const ROLE_LABELS = {
   admin: 'Admin SIPASTI',
   wali_pas: 'Wali PAS',

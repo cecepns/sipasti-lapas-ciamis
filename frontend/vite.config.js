@@ -15,7 +15,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['logo-sipasti.png', 'pwa-192x192.png', 'pwa-512x512.png'],
+      includeAssets: ['logo-sipasti.png', 'logo-kementerian.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'SIPASTI - Lapas Kelas IIB Ciamis',
         short_name: 'SIPASTI',

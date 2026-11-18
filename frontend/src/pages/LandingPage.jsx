@@ -54,11 +54,16 @@ export function LandingPage() {
       {/* Top Navbar */}
       <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Link to="/" className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-2.5">
+            <img
+              src="/logo-kementerian.png"
+              alt="Logo Kementerian Pemasyarakatan"
+              className="h-10 w-10 rounded-xl object-contain bg-white border border-slate-100 p-0.5 shadow-xs"
+            />
             <img
               src="/logo-sipasti.png"
               alt="Logo SIPASTI"
-              className="h-11 w-11 rounded-xl object-contain bg-white border border-emerald-100 p-0.5 shadow-xs"
+              className="h-10 w-10 rounded-xl object-contain bg-white border border-emerald-100 p-0.5 shadow-xs"
             />
             <div>
               <span className="block text-lg font-extrabold tracking-tight text-emerald-700 leading-none">
@@ -77,9 +82,9 @@ export function LandingPage() {
             <a href="#program" className="hover:text-emerald-700 transition-colors">
               Program Spiritual
             </a>
-            <a href="#tentang" className="hover:text-emerald-700 transition-colors">
-              Tentang SIPASTI
-            </a>
+            <Link to="/panduan" className="hover:text-emerald-700 transition-colors">
+              Buku Panduan
+            </Link>
             <Link to="/registrasi-mitra" className="hover:text-emerald-700 transition-colors">
               Registrasi Mitra
             </Link>
