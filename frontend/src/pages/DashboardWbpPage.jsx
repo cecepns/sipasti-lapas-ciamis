@@ -39,7 +39,6 @@ import {
   formatDate,
   formatDateTime,
   INSTRUMEN_INFO,
-  REKOMENDASI_RULES,
   toIsoDate,
 } from '@/utils/formatters';
 import { exportWbpProfilePdf, exportWbpRankingPdf } from '@/utils/pdfGenerator';
@@ -160,44 +159,35 @@ export function DashboardWbpPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Dasbor & Profil Kelayakan WBP</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Penilaian terpisah <strong>SPPN</strong> (Sistem Penilaian Pembinaan Narapidana — Utama) &{' '}
-            <strong>PPKS</strong> (Penilaian Pembinaan Kepribadian Spiritual — Monitoring)
-          </p>
-        </div>
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+          Dasbor & Profil WBP
+        </h1>
         <button
           type="button"
           onClick={handleExportAllPdf}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition-colors"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-emerald-700 transition-colors"
         >
           <FileDown className="h-4 w-4" />
-          Download Rekap WBP (PDF)
+          Unduh Rekap PDF
         </button>
       </div>
 
-      {/* Decision Matrix Legend — Vibrant Full-Color Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        {REKOMENDASI_RULES.map((rule) => {
-          const colors =
-            rule.color === 'emerald'
-              ? 'bg-gradient-to-br from-emerald-600 to-teal-500 text-white shadow-md shadow-emerald-500/20'
-              : rule.color === 'amber'
-              ? 'bg-gradient-to-br from-amber-500 to-orange-500 text-white shadow-md shadow-amber-500/20'
-              : 'bg-gradient-to-br from-rose-600 to-pink-600 text-white shadow-md shadow-rose-500/20';
-          return (
-            <div key={rule.code} className={`rounded-2xl p-4 ${colors}`}>
-              <p className="text-sm font-black">{rule.label}</p>
-              <p className="text-[11px] font-bold bg-white/20 rounded-lg px-2.5 py-1 mt-1.5 inline-block">
-                {rule.syarat}
-              </p>
-              <p className="text-xs text-white/90 mt-1.5 leading-relaxed">{rule.arti}</p>
-            </div>
-          );
-        })}
+      {/* Compact Decision Legend */}
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-800">
+          <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          Direkomendasikan: SPPN ≥ 70 & PPKS ≥ 70
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1 font-semibold text-amber-800">
+          <span className="h-2 w-2 rounded-full bg-amber-500" />
+          Dengan Catatan: SPPN ≥ 70, PPKS &lt; 70
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 font-semibold text-rose-800">
+          <span className="h-2 w-2 rounded-full bg-rose-500" />
+          Tidak Direkomendasikan: SPPN &lt; 70
+        </span>
       </div>
 
       {/* Filters */}
@@ -280,14 +270,14 @@ export function DashboardWbpPage() {
                     <th className="px-4 py-3.5">Warga Binaan</th>
                     <th className="px-4 py-3.5">Wali PAS</th>
                     <th className="px-4 py-3.5 text-center bg-emerald-50/50 text-emerald-800">
-                      SPPN (Nilai Utama)
+                      SPPN
                     </th>
                     <th className="px-4 py-3.5 text-center bg-amber-50/50 text-amber-800">
-                      PPKS (Pendukung Monitoring)
+                      PPKS
                     </th>
                     <th className="px-4 py-3.5 text-center">Face ID</th>
-                    <th className="px-4 py-3.5 text-center">Keputusan Rekomendasi</th>
-                    <th className="px-4 py-3.5 text-right">Profil & PDF</th>
+                    <th className="px-4 py-3.5 text-center">Rekomendasi</th>
+                    <th className="px-4 py-3.5 text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">

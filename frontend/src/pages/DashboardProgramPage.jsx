@@ -18,6 +18,7 @@ import { SelectInput } from '@/components/common/SelectInput';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorState } from '@/components/common/ErrorState';
 import { StatusBadge } from '@/components/common/StatusBadge';
+import { SectionCard } from '@/components/dashboard/SectionCard';
 import { toIsoDate } from '@/utils/formatters';
 import { exportProgramSummaryPdf } from '@/utils/pdfGenerator';
 
@@ -61,22 +62,19 @@ export function DashboardProgramPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Dasbor Program Pembinaan</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Evaluasi bobot, target pelaksanaan, realisasi & efektivitas tiap program spiritual
-          </p>
-        </div>
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+          Dasbor Program Pembinaan
+        </h1>
         <button
           type="button"
           onClick={handleExportPdf}
           disabled={loading || rows.length === 0}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-50"
         >
           <FileDown className="h-4 w-4" />
-          Download Laporan Program (PDF)
+          Unduh Laporan PDF
         </button>
       </div>
 
@@ -85,7 +83,7 @@ export function DashboardProgramPage() {
           startDate={dateRange.startDate}
           endDate={dateRange.endDate}
           onChange={setDateRange}
-          showPresets
+          showPresets={false}
         />
         <div className="w-full sm:w-56">
           <SelectInput
@@ -99,34 +97,26 @@ export function DashboardProgramPage() {
       </div>
 
       {loading ? (
-        <LoadingSpinner label="Menghitung capaian program spiritual..." />
+        <LoadingSpinner label="Memuat data program..." />
       ) : error ? (
         <ErrorState message={error} onRetry={fetchData} />
       ) : (
         <>
-          <div className="rounded-2xl border border-slate-200/80 bg-white shadow-md overflow-hidden">
-            <div className="bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 px-5 py-3.5 text-white">
-              <h3 className="text-base font-extrabold">
-                Komparasi Pelaksanaan & Rata-rata Skor per Program
-              </h3>
-              <p className="text-xs text-sky-100">
-                Rasio pelaksanaan Ya (%) dan rata-rata skor konversi (0–100)
-              </p>
-            </div>
-            <div className="p-5 h-72">
+          <SectionCard title="Komparasi Pelaksanaan & Skor Program" icon={BookOpenCheck}>
+            <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={rows}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis dataKey="nama_program" tick={{ fontSize: 11, fontWeight: 600 }} />
                   <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
                   <Tooltip />
-                  <Legend />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
                   <Bar dataKey="rasio_pelaksanaan" name="Rasio Ya (%)" fill="#10b981" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="rata_skor" name="Rata Skor (0-100)" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="rata_skor" name="Rata Skor" fill="#f59e0b" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </SectionCard>
 
           <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
             <div className="overflow-x-auto">

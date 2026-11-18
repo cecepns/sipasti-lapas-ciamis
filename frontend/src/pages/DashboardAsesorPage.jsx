@@ -19,6 +19,7 @@ import { SelectInput } from '@/components/common/SelectInput';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorState } from '@/components/common/ErrorState';
 import { StatusBadge } from '@/components/common/StatusBadge';
+import { SectionCard } from '@/components/dashboard/SectionCard';
 import { ROLE_LABELS, toIsoDate } from '@/utils/formatters';
 import { exportAsesorSummaryPdf } from '@/utils/pdfGenerator';
 
@@ -63,22 +64,17 @@ export function DashboardAsesorPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Dasbor Asesor (Wali PAS & Mitra)</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Monitoring keaktifan input penilaian SPPN & PPKS oleh Wali PAS dan Mitra Keagamaan
-          </p>
-        </div>
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">Dasbor Asesor</h1>
         <button
           type="button"
           onClick={handleExportPdf}
           disabled={loading || rows.length === 0}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-50"
         >
           <FileDown className="h-4 w-4" />
-          Download Laporan Asesor (PDF)
+          Unduh Laporan PDF
         </button>
       </div>
 
@@ -102,41 +98,33 @@ export function DashboardAsesorPage() {
             options={ROLE_OPTIONS}
             value={roleOption}
             onChange={setRoleOption}
-            placeholder="Semua Peran Asesor"
+            placeholder="Semua Peran"
             isSearchable={false}
           />
         </div>
       </div>
 
       {loading ? (
-        <LoadingSpinner label="Menghitung kinerja Wali PAS & Mitra..." />
+        <LoadingSpinner label="Memuat data asesor..." />
       ) : error ? (
         <ErrorState message={error} onRetry={fetchData} />
       ) : (
         <>
-          <div className="rounded-2xl border border-slate-200/80 bg-white shadow-md overflow-hidden">
-            <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 px-5 py-3.5 text-white">
-              <h3 className="text-base font-extrabold">
-                Produktivitas Input Penilaian SPPN & PPKS per Asesor
-              </h3>
-              <p className="text-xs text-purple-100">
-                Perbandingan kontribusi input penilaian Wali PAS dan Mitra Keagamaan
-              </p>
-            </div>
-            <div className="p-5 h-72">
+          <SectionCard title="Produktivitas Input Penilaian per Asesor" icon={UserCheck}>
+            <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={rows.slice(0, 10)}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis dataKey="nama" tick={{ fontSize: 10, fontWeight: 600 }} />
                   <YAxis tick={{ fontSize: 11 }} />
                   <Tooltip />
-                  <Legend />
-                  <Bar dataKey="total_sppn" name="SPPN (Utama)" stackId="a" fill="#10b981" />
-                  <Bar dataKey="total_ppks" name="PPKS (Pendukung)" stackId="a" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Bar dataKey="total_sppn" name="SPPN" stackId="a" fill="#10b981" />
+                  <Bar dataKey="total_ppks" name="PPKS" stackId="a" fill="#f59e0b" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </SectionCard>
 
           <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
