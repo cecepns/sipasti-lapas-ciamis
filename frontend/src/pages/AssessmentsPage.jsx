@@ -26,7 +26,7 @@ import { StatusBadge } from '@/components/common/StatusBadge';
 import { EmptyState } from '@/components/common/EmptyState';
 import { TableSkeleton } from '@/components/common/LoadingSpinner';
 import { ErrorState } from '@/components/common/ErrorState';
-import { formatDateTime, INSTRUMEN_INFO, toIsoDate } from '@/utils/formatters';
+import { formatDateTime, toIsoDate } from '@/utils/formatters';
 import { exportAssessmentsPdf } from '@/utils/pdfGenerator';
 
 const JENIS_OPTIONS = [
@@ -285,62 +285,56 @@ export function AssessmentsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">
-            Penilaian SPPN & PPKS (Terpisah)
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            <strong>SPPN</strong> ({INSTRUMEN_INFO.SPPN.kepanjangan}) sebagai nilai utama &{' '}
-            <strong>PPKS</strong> ({INSTRUMEN_INFO.PPKS.kepanjangan}) sebagai pendukung monitoring
-          </p>
-        </div>
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+          Penilaian SPPN & PPKS
+        </h1>
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={handleExportPdf}
-            className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors"
+            className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs sm:text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors"
           >
             <FileDown className="h-4 w-4" />
-            Export PDF
+            Unduh PDF
           </button>
           {canInput && (
             <>
               <button
                 type="button"
                 onClick={() => openCreateModal('SPPN')}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-700 transition-colors"
               >
                 <Plus className="h-4 w-4" />
-                Input Nilai SPPN
+                Input SPPN
               </button>
               <button
                 type="button"
                 onClick={() => openCreateModal('PPKS')}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-amber-600 transition-colors"
+                className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-2 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-amber-600 transition-colors"
               >
                 <Plus className="h-4 w-4" />
-                Input Nilai PPKS
+                Input PPKS
               </button>
             </>
           )}
         </div>
       </div>
 
-      {/* Separated SPPN vs PPKS Quick View Tabs */}
+      {/* Quick Filter Tabs */}
       <div className="flex flex-wrap items-center gap-2">
         {[
-          { val: null, label: 'Semua Catatan', style: 'bg-slate-900 text-white' },
+          { val: null, label: 'Semua', style: 'bg-slate-900 text-white' },
           {
             val: 'SPPN',
-            label: 'SPPN — Sistem Penilaian Pembinaan Narapidana (Utama)',
-            style: 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20',
+            label: 'SPPN',
+            style: 'bg-emerald-600 text-white shadow-xs',
           },
           {
             val: 'PPKS',
-            label: 'PPKS — Penilaian Pembinaan Kepribadian Spiritual (Pendukung)',
-            style: 'bg-amber-500 text-white shadow-md shadow-amber-500/20',
+            label: 'PPKS',
+            style: 'bg-amber-500 text-white shadow-xs',
           },
         ].map((tab) => {
           const isActive = (filterJenis?.value || null) === tab.val;

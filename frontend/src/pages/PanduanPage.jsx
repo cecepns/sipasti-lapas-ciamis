@@ -109,45 +109,20 @@ export function PanduanPage({ isPublic = false }) {
           </Link>
         )}
 
-        {/* Header Banner */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-900 via-teal-800 to-slate-900 p-6 sm:p-8 text-white shadow-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 shrink-0">
-                <img
-                  src="/logo-kementerian.png"
-                  alt="Logo Kementerian"
-                  className="h-14 w-14 rounded-2xl bg-white p-1.5 object-contain shadow-md"
-                />
-                <img
-                  src="/logo-sipasti.png"
-                  alt="Logo SIPASTI"
-                  className="h-14 w-14 rounded-2xl bg-white p-1.5 object-contain shadow-md"
-                />
-              </div>
-              <div>
-                <span className="inline-block rounded-full bg-amber-400/20 border border-amber-300/40 px-3 py-0.5 text-[11px] font-bold text-amber-200">
-                  Manual Resmi Pengguna • Versi 2.0
-                </span>
-                <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">
-                  Buku Panduan Aplikasi SI PASTI
-                </h1>
-                <p className="text-xs sm:text-sm text-emerald-100/85 mt-1">
-                  Petunjuk operasional lengkap penilaian SPPN & PPKS, Absensi Face ID, Rekap Periodik & Laporan PDF
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleDownloadPdf}
-              disabled={downloading}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-400 px-5 py-3 text-sm font-extrabold text-slate-950 shadow-lg hover:bg-amber-300 disabled:opacity-60 transition-all shrink-0"
-            >
-              <FileDown className="h-4 w-4" />
-              {downloading ? 'Menyiapkan PDF...' : 'Download Buku Panduan (PDF)'}
-            </button>
-          </div>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">
+            Buku Panduan SIPASTI
+          </h1>
+          <button
+            type="button"
+            onClick={handleDownloadPdf}
+            disabled={downloading}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-60 transition-colors shrink-0"
+          >
+            <FileDown className="h-4 w-4" />
+            {downloading ? 'Menyiapkan PDF...' : 'Unduh Panduan (PDF)'}
+          </button>
         </div>
 
         {/* Chapter Navigation */}

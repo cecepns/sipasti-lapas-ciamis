@@ -19,14 +19,15 @@ import { AsyncSelectInput } from '@/components/common/AsyncSelectInput';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
+import { SectionCard } from '@/components/dashboard/SectionCard';
 import { PERIOD_LABELS, toIsoDate } from '@/utils/formatters';
 import { exportRekapPeriodikPdf } from '@/utils/pdfGenerator';
 
 const PERIODS = [
-  { key: 'harian', label: 'Rekap Harian', desc: 'Rincian per tanggal pelaksanaan', grad: 'from-emerald-600 to-teal-500' },
-  { key: 'mingguan', label: 'Rekap Mingguan', desc: 'Akumulasi per minggu berjalan', grad: 'from-blue-600 to-cyan-500' },
-  { key: 'bulanan', label: 'Rekap Bulanan', desc: 'Evaluasi rutin tiap bulan', grad: 'from-amber-500 to-orange-500' },
-  { key: 'triwulan', label: 'Rekap Per 3 Bulan (Triwulan)', desc: 'Evaluasi triwulan (Q1–Q4)', grad: 'from-violet-600 to-purple-500' },
+  { key: 'harian', label: 'Harian' },
+  { key: 'mingguan', label: 'Mingguan' },
+  { key: 'bulanan', label: 'Bulanan' },
+  { key: 'triwulan', label: 'Triwulan' },
 ];
 
 export function RekapPeriodikPage() {
@@ -87,87 +88,70 @@ export function RekapPeriodikPage() {
   const chartData = [...rows].reverse();
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">
-            Rekap Penilaian Periodik (Harian, Mingguan, Bulanan & Per 3 Bulan)
-          </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Monitoring terpisah nilai utama <strong>SPPN</strong> & pendukung{' '}
-            <strong>PPKS</strong> serta sebaran rekomendasi kelayakan di setiap rentang periode
-          </p>
-        </div>
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">Rekap Penilaian</h1>
         <button
           type="button"
           onClick={handleExportPdf}
           disabled={loading || rows.length === 0}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50 shrink-0"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-50 shrink-0"
         >
           <FileDown className="h-4 w-4" />
-          Export PDF ({PERIOD_LABELS[period]})
+          Unduh PDF ({PERIOD_LABELS[period]})
         </button>
       </div>
 
-      {/* Period Selector Cards */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {PERIODS.map((p) => {
-          const active = period === p.key;
-          return (
-            <button
-              key={p.key}
-              type="button"
-              onClick={() => setPeriod(p.key)}
-              className={`rounded-2xl border p-4 text-left transition-all ${
-                active
-                  ? `border-transparent bg-gradient-to-br ${p.grad} text-white shadow-lg scale-[1.01]`
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/40'
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-extrabold">{p.label}</span>
-                <CalendarRange className={`h-4 w-4 ${active ? 'text-amber-300' : 'text-emerald-600'}`} />
-              </div>
-              <p className={`text-xs mt-1 ${active ? 'text-emerald-100' : 'text-slate-500'}`}>
-                {p.desc}
-              </p>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Filters */}
+      {/* Filters & Period Tabs */}
       <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs space-y-3">
-        <DateRangeFilter
-          startDate={dateRange.startDate}
-          endDate={dateRange.endDate}
-          onChange={setDateRange}
-          showPresets
-        />
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <DateRangeFilter
+            startDate={dateRange.startDate}
+            endDate={dateRange.endDate}
+            onChange={setDateRange}
+            showPresets={false}
+          />
+          <div className="inline-flex self-start lg:self-auto rounded-xl bg-slate-100 p-1">
+            {PERIODS.map((p) => (
+              <button
+                key={p.key}
+                type="button"
+                onClick={() => setPeriod(p.key)}
+                className={`rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all whitespace-nowrap ${
+                  period === p.key
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="grid gap-3 sm:grid-cols-3">
           <AsyncSelectInput
             loadOptionsFn={loadWbpOptions}
             value={selectedWbp}
             onChange={setSelectedWbp}
-            placeholder="Filter Warga Binaan (ketik nama)..."
+            placeholder="Filter Warga Binaan..."
           />
           <AsyncSelectInput
             loadOptionsFn={loadProgramOptions}
             value={selectedProgram}
             onChange={setSelectedProgram}
-            placeholder="Filter Program Spiritual..."
+            placeholder="Filter Program..."
           />
           <AsyncSelectInput
             loadOptionsFn={loadAsesorOptions}
             value={selectedAsesor}
             onChange={setSelectedAsesor}
-            placeholder="Filter Asesor (Wali PAS / Mitra)..."
+            placeholder="Filter Asesor..."
           />
         </div>
       </div>
 
       {loading ? (
-        <LoadingSpinner label={`Menyusun rekap ${PERIOD_LABELS[period]}...`} />
+        <LoadingSpinner label={`Memuat rekap ${PERIOD_LABELS[period].toLowerCase()}...`} />
       ) : error ? (
         <ErrorState message={error} onRetry={fetchData} />
       ) : rows.length === 0 ? (
@@ -175,19 +159,12 @@ export function RekapPeriodikPage() {
           <EmptyState
             icon={CalendarRange}
             title="Belum ada data pada periode ini"
-            description="Ubah rentang waktu atau filter untuk melihat rekap penilaian periodik."
+            description="Ubah rentang waktu atau filter untuk melihat data."
           />
         </div>
       ) : (
         <>
-          {/* Composed Chart */}
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
-            <h3 className="text-base font-extrabold text-slate-900 mb-1">
-              Grafik Rekap {PERIOD_LABELS[period]} — SPPN (Utama) vs PPKS (Pendukung)
-            </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Perbandingan jumlah sesi terlaksana & rata-rata skor (0–100) secara terpisah
-            </p>
+          <SectionCard title={`Grafik Rekap ${PERIOD_LABELS[period]}`} icon={CalendarRange}>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={chartData}>
@@ -196,15 +173,15 @@ export function RekapPeriodikPage() {
                   <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
                   <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fontSize: 11 }} />
                   <Tooltip />
-                  <Legend />
-                  <Bar yAxisId="left" dataKey="total_sppn" name="Sesi SPPN (Utama)" fill="#059669" radius={[6, 6, 0, 0]} />
-                  <Bar yAxisId="left" dataKey="total_ppks" name="Sesi PPKS (Pendukung)" fill="#f59e0b" radius={[6, 6, 0, 0]} />
-                  <Line yAxisId="right" type="monotone" dataKey="rata_sppn" name="Rata Skor SPPN" stroke="#047857" strokeWidth={2.5} />
-                  <Line yAxisId="right" type="monotone" dataKey="rata_ppks" name="Rata Skor PPKS" stroke="#d97706" strokeWidth={2.5} strokeDasharray="4 4" />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  <Bar yAxisId="left" dataKey="total_sppn" name="Sesi SPPN" fill="#059669" radius={[6, 6, 0, 0]} />
+                  <Bar yAxisId="left" dataKey="total_ppks" name="Sesi PPKS" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                  <Line yAxisId="right" type="monotone" dataKey="rata_sppn" name="Skor SPPN" stroke="#047857" strokeWidth={2.5} />
+                  <Line yAxisId="right" type="monotone" dataKey="rata_ppks" name="Skor PPKS" stroke="#d97706" strokeWidth={2.5} strokeDasharray="4 4" />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>
-          </div>
+          </SectionCard>
 
           {/* Periodic Table */}
           <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
@@ -212,13 +189,13 @@ export function RekapPeriodikPage() {
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 border-b border-slate-100 text-xs font-bold uppercase text-slate-500">
                   <tr>
-                    <th className="px-4 py-3.5">Periode ({PERIOD_LABELS[period]})</th>
+                    <th className="px-4 py-3.5">Periode</th>
                     <th className="px-4 py-3.5 text-center">WBP Dinilai</th>
                     <th className="px-4 py-3.5 text-center bg-emerald-50/50 text-emerald-800">
-                      SPPN Utama (Ya/Tot • Skor)
+                      SPPN
                     </th>
                     <th className="px-4 py-3.5 text-center bg-amber-50/50 text-amber-800">
-                      PPKS Pendukung (Ya/Tot • Skor)
+                      PPKS
                     </th>
                     <th className="px-4 py-3.5 text-center text-emerald-700">Direkomendasikan</th>
                     <th className="px-4 py-3.5 text-center text-amber-700">Dengan Catatan</th>

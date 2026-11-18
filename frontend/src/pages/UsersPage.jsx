@@ -163,21 +163,16 @@ export function UsersPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900">Data Wali PAS & Manajemen Akun</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Kelola akun Admin, Wali PAS, Mitra Keagamaan, Kasubsi Reg & Bimkemas, Kasi Binadik & Ka. Lapas
-          </p>
-        </div>
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">Manajemen Akun</h1>
         <button
           type="button"
           onClick={openCreate}
-          className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+          className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-emerald-700"
         >
           <Plus className="h-4 w-4" />
-          Tambah Wali PAS / Akun
+          Tambah Akun
         </button>
       </div>
 

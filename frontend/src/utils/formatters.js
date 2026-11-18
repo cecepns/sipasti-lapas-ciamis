@@ -46,7 +46,7 @@ export const PERIOD_LABELS = {
   harian: 'Harian',
   mingguan: 'Mingguan',
   bulanan: 'Bulanan',
-  triwulan: 'Per 3 Bulan (Triwulan)',
+  triwulan: 'Triwulan',
 };
 
 export const ROLE_LABELS = {

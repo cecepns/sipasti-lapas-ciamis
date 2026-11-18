@@ -25,7 +25,7 @@ import toast from 'react-hot-toast';
 
 const NAV_GROUPS = [
   {
-    title: 'Visualisasi Dasbor',
+    title: 'Dasbor',
     items: [
       { to: '/app/dasbor-umum', label: 'Dasbor Umum', icon: LayoutDashboard, badge: 'bg-emerald-500/25 text-emerald-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
       { to: '/app/dasbor-wbp', label: 'Dasbor & Profil WBP', icon: Award, badge: 'bg-amber-500/25 text-amber-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
@@ -37,17 +37,17 @@ const NAV_GROUPS = [
     title: 'Pelaksanaan & Laporan',
     items: [
       { to: '/app/penilaian', label: 'Penilaian SPPN & PPKS', icon: ClipboardCheck, badge: 'bg-teal-500/25 text-teal-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
-      { to: '/app/rekap-penilaian', label: 'Rekap Periodik', icon: CalendarRange, badge: 'bg-orange-500/25 text-orange-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
+      { to: '/app/rekap-penilaian', label: 'Rekap Penilaian', icon: CalendarRange, badge: 'bg-orange-500/25 text-orange-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
       { to: '/app/absensi', label: 'Absensi Face ID', icon: ScanFace, badge: 'bg-indigo-500/25 text-indigo-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
     ],
   },
   {
-    title: 'Master Data SIPASTI',
+    title: 'Master Data',
     items: [
-      { to: '/app/wbp', label: 'Data WBP (SDP)', icon: Users, badge: 'bg-cyan-500/25 text-cyan-300', roles: ['admin', 'wali_pas', 'kasubsi', 'kasi_binadik', 'kalapas'] },
-      { to: '/app/programs', label: 'Data Program', icon: BookOpenCheck, badge: 'bg-lime-500/25 text-lime-300', roles: ['admin', 'wali_pas', 'kasubsi', 'kasi_binadik', 'kalapas'] },
-      { to: '/app/mitra', label: 'Registrasi Mitra', icon: Handshake, badge: 'bg-pink-500/25 text-pink-300', roles: ['admin', 'mitra', 'kasubsi'] },
-      { to: '/app/users', label: 'Wali PAS & Akun', icon: ShieldCheck, badge: 'bg-rose-500/25 text-rose-300', roles: ['admin'] },
+      { to: '/app/wbp', label: 'Data Warga Binaan', icon: Users, badge: 'bg-cyan-500/25 text-cyan-300', roles: ['admin', 'wali_pas', 'kasubsi', 'kasi_binadik', 'kalapas'] },
+      { to: '/app/programs', label: 'Program Pembinaan', icon: BookOpenCheck, badge: 'bg-lime-500/25 text-lime-300', roles: ['admin', 'wali_pas', 'kasubsi', 'kasi_binadik', 'kalapas'] },
+      { to: '/app/mitra', label: 'Data Mitra', icon: Handshake, badge: 'bg-pink-500/25 text-pink-300', roles: ['admin', 'mitra', 'kasubsi'] },
+      { to: '/app/users', label: 'Manajemen Akun', icon: ShieldCheck, badge: 'bg-rose-500/25 text-rose-300', roles: ['admin'] },
     ],
   },
   {
