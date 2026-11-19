@@ -35,63 +35,71 @@ async function loadImageAsDataUrl(url) {
 
 /**
  * Kop Surat Resmi Lapas Kelas IIB Ciamis:
- * - Kiri: Logo Kementerian / Pemasyarakatan (/logo-kementerian.png)
- * - Kanan: Logo SIPASTI (/logo-sipasti.png)
+ * - Atas: Logo Kemenimpas baku (/logo-kemenas.png) + Teks Kop Lapas Kelas IIB Ciamis (REV0013)
+ * - Pembatas: Garis ganda pembatas Kop
+ * - Di Bawah Kop: Logo SIPASTI (/logo-sipasti.png) + Header SIPASTI + Judul Dokumen (REV0014)
  */
 async function drawOfficialHeader(doc, title, subtitle) {
   const pageWidth = doc.internal.pageSize.getWidth();
-  const [logoKementerian, logoSipasti] = await Promise.all([
-    loadImageAsDataUrl('/logo-kementerian.png'),
+  const [logoKemenas, logoSipasti] = await Promise.all([
+    loadImageAsDataUrl('/logo-kemenas.png'),
     loadImageAsDataUrl('/logo-sipasti.png'),
   ]);
 
-  if (logoKementerian) {
-    doc.addImage(logoKementerian, 'PNG', 14, 9, 23, 23);
-  }
-  if (logoSipasti) {
-    doc.addImage(logoSipasti, 'PNG', pageWidth - 37, 9, 23, 23);
+  // 1. Logo Kemenimpas (Lingkaran) pada Kop Baku
+  if (logoKemenas) {
+    doc.addImage(logoKemenas, 'PNG', 14, 7, 23, 23);
   }
 
+  // 2. Teks Kop Surat Baku Lembaga Pemasyarakatan Kelas IIB Ciamis
   doc.setTextColor(15, 23, 42);
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9.5);
-  doc.text('KEMENTERIAN IMIGRASI DAN PEMASYARAKATAN REPUBLIK INDONESIA', pageWidth / 2, 13.5, { align: 'center' });
+  doc.text('KEMENTERIAN IMIGRASI DAN PEMASYARAKATAN REPUBLIK INDONESIA', pageWidth / 2 + 8, 11, { align: 'center' });
 
   doc.setFontSize(8.5);
   doc.setTextColor(51, 65, 85);
-  doc.text('DIREKTORAT JENDERAL PEMASYARAKATAN — KANWIL JAWA BARAT', pageWidth / 2, 18, { align: 'center' });
+  doc.text('DIREKTORAT JENDERAL PEMASYARAKATAN', pageWidth / 2 + 8, 15.5, { align: 'center' });
+  doc.text('KANTOR WILAYAH JAWA BARAT', pageWidth / 2 + 8, 19.5, { align: 'center' });
 
   doc.setFontSize(12);
   doc.setTextColor(4, 120, 87);
-  doc.text('LEMBAGA PEMASYARAKATAN KELAS IIB CIAMIS', pageWidth / 2, 23, { align: 'center' });
+  doc.text('LEMBAGA PEMASYARAKATAN KELAS IIB CIAMIS', pageWidth / 2 + 8, 24.5, { align: 'center' });
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
+  doc.setFontSize(7.5);
   doc.setTextColor(71, 85, 105);
-  doc.text('Jl. Ir. H. Juanda No.146, Ciamis — Telp: 0851-6984-1951 | Email: kontak@sipastilapasciamis.com', pageWidth / 2, 27.5, { align: 'center' });
-  doc.text('SIPASTI (Sistem Informasi Penilaian Aktivitas Spiritual Terintegrasi)', pageWidth / 2, 31.5, { align: 'center' });
+  doc.text('Jl. Ir. H. Juanda No.146, Ciamis — Jawa Barat 46211 | Telp/WA: 0851-6984-1951', pageWidth / 2 + 8, 28.5, { align: 'center' });
 
-  // Double institutional divider line
+  // 3. Garis Pembatas Kop Baku (Double Line)
   doc.setDrawColor(4, 120, 87);
   doc.setLineWidth(1.0);
-  doc.line(14, 35, pageWidth - 14, 35);
+  doc.line(14, 32, pageWidth - 14, 32);
   doc.setLineWidth(0.35);
-  doc.line(14, 36.6, pageWidth - 14, 36.6);
+  doc.line(14, 33.6, pageWidth - 14, 33.6);
 
-  // Document Title
+  // 4. Di Bawah Kop: Logo SIPASTI + Header SIPASTI + Judul Dokumen (REV0014)
+  if (logoSipasti) {
+    doc.addImage(logoSipasti, 'PNG', 14, 36.5, 15, 15);
+  }
+
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(11.5);
+  doc.setFontSize(9);
+  doc.setTextColor(4, 120, 87);
+  doc.text('SIPASTI (SISTEM INFORMASI PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI)', 33, 41.5);
+
+  doc.setFontSize(11);
   doc.setTextColor(15, 23, 42);
-  doc.text(title.toUpperCase(), pageWidth / 2, 44, { align: 'center' });
+  doc.text(title.toUpperCase(), 33, 47);
 
   if (subtitle) {
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(71, 85, 105);
-    doc.text(subtitle, pageWidth / 2, 49, { align: 'center' });
+    doc.text(subtitle, 33, 51.5);
   }
 
-  return subtitle ? 54 : 49;
+  return subtitle ? 56 : 52;
 }
 
 function drawSignatureFooter(doc, startY) {
@@ -358,14 +366,13 @@ export async function exportAssessmentsPdf(rows, filters = {}) {
   doc.save(`Rekap_Penilaian_SIPASTI_${formatDate(new Date(), 'yyyyMMdd')}.pdf`);
 }
 
-export async function exportRekapPeriodikPdf(rows, period = 'bulanan', filters = {}) {
+export async function exportRekapPeriodikPdf(rows, period = 'triwulan', filters = {}) {
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
   const periodLabel = formatDateRangeLabel(filters.startDate, filters.endDate);
-  const pTitle = PERIOD_LABELS[period] || 'Bulanan';
   const y = await drawOfficialHeader(
     doc,
-    `Rekapitulasi Penilaian ${pTitle} (SPPN Utama & PPKS Pendukung)`,
-    `Rentang Tanggal: ${periodLabel} | Pengelompokan: ${pTitle}`
+    'Laporan Rekapitulasi Penilaian Triwulan (SPPN & PPKS)',
+    `Rentang Tanggal: ${periodLabel}`
   );
 
   autoTable(doc, {
@@ -376,33 +383,29 @@ export async function exportRekapPeriodikPdf(rows, period = 'bulanan', filters =
     head: [
       [
         'No',
-        `Periode (${pTitle})`,
-        'WBP Dinilai',
-        'Sesi SPPN (Ya/Tot)',
-        'Rata SPPN (Utama)',
-        'Sesi PPKS (Ya/Tot)',
-        'Rata PPKS (Pendukung)',
-        'Direkomendasikan',
-        'Dgn Catatan',
-        'Tidak Direk.',
+        'Triwulan',
+        'Jumlah WBP',
+        'x̄ % Pelaksanaan',
+        'x̄ Nilai SPPN',
+        'x̄ Kualifikasi SPPN',
+        'x̄ Nilai PPKS',
+        'x̄ Kualifikasi PPKS',
       ],
     ],
     body: rows.map((r, idx) => [
       idx + 1,
-      r.period_label || r.period_key,
+      r.triwulan || r.period_label || r.period_key,
       `${r.wbp_dinilai} WBP`,
-      `${r.sppn_ya} / ${r.total_sppn}`,
+      `${r.pelaksanaan_pct ?? (r.total_penilaian > 0 ? Math.round(((r.sppn_ya + r.ppks_ya) / r.total_penilaian) * 100) : 0)}%`,
       r.rata_sppn || '-',
-      `${r.ppks_ya} / ${r.total_ppks}`,
+      r.kualifikasi_sppn || (r.rata_sppn >= 70 ? '1' : '0'),
       r.rata_ppks || '-',
-      `${r.direkomendasikan} WBP`,
-      `${r.dengan_catatan} WBP`,
-      `${r.tidak_direkomendasikan} WBP`,
+      r.kualifikasi_ppks || (r.rata_ppks >= 4.0 ? '2' : r.rata_ppks >= 3.0 ? '1' : '0'),
     ]),
   });
 
   drawSignatureFooter(doc, doc.lastAutoTable.finalY);
-  doc.save(`Rekap_${period}_SIPASTI_${formatDate(new Date(), 'yyyyMMdd')}.pdf`);
+  doc.save(`Rekap_Penilaian_Triwulan_SIPASTI_${formatDate(new Date(), 'yyyyMMdd')}.pdf`);
 }
 
 export async function exportAttendancesPdf(rows, filters = {}) {
@@ -444,8 +447,8 @@ export async function exportWbpRankingPdf(rows, filters = {}) {
   const periodLabel = formatDateRangeLabel(filters.startDate, filters.endDate);
   const y = await drawOfficialHeader(
     doc,
-    'Laporan Evaluasi Kelayakan Warga Binaan (SPPN Utama & PPKS Pendukung)',
-    `Periode: ${periodLabel} | Total WBP: ${rows.length} | Penilaian SPPN & PPKS Dipisahkan`
+    'Laporan Evaluasi Kelayakan Warga Binaan (SPPN & PPKS)',
+    `Periode: ${periodLabel} | Total WBP: ${rows.length}`
   );
 
   autoTable(doc, {
@@ -456,28 +459,28 @@ export async function exportWbpRankingPdf(rows, filters = {}) {
     head: [
       [
         'No',
-        'No. Registrasi',
-        'Nama WBP',
+        'Warga Binaan',
+        'No. Reg',
         'Wali PAS',
+        'Mitra',
+        '% Pelaksanaan',
         'SPPN (Utama)',
-        'Status SPPN',
-        'PPKS (Pendukung)',
-        'Status PPKS',
-        'Absen Face ID',
-        'Keputusan Rekomendasi',
+        'PPKS (Skala 1-5)',
+        'Kualifikasi Akhir',
+        'Face ID',
       ],
     ],
     body: rows.map((r, idx) => [
       idx + 1,
-      r.no_registrasi,
       r.nama,
+      r.no_registrasi,
       r.wali_pas_nama || '-',
-      `${r.sppn_skor ?? 0} (${r.sppn_count ?? 0}x)`,
-      r.sppn_status || '-',
-      `${r.ppks_skor ?? 0} (${r.ppks_count ?? 0}x)`,
-      r.ppks_status || '-',
+      r.mitra_nama || '-',
+      `${r.pelaksanaan_pct ?? (r.total_penilaian > 0 ? Math.round(((r.jumlah_ya || 0) / r.total_penilaian) * 100) : 0)}%`,
+      `${r.sppn_skor ?? 0} (Kualifikasi ${r.sppn_kualifikasi ?? (r.sppn_skor >= 70 ? '1' : '0')})`,
+      `${r.ppks_skor ?? 0} (Kualifikasi ${r.ppks_kualifikasi ?? (r.ppks_skor >= 4.0 ? '2' : r.ppks_skor >= 3.0 ? '1' : '0')})`,
+      r.rekomendasi?.label || (r.kualifikasi_akhir === 2 ? 'Memenuhi Syarat dan Direkomendasikan' : r.kualifikasi_akhir === 1 ? 'Memenuhi Syarat dengan Pertimbangan' : 'Tidak Memenuhi Syarat'),
       `${r.absensi_face_verified ?? 0}/${r.total_absensi ?? 0}`,
-      r.rekomendasi?.label || '-',
     ]),
   });
 
@@ -490,7 +493,7 @@ export async function exportProgramSummaryPdf(rows, filters = {}) {
   const periodLabel = formatDateRangeLabel(filters.startDate, filters.endDate);
   const y = await drawOfficialHeader(
     doc,
-    'Laporan Capaian Program Pembinaan Spiritual (Bobot, Target & Realisasi)',
+    'Laporan Capaian Program Pembinaan Spiritual',
     `Periode: ${periodLabel}`
   );
 
@@ -499,19 +502,31 @@ export async function exportProgramSummaryPdf(rows, filters = {}) {
     theme: 'striped',
     styles: { fontSize: 8.5, cellPadding: 2.5 },
     headStyles: { fillColor: [4, 120, 87], textColor: 255 },
-    head: [['No', 'Kode', 'Nama Program', 'Kategori', 'Bobot', 'Target Kolektif', 'Realisasi Ya', 'Tidak', 'Rasio Ya', 'Rata Karakter', 'Rata Skor']],
+    head: [
+      [
+        'No',
+        'Program Pembinaan',
+        'Kategori',
+        'Bobot',
+        'Target',
+        'x̄ % Pelaksanaan',
+        'x̄ Nilai SPPN',
+        'x̄ Kualifikasi SPPN',
+        'x̄ Nilai PPKS',
+        'x̄ Kualifikasi PPKS',
+      ],
+    ],
     body: rows.map((r, idx) => [
       idx + 1,
-      r.kode_program,
       r.nama_program,
       r.kategori,
       `${r.bobot}%`,
-      r.target_kolektif,
-      r.jumlah_ya,
-      r.jumlah_tidak,
-      `${r.rasio_pelaksanaan}%`,
-      r.rata_karakter || '-',
-      r.rata_skor || '-',
+      `${r.target || r.target_bulanan || 0} sesi`,
+      `${r.pelaksanaan_pct ?? r.rasio_pelaksanaan ?? 0}%`,
+      r.rata_sppn ?? '-',
+      r.kualifikasi_sppn ?? (r.rata_sppn >= 70 ? '1' : '0'),
+      r.rata_ppks ?? '-',
+      r.kualifikasi_ppks ?? (r.rata_ppks >= 4.0 ? '2' : r.rata_ppks >= 3.0 ? '1' : '0'),
     ]),
   });
 
@@ -524,7 +539,7 @@ export async function exportAsesorSummaryPdf(rows, filters = {}) {
   const periodLabel = formatDateRangeLabel(filters.startDate, filters.endDate);
   const y = await drawOfficialHeader(
     doc,
-    'Laporan Kinerja Asesor Pembinaan Spiritual (Wali PAS & Mitra Keagamaan)',
+    'Laporan Kinerja Asesor Pembinaan Spiritual (Wali PAS & Mitra)',
     `Periode: ${periodLabel}`
   );
 
@@ -533,19 +548,27 @@ export async function exportAsesorSummaryPdf(rows, filters = {}) {
     theme: 'striped',
     styles: { fontSize: 8.5, cellPadding: 2.5 },
     headStyles: { fillColor: [4, 120, 87], textColor: 255 },
-    head: [['No', 'Nama Asesor', 'Peran', 'Instansi', 'Total Input', 'SPPN', 'PPKS', 'WBP Dinilai', 'Rasio Ya', 'Rata Karakter', 'Rata Skor']],
+    head: [
+      [
+        'No',
+        'Nama Asesor',
+        'Peran',
+        'Instansi',
+        'Jumlah WBP Dibina',
+        'x̄ % Pelaksanaan',
+        'x̄ Kualifikasi SPPN',
+        'x̄ Kualifikasi PPKS',
+      ],
+    ],
     body: rows.map((r, idx) => [
       idx + 1,
       r.nama,
       ROLE_LABELS[r.role] || r.role,
       r.instansi || '-',
-      r.total_penilaian,
-      r.total_sppn,
-      r.total_ppks,
-      r.wbp_dinilai,
-      `${r.rasio_ya}%`,
-      r.rata_karakter || '-',
-      r.rata_skor || '-',
+      `${r.total_wbp_dibina ?? (r.role === 'wali_pas' ? r.total_wbp_binaan : r.wbp_dinilai) ?? 0} WBP`,
+      `${r.pelaksanaan_pct ?? r.rasio_ya ?? 0}%`,
+      r.kualifikasi_sppn ?? (r.rata_skor >= 70 ? '1' : '0'),
+      r.kualifikasi_ppks ?? (r.rata_karakter >= 4.0 ? '2' : r.rata_karakter >= 3.0 ? '1' : '0'),
     ]),
   });
 

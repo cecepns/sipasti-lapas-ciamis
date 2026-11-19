@@ -28,7 +28,7 @@ const NAV_GROUPS = [
     title: 'Dasbor',
     items: [
       { to: '/app/dasbor-umum', label: 'Dasbor Umum', icon: LayoutDashboard, badge: 'bg-emerald-500/25 text-emerald-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
-      { to: '/app/dasbor-wbp', label: 'Dasbor & Profil WBP', icon: Award, badge: 'bg-amber-500/25 text-amber-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
+      { to: '/app/dasbor-wbp', label: 'Dasbor WBP', icon: Award, badge: 'bg-amber-500/25 text-amber-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
       { to: '/app/dasbor-program', label: 'Dasbor Program', icon: BookOpenCheck, badge: 'bg-sky-500/25 text-sky-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
       { to: '/app/dasbor-asesor', label: 'Dasbor Asesor', icon: UserCheck, badge: 'bg-violet-500/25 text-violet-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
     ],
@@ -36,7 +36,7 @@ const NAV_GROUPS = [
   {
     title: 'Pelaksanaan & Laporan',
     items: [
-      { to: '/app/penilaian', label: 'Penilaian SPPN & PPKS', icon: ClipboardCheck, badge: 'bg-teal-500/25 text-teal-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
+      { to: '/app/penilaian', label: 'Penilaian', icon: ClipboardCheck, badge: 'bg-teal-500/25 text-teal-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
       { to: '/app/rekap-penilaian', label: 'Rekap Penilaian', icon: CalendarRange, badge: 'bg-orange-500/25 text-orange-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
       { to: '/app/absensi', label: 'Absensi Face ID', icon: ScanFace, badge: 'bg-indigo-500/25 text-indigo-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
     ],

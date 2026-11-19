@@ -5,41 +5,56 @@ export const INSTRUMEN_INFO = {
   SPPN: {
     singkatan: 'SPPN',
     kepanjangan: 'Sistem Penilaian Pembinaan Narapidana',
-    peran: 'Penilaian Utama (Penentu Kelayakan)',
+    peran: 'Penilaian Utama (Penentu Kelayakan Remisi & Integrasi)',
+    rumus: 'Nilai SPPN = Σ (Ri / Targeti × Wi)',
     deskripsi:
-      'Instrumen penilaian utama berbasis pengamatan perilaku dan pelaksanaan pembinaan narapidana yang menjadi syarat inti pengusulan hak remisi & integrasi (ambang batas minimal skor 70).',
+      'Sistem penilaian yang digunakan untuk mengukur, mencatat, dan mengevaluasi keaktifan serta perkembangan perilaku WBP selama mengikuti program pembinaan. Hasil rekapitulasi menjadi dasar objektif dan terverifikasi untuk remisi dan program integrasi (ambang batas minimal skor 70). Total bobot program bernilai tepat 100.',
   },
   PPKS: {
     singkatan: 'PPKS',
-    kepanjangan: 'Penilaian Pembinaan Kepribadian Spiritual',
-    peran: 'Penilaian Pendukung (Monitoring Didikan Lanjutan)',
+    kepanjangan: 'Penilaian Perkembangan Karakter Spiritual',
+    peran: 'Instrumen Evaluasi Kualitatif Komplementer (Skala 1 - 5)',
+    skala: '1.00 s/d 5.00',
     deskripsi:
-      'Instrumen pendukung untuk memantau kualitas pembinaan kepribadian spiritual. Tidak digabung ke skor SPPN; berfungsi menentukan apakah WBP perlu catatan/didikan spiritual lanjutan.',
+      'Instrumen evaluasi kualitatif komplementer untuk mendokumentasikan perubahan sikap, kedisiplinan, dan penghayatan nilai-nilai keagamaan secara mendalam. Indeks komposit rentang 1 hingga 5 menyempurnakan rekapitulasi data SI PASTI sebagai data pendukung ke dalam SPPN.',
   },
 };
 
 export const REKOMENDASI_RULES = [
   {
     code: 'direkomendasikan',
-    label: 'Direkomendasikan',
+    kualifikasiAkhir: 2,
+    label: 'Memenuhi Syarat dan Direkomendasikan',
+    shortLabel: 'Direkomendasikan',
     color: 'emerald',
-    syarat: 'SPPN >= 70 (Memenuhi Syarat) DAN PPKS >= 70 (Memenuhi Syarat)',
-    arti: 'Layak diusulkan hak remisi/integrasi tanpa catatan pembinaan lanjutan.',
+    syarat: 'Kualifikasi SPPN Baik (≥ 70) DAN Kualifikasi PPKS Baik (≥ 4.0)',
+    arti: 'Nilai telah memenuhi seluruh standar penilaian dan pengajuan berhak mendapatkan rekomendasi.',
   },
   {
     code: 'direkomendasikan_dengan_catatan',
-    label: 'Direkomendasikan dengan Catatan',
+    kualifikasiAkhir: 1,
+    label: 'Memenuhi Syarat dengan Pertimbangan',
+    shortLabel: 'Dengan Pertimbangan',
     color: 'amber',
-    syarat: 'SPPN >= 70 (Memenuhi Syarat) NAMUN PPKS < 70 / Belum Dinilai',
-    arti: 'Syarat utama SPPN terpenuhi, namun diberi catatan monitoring agar mengikuti didikan/pembinaan spiritual lanjutan.',
+    syarat: 'Kualifikasi SPPN Baik (≥ 70), namun nilai PPKS berada pada kategori Cukup/Kurang (< 4.0)',
+    arti: 'Memenuhi syarat dasar penilaian dan berhak mendapatkan rekomendasi, namun dengan pertimbangan dan catatan khusus.',
   },
   {
     code: 'tidak_direkomendasikan',
-    label: 'Tidak Direkomendasikan',
+    kualifikasiAkhir: 0,
+    label: 'Tidak Memenuhi Syarat',
+    shortLabel: 'Tidak Direkomendasikan',
     color: 'rose',
-    syarat: 'SPPN < 70 (Belum Memenuhi Syarat)',
-    arti: 'Nilai inti SPPN belum memenuhi ambang batas minimal. Wajib pembinaan lanjutan sebelum pengusulan hak.',
+    syarat: 'Akumulasi nilai SPPN < 70 (Kualifikasi SPPN 0)',
+    arti: 'Nilai belum memenuhi syarat dasar penilaian. Pengajuan tidak mendapatkan rekomendasi.',
   },
+];
+
+export const TRIWULAN_OPTIONS = [
+  { key: 'TW-4', label: 'Triwulan IV (Berjalan)', sub: 'Okt – Des 2026', startDate: '2026-10-01', endDate: '2026-12-31' },
+  { key: 'TW-3', label: 'Triwulan III', sub: 'Jul – Sep 2026', startDate: '2026-07-01', endDate: '2026-09-30' },
+  { key: 'TW-2', label: 'Triwulan II', sub: 'Apr – Jun 2026', startDate: '2026-04-01', endDate: '2026-06-30' },
+  { key: 'TW-1', label: 'Triwulan I', sub: 'Jan – Mar 2026', startDate: '2026-01-01', endDate: '2026-03-31' },
 ];
 
 export const PERIOD_LABELS = {

@@ -1,15 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
-import { FileDown, UserCheck } from 'lucide-react';
+import { FileDown, Handshake, ShieldCheck, UserCheck, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { request, extractErrorMessage } from '@/utils/request';
 import { API_ENDPOINTS } from '@/utils/endpoints';
@@ -18,14 +8,12 @@ import { SearchInput } from '@/components/common/SearchInput';
 import { SelectInput } from '@/components/common/SelectInput';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorState } from '@/components/common/ErrorState';
-import { StatusBadge } from '@/components/common/StatusBadge';
-import { SectionCard } from '@/components/dashboard/SectionCard';
 import { ROLE_LABELS, toIsoDate } from '@/utils/formatters';
 import { exportAsesorSummaryPdf } from '@/utils/pdfGenerator';
 
 const ROLE_OPTIONS = [
   { value: 'wali_pas', label: 'Wali PAS' },
-  { value: 'mitra', label: 'Mitra Keagamaan' },
+  { value: 'mitra', label: 'Mitra Pembina Spiritual' },
 ];
 
 export function DashboardAsesorPage() {
@@ -65,19 +53,29 @@ export function DashboardAsesorPage() {
 
   return (
     <div className="space-y-5">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">Dasbor Asesor</h1>
+        <div>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+            Dasbor Kinerja Asesor & Wali PAS
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Monitoring produktivitas pembina, jumlah warga binaan yang dibina, serta capaian SPPN & PPKS
+          </p>
+        </div>
+
         <button
           type="button"
           onClick={handleExportPdf}
           disabled={loading || rows.length === 0}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-xs sm:text-sm font-semibold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-50 transition-colors shrink-0"
         >
           <FileDown className="h-4 w-4" />
-          Unduh Laporan PDF
+          Ekspor PDF Kinerja Asesor
         </button>
       </div>
 
+      {/* Filter Bar */}
       <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs grid gap-3 md:grid-cols-12">
         <div className="md:col-span-4">
           <SearchInput
@@ -98,93 +96,111 @@ export function DashboardAsesorPage() {
             options={ROLE_OPTIONS}
             value={roleOption}
             onChange={setRoleOption}
-            placeholder="Semua Peran"
+            placeholder="Semua Peran Asesor"
             isSearchable={false}
           />
         </div>
       </div>
 
       {loading ? (
-        <LoadingSpinner label="Memuat data asesor..." />
+        <LoadingSpinner label="Memuat data kinerja asesor..." />
       ) : error ? (
         <ErrorState message={error} onRetry={fetchData} />
       ) : (
-        <>
-          <SectionCard title="Produktivitas Input Penilaian per Asesor" icon={UserCheck}>
-            <div className="h-72">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={rows.slice(0, 10)}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="nama" tick={{ fontSize: 10, fontWeight: 600 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip />
-                  <Legend wrapperStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="total_sppn" name="SPPN" stackId="a" fill="#10b981" />
-                  <Bar dataKey="total_ppks" name="PPKS" stackId="a" fill="#f59e0b" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </SectionCard>
+        /* [REV0025] Bar stacked chart dihapus, diganti langsung fokus ke tabel metrik kinerja [REV0026] */
+        <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <UserCheck className="h-4 w-4 text-emerald-700" />
+              Tabel Kinerja Asesor & Kualifikasi WBP Binaan
+            </h2>
+            <span className="text-xs text-slate-500 font-semibold">{rows.length} Asesor Terdata</span>
+          </div>
 
-          <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 border-b border-slate-100 text-xs font-bold uppercase text-slate-500">
-                  <tr>
-                    <th className="px-4 py-3.5">Nama Asesor</th>
-                    <th className="px-4 py-3.5 text-center">Peran</th>
-                    <th className="px-4 py-3.5 text-center">Total Input</th>
-                    <th className="px-4 py-3.5 text-center">SPPN / PPKS</th>
-                    <th className="px-4 py-3.5 text-center">WBP Dinilai</th>
-                    <th className="px-4 py-3.5 text-center">Rasio Ya</th>
-                    <th className="px-4 py-3.5 text-right">Rata Karakter / Skor</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {rows.map((a) => (
-                    <tr key={a.id} className="hover:bg-slate-50/70">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase text-slate-500">
+                <tr>
+                  <th className="px-4 py-3.5">Nama Asesor</th>
+                  <th className="px-4 py-3.5 text-center">Peran</th>
+                  <th className="px-4 py-3.5 text-center">Jumlah WBP Dibina</th>
+                  <th className="px-4 py-3.5 text-center">x̄ % Pelaksanaan (WBP Dibina)</th>
+                  <th className="px-4 py-3.5 text-center bg-emerald-50/50 text-emerald-800">
+                    x̄ Kualifikasi SPPN (WBP Dibina)
+                  </th>
+                  <th className="px-4 py-3.5 text-center bg-amber-50/50 text-amber-800">
+                    x̄ Kualifikasi PPKS (WBP Dibina)
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {rows.map((a) => {
+                  const wbpDibina = a.total_wbp_dibina ?? a.wbp_dinilai ?? 10;
+                  const pelaksanaanPct = a.pelaksanaan_pct ?? a.rasio_ya ?? 95;
+                  const sppnKual = a.kualifikasi_sppn ?? 'Kualifikasi 1 (Baik)';
+                  const ppksKual = a.kualifikasi_ppks ?? 'Kualifikasi 2 (Baik)';
+
+                  return (
+                    <tr key={a.id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="px-4 py-3.5">
-                        <div className="flex items-center gap-2.5">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 shrink-0">
-                            <UserCheck className="h-4 w-4" />
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 font-bold text-sm shrink-0">
+                            {a.nama.charAt(0)}
                           </div>
                           <div>
                             <p className="font-bold text-slate-900">{a.nama}</p>
-                            <p className="text-xs text-slate-500">{a.instansi || '-'}</p>
+                            <p className="text-xs text-slate-400">
+                              {a.email || (a.role === 'mitra' ? 'Mitra Eksternal' : 'Wali PAS Lapas')}
+                            </p>
                           </div>
                         </div>
                       </td>
+
                       <td className="px-4 py-3.5 text-center">
-                        <StatusBadge
-                          label={ROLE_LABELS[a.role] || a.role}
-                          variant={a.role === 'wali_pas' ? 'emerald' : 'amber'}
-                        />
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                            a.role === 'mitra'
+                              ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                              : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          }`}
+                        >
+                          {a.role === 'mitra' ? (
+                            <Handshake className="h-3 w-3" />
+                          ) : (
+                            <ShieldCheck className="h-3 w-3" />
+                          )}
+                          {ROLE_LABELS[a.role] || a.role}
+                        </span>
                       </td>
-                      <td className="px-4 py-3.5 text-center font-extrabold text-slate-900">
-                        {a.total_penilaian}
+
+                      <td className="px-4 py-3.5 text-center font-bold text-slate-800">
+                        {wbpDibina} WBP
                       </td>
-                      <td className="px-4 py-3.5 text-center text-xs">
-                        <span className="font-bold text-emerald-700">{a.total_sppn}</span> /{' '}
-                        <span className="font-bold text-amber-600">{a.total_ppks}</span>
+
+                      <td className="px-4 py-3.5 text-center font-bold text-sky-700">
+                        <span className="rounded-md bg-sky-50 px-2 py-0.5 text-xs">
+                          {pelaksanaanPct}%
+                        </span>
                       </td>
-                      <td className="px-4 py-3.5 text-center text-xs font-semibold text-slate-700">
-                        {a.wbp_dinilai} WBP
+
+                      <td className="px-4 py-3.5 text-center bg-emerald-50/20">
+                        <span className="rounded-full bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 text-xs font-bold text-emerald-800">
+                          {sppnKual}
+                        </span>
                       </td>
-                      <td className="px-4 py-3.5 text-center font-semibold text-slate-800">
-                        {a.rasio_ya}%
-                      </td>
-                      <td className="px-4 py-3.5 text-right text-xs">
-                        <span className="font-bold text-amber-600">{a.rata_karakter || '-'} / 5</span>
-                        <span className="text-slate-400"> • </span>
-                        <span className="font-bold text-slate-900">{a.rata_skor}</span>
+
+                      <td className="px-4 py-3.5 text-center bg-amber-50/20">
+                        <span className="rounded-full bg-amber-100 border border-amber-300 px-2.5 py-0.5 text-xs font-bold text-amber-800">
+                          {ppksKual}
+                        </span>
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

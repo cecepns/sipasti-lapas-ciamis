@@ -9,6 +9,7 @@ export function PublicMitraRegisterPage() {
   const [form, setForm] = useState({
     nama_lengkap: '',
     lembaga_instansi: '',
+    peran_asesor: 'Mitra Pembina Spiritual',
     bidang_keahlian: '',
     email: '',
     no_hp: '',
@@ -55,7 +56,7 @@ export function PublicMitraRegisterPage() {
               <h2 className="text-2xl font-extrabold text-slate-900">Registrasi Terkirim!</h2>
               <p className="text-sm text-slate-600 max-w-md mx-auto">
                 Terima kasih atas pendaftaran Anda sebagai Mitra Pembinaan Spiritual Lapas Kelas IIB
-                Ciamis. Admin akan memverifikasi data Anda dan mengaktifkan akses akun SIPASTI.
+                Ciamis. Admin akan memverifikasi data dan mengaktifkan akun asesor SIPASTI Anda.
               </p>
               <div className="pt-2 flex justify-center gap-3">
                 <Link
@@ -86,7 +87,7 @@ export function PublicMitraRegisterPage() {
                     Kemitraan Pembinaan Spiritual
                   </span>
                   <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">
-                    Registrasi Mitra Keagamaan
+                    Registrasi Mitra & Asesor Eksternal
                   </h1>
                 </div>
               </div>
@@ -106,6 +107,7 @@ export function PublicMitraRegisterPage() {
                       className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
+
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1.5">
                       Lembaga / Instansi / Pesantren *
@@ -121,18 +123,38 @@ export function PublicMitraRegisterPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                    Bidang Keahlian / Materi Pembinaan *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={form.bidang_keahlian}
-                    onChange={(e) => setForm({ ...form, bidang_keahlian: e.target.value })}
-                    placeholder="Contoh: Tahsin Al-Quran, Kajian Akhlak, Konseling Rohani"
-                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                  />
+                {/* [REV0011] Pilihan Peran Asesor / Pengisi Pembinaan */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Peran Asesor Pengisi *
+                    </label>
+                    <select
+                      value={form.peran_asesor}
+                      onChange={(e) => setForm({ ...form, peran_asesor: e.target.value })}
+                      className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white"
+                    >
+                      <option value="Mitra Pembina Spiritual">Mitra Pembina Spiritual</option>
+                      <option value="Penyuluh Agama Islam (Kemenag)">Penyuluh Agama Islam (Kemenag)</option>
+                      <option value="Ustadz / Pengajar Pesantren">Ustadz / Pengajar Pesantren</option>
+                      <option value="Rohaniwan / Konselor Keagamaan">Rohaniwan / Konselor Keagamaan</option>
+                      <option value="Wali PAS Pembina">Wali PAS Pembina</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                      Bidang Keahlian / Materi Pembinaan *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={form.bidang_keahlian}
+                      onChange={(e) => setForm({ ...form, bidang_keahlian: e.target.value })}
+                      placeholder="Tahsin Al-Qur'an, Fiqih, Akhlak, dll"
+                      className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -170,7 +192,7 @@ export function PublicMitraRegisterPage() {
                     rows={3}
                     value={form.alamat}
                     onChange={(e) => setForm({ ...form, alamat: e.target.value })}
-                    placeholder="Alamat domisili atau alamat lembaga..."
+                    placeholder="Alamat domisili atau kantor lembaga..."
                     className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
                   />
                 </div>

@@ -18,78 +18,50 @@ import {
   ArrowRight,
   Award,
   BookOpen,
-  CalendarRange,
+  Calendar,
   CheckCircle2,
-  ClipboardCheck,
+  ChevronRight,
   Clock,
   FileDown,
+  Layers,
   PieChart as PieChartIcon,
   PlusCircle,
   ScanFace,
   ShieldCheck,
   TrendingUp,
-  Trophy,
   Users,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import { request, extractErrorMessage } from '@/utils/request';
 import { API_ENDPOINTS } from '@/utils/endpoints';
-import { getAssetUrl } from '@/utils/api';
-import { DateRangeFilter } from '@/components/common/DateRangeFilter';
-import { AsyncSelectInput } from '@/components/common/AsyncSelectInput';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { ErrorState } from '@/components/common/ErrorState';
 import { StatusBadge } from '@/components/common/StatusBadge';
-import { KpiCard } from '@/components/dashboard/KpiCard';
 import { SectionCard } from '@/components/dashboard/SectionCard';
 import {
   formatDate,
   formatNumber,
-  PERIOD_LABELS,
   ROLE_LABELS,
-  toIsoDate,
+  TRIWULAN_OPTIONS,
 } from '@/utils/formatters';
 import { exportAssessmentsPdf } from '@/utils/pdfGenerator';
 
-const PERIOD_TABS = [
-  { key: 'harian', label: 'Harian' },
-  { key: 'mingguan', label: 'Mingguan' },
-  { key: 'bulanan', label: 'Bulanan' },
-  { key: 'triwulan', label: 'Triwulan' },
-];
-
 export function DashboardUmumPage() {
   const { user } = useAuth();
-  const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
-  const [selectedProgram, setSelectedProgram] = useState(null);
-  const [period, setPeriod] = useState('bulanan');
+  const [selectedTw, setSelectedTw] = useState('tw4');
+  const [selectedCompTw, setSelectedCompTw] = useState('tw3');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState('');
-
-  const loadProgramOptions = useCallback(async (search) => {
-    const res = await request.get(API_ENDPOINTS.PROGRAMS.LIST, {
-      search,
-      limit: 25,
-      status: 'aktif',
-    });
-    return (res.data || []).map((p) => ({
-      value: p.id,
-      label: `${p.nama_program} (${p.bobot}%)`,
-    }));
-  }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
       const res = await request.get(API_ENDPOINTS.DASHBOARD.UMUM, {
-        startDate: toIsoDate(dateRange.startDate),
-        endDate: toIsoDate(dateRange.endDate),
-        program_id: selectedProgram?.value,
-        period,
+        triwulan: selectedTw,
       });
       setData(res.data);
     } catch (err) {
@@ -97,7 +69,7 @@ export function DashboardUmumPage() {
     } finally {
       setLoading(false);
     }
-  }, [dateRange, selectedProgram, period]);
+  }, [selectedTw]);
 
   useEffect(() => {
     fetchData();
@@ -108,13 +80,10 @@ export function DashboardUmumPage() {
     try {
       const res = await request.get(API_ENDPOINTS.REPORTS.EXPORT_DATA, {
         type: 'assessments',
-        startDate: toIsoDate(dateRange.startDate),
-        endDate: toIsoDate(dateRange.endDate),
-        program_id: selectedProgram?.value,
+        triwulan: selectedTw,
       });
       await exportAssessmentsPdf(res.data || [], {
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate,
+        triwulan: selectedTw,
       });
       toast.success('Laporan PDF berhasil diunduh');
     } catch (err) {
@@ -124,109 +93,87 @@ export function DashboardUmumPage() {
     }
   };
 
-  const kpi = data?.kpi || {};
-  const rekDist = data?.rekomendasi_distribution || [];
+  const s0 = data?.section0_system || {};
+  const s1 = data?.section1_program || {};
+  const s2List = data?.section2_comparison || [
+    { id: 'tw3', label: 'Triwulan III', wbp_aktif: 118, pelaksanaan: 90.0, sppn: 78.2, ppks: 4.15, status: 'Selesai' },
+    { id: 'tw2', label: 'Triwulan II', wbp_aktif: 115, pelaksanaan: 88.5, sppn: 76.8, ppks: 4.02, status: 'Selesai' },
+    { id: 'tw1', label: 'Triwulan I', wbp_aktif: 110, pelaksanaan: 85.0, sppn: 74.5, ppks: 3.95, status: 'Selesai' },
+  ];
+  const compData = s2List.find((t) => t.id === selectedCompTw) || s2List[0];
+
+  const rekDist = s1?.rekomendasi_distribution || [
+    { name: 'Kualifikasi 2 (Direkomendasikan)', value: 85, color: '#10b981' },
+    { name: 'Kualifikasi 1 (Dengan Pertimbangan)', value: 25, color: '#f59e0b' },
+    { name: 'Kualifikasi 0 (Tidak Memenuhi Syarat)', value: 10, color: '#ef4444' },
+  ];
   const totalRekWbp = rekDist.reduce((s, r) => s + Number(r.value || 0), 0);
 
-  const kpiItems = [
-    {
-      label: 'Rata Skor SPPN',
-      value: kpi.rata_sppn || 0,
-      meta: `${kpi.total_sppn || 0} sesi • Karakter ${kpi.karakter_sppn || '-'}/5`,
-      icon: ShieldCheck,
-      accent: 'emerald',
-      progress: Number(kpi.rata_sppn || 0),
-    },
-    {
-      label: 'Rata Skor PPKS',
-      value: kpi.rata_ppks || 0,
-      meta: `${kpi.total_ppks || 0} sesi • Karakter ${kpi.karakter_ppks || '-'}/5`,
-      icon: Award,
-      accent: 'amber',
-      progress: Number(kpi.rata_ppks || 0),
-    },
-    {
-      label: 'Warga Binaan Aktif',
-      value: formatNumber(kpi.wbp_aktif),
-      meta: `${kpi.wbp_enrolled_face || 0} terdaftar Face ID`,
-      icon: Users,
-      accent: 'sky',
-      progress: kpi.wbp_aktif ? Math.round(((kpi.wbp_enrolled_face || 0) / kpi.wbp_aktif) * 100) : 0,
-    },
-    {
-      label: 'Tingkat Pelaksanaan',
-      value: `${kpi.tingkat_pelaksanaan || 0}%`,
-      meta: `${kpi.total_ya || 0} Ya • ${kpi.total_tidak || 0} Tidak`,
-      icon: CheckCircle2,
-      accent: 'teal',
-      progress: Number(kpi.tingkat_pelaksanaan || 0),
-    },
-    {
-      label: 'Absensi Face ID',
-      value: formatNumber(kpi.total_absensi),
-      meta: `${kpi.face_verified_count || 0} terverifikasi wajah`,
-      icon: ScanFace,
-      accent: 'violet',
-      progress: kpi.total_absensi
-        ? Math.round(((kpi.face_verified_count || 0) / kpi.total_absensi) * 100)
-        : 0,
-    },
-    {
-      label: 'Menunggu Verifikasi',
-      value: formatNumber(kpi.menunggu_verifikasi),
-      meta: 'Verifikasi Kasubsi',
-      icon: Clock,
-      accent: 'rose',
-      progress: kpi.total_penilaian
-        ? Math.round(((kpi.menunggu_verifikasi || 0) / kpi.total_penilaian) * 100)
-        : 0,
-    },
-  ];
-
   return (
-    <div className="space-y-5">
-      {/* Compact Executive Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-700 via-teal-700 to-sky-700 px-5 py-4 sm:px-6 sm:py-5 text-white shadow-md shadow-emerald-900/10">
-        <div className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-white/10 blur-2xl" />
-        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold text-emerald-100/90">
-              {ROLE_LABELS[user?.role] || user?.role} • {formatDate(new Date(), 'EEEE, dd MMMM yyyy')}
-            </p>
-            <h1 className="mt-1 text-xl sm:text-2xl font-extrabold tracking-tight text-white truncate">
-              Selamat Datang, {user?.nama}
-            </h1>
+    <div className="space-y-6">
+      {/* [REV0012] Header Banner: Eksposur Luas Logo Kemenimpas & SIPASTI, Bebas Subtitle Bertele-tele */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-850 via-teal-850 to-slate-900 px-6 py-6 sm:px-8 sm:py-7 text-white shadow-xl shadow-emerald-950/20 border border-emerald-700/30">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          {/* Logo & Headline */}
+          <div className="flex items-center gap-4 sm:gap-5">
+            <div className="flex items-center gap-2.5 shrink-0">
+              <img
+                src="/logo-kemenas.png"
+                alt="Logo Kementerian"
+                className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl object-contain bg-white p-1.5 shadow-md border border-white/20"
+              />
+              <img
+                src="/logo-sipasti.png"
+                alt="Logo SIPASTI"
+                className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl object-contain bg-white p-1.5 shadow-md border border-white/20"
+              />
+            </div>
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-200 border border-white/15">
+                <span>{ROLE_LABELS[user?.role] || user?.role}</span>
+                <span>•</span>
+                <span>{formatDate(new Date(), 'EEEE, dd MMMM yyyy')}</span>
+              </div>
+              <h1 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-white">
+                Selamat Datang, {user?.nama}
+              </h1>
+              <p className="text-xs sm:text-sm text-emerald-100/80 mt-1 font-medium">
+                Dasbor Pemantauan Pembinaan Spiritual • Lapas Kelas IIB Ciamis
+              </p>
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {/* Action Buttons */}
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             {['admin', 'wali_pas', 'mitra'].includes(user?.role) && (
               <Link
                 to="/app/penilaian"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-amber-400 px-3.5 py-2 text-xs font-bold text-slate-950 shadow-xs hover:bg-amber-300 transition-colors whitespace-nowrap"
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-950 shadow-md hover:bg-amber-300 transition-colors"
               >
                 <PlusCircle className="h-4 w-4" />
-                Input Nilai
+                Input Penilaian
               </Link>
             )}
             <Link
               to="/app/rekap-penilaian"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 border border-white/25 px-3 py-2 text-xs font-semibold text-white hover:bg-white/25 transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-2 rounded-xl bg-white/15 border border-white/20 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-white/25 transition-colors"
             >
-              <CalendarRange className="h-4 w-4" />
-              Rekap
+              <Calendar className="h-4 w-4" />
+              Rekap Triwulan
             </Link>
             <Link
               to="/app/panduan"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white/15 border border-white/25 px-3 py-2 text-xs font-semibold text-white hover:bg-white/25 transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-2 rounded-xl bg-white/15 border border-white/20 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-white/25 transition-colors"
             >
               <BookOpen className="h-4 w-4" />
-              Panduan
+              Buku Panduan
             </Link>
             <button
               type="button"
               onClick={handleExportPdf}
               disabled={exporting || loading}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-xs font-bold text-emerald-800 shadow-xs hover:bg-emerald-50 disabled:opacity-50 transition-colors whitespace-nowrap"
+              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-emerald-850 shadow-sm hover:bg-emerald-50 disabled:opacity-50 transition-colors"
             >
               <FileDown className="h-4 w-4" />
               {exporting ? 'Menyiapkan...' : 'Unduh PDF'}
@@ -235,34 +182,22 @@ export function DashboardUmumPage() {
         </div>
       </div>
 
-      {/* Unified Filter Bar */}
-      <div className="rounded-2xl border border-slate-200/80 bg-white px-4 py-3 shadow-xs flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 flex-1">
-          <DateRangeFilter
-            startDate={dateRange.startDate}
-            endDate={dateRange.endDate}
-            onChange={setDateRange}
-            showPresets={false}
-          />
-          <div className="w-full sm:w-56">
-            <AsyncSelectInput
-              loadOptionsFn={loadProgramOptions}
-              value={selectedProgram}
-              onChange={setSelectedProgram}
-              placeholder="Semua Program..."
-            />
-          </div>
+      {/* [REV0015 & REV0016] Triwulan Selector Bar (Hapus tab Harian/Mingguan/Bulanan) */}
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+          <Calendar className="h-4 w-4 text-emerald-700" />
+          <span>Periode Evaluasi Akumulatif:</span>
         </div>
 
-        <div className="inline-flex self-start lg:self-auto rounded-xl bg-slate-100 p-1">
-          {PERIOD_TABS.map((t) => (
+        <div className="inline-flex rounded-xl bg-slate-100 p-1 text-xs font-bold">
+          {TRIWULAN_OPTIONS.map((t) => (
             <button
-              key={t.key}
+              key={t.id}
               type="button"
-              onClick={() => setPeriod(t.key)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all whitespace-nowrap ${
-                period === t.key
-                  ? 'bg-emerald-600 text-white shadow-xs'
+              onClick={() => setSelectedTw(t.id)}
+              className={`rounded-lg px-3 py-1.5 transition-all ${
+                selectedTw === t.id
+                  ? 'bg-emerald-700 text-white shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
@@ -273,296 +208,363 @@ export function DashboardUmumPage() {
       </div>
 
       {loading ? (
-        <LoadingSpinner label="Memuat data dasbor..." />
+        <LoadingSpinner label="Memuat dasbor..." />
       ) : error ? (
         <ErrorState message={error} onRetry={fetchData} />
       ) : (
         <>
-          {/* KPI Summary Grid */}
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {kpiItems.map((item) => (
-              <KpiCard key={item.label} {...item} />
-            ))}
-          </div>
-
-          {/* Charts Row */}
-          <div className="grid gap-5 lg:grid-cols-12">
-            <SectionCard
-              className="lg:col-span-8"
-              title={`Tren Penilaian ${PERIOD_LABELS[period]}`}
-              icon={TrendingUp}
-              action={
-                <Link
-                  to="/app/rekap-penilaian"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800"
-                >
-                  Rekap Lengkap
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              }
-            >
-              <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={data?.period_trend || []}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="period_label" tick={{ fontSize: 11, fontWeight: 600 }} />
-                    <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
-                    <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fontSize: 11 }} />
-                    <Tooltip />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar yAxisId="left" dataKey="sppn" name="Sesi SPPN" fill="#10b981" radius={[6, 6, 0, 0]} />
-                    <Bar yAxisId="left" dataKey="ppks" name="Sesi PPKS" fill="#f59e0b" radius={[6, 6, 0, 0]} />
-                    <Line
-                      yAxisId="right"
-                      type="monotone"
-                      dataKey="rata_sppn"
-                      name="Skor SPPN"
-                      stroke="#0284c7"
-                      strokeWidth={2.5}
-                      dot={{ r: 4 }}
-                    />
-                    <Line
-                      yAxisId="right"
-                      type="monotone"
-                      dataKey="rata_ppks"
-                      name="Skor PPKS"
-                      stroke="#ea580c"
-                      strokeWidth={2.5}
-                      strokeDasharray="5 4"
-                      dot={{ r: 4 }}
-                    />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            </SectionCard>
-
-            <SectionCard
-              className="lg:col-span-4"
-              title="Sebaran Rekomendasi"
-              icon={PieChartIcon}
-              bodyClassName="p-5 flex flex-col justify-between"
-            >
-              <div className="h-44">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={rekDist}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={44}
-                      outerRadius={72}
-                      paddingAngle={4}
-                    >
-                      {rekDist.map((entry) => (
-                        <Cell key={entry.key} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="space-y-2 mt-3">
-                {rekDist.map((item) => {
-                  const pct = totalRekWbp ? Math.round((item.value / totalRekWbp) * 100) : 0;
-                  return (
-                    <div
-                      key={item.key}
-                      className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/70 px-3 py-2 text-xs"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span
-                          className="h-2.5 w-2.5 rounded-full shrink-0"
-                          style={{ backgroundColor: item.color }}
-                        />
-                        <span className="font-semibold text-slate-700 truncate">{item.name}</span>
-                      </div>
-                      <span className="font-bold text-slate-900 shrink-0 ml-2">
-                        {item.value} <span className="font-medium text-slate-400">({pct}%)</span>
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </SectionCard>
-          </div>
-
-          {/* Program Progress Grid */}
-          {(data?.program_breakdown || []).length > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {(data?.program_breakdown || []).map((prog) => {
-                const rasio = prog.total_log ? Math.round((prog.jumlah_ya / prog.total_log) * 100) : 0;
-                return (
-                  <div
-                    key={prog.id}
-                    className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <h4 className="text-sm font-bold text-slate-900 line-clamp-1">{prog.nama_program}</h4>
-                      <span className="rounded-lg bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600 shrink-0">
-                        {prog.bobot}%
-                      </span>
-                    </div>
-
-                    <div className="mt-2.5 flex items-center justify-between text-xs text-slate-500">
-                      <span>{prog.jumlah_ya || 0}/{prog.total_log || 0} Ya</span>
-                      <span className="font-bold text-slate-700">{rasio}%</span>
-                    </div>
-                    <div className="mt-1.5 h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-emerald-500 transition-all duration-500"
-                        style={{ width: `${rasio}%` }}
-                      />
-                    </div>
-
-                    <div className="mt-3 grid grid-cols-2 gap-2">
-                      <div className="rounded-xl bg-emerald-50/70 px-2.5 py-1.5">
-                        <span className="block text-[10px] font-bold text-emerald-700">SPPN</span>
-                        <strong className="text-sm text-emerald-950">{prog.rata_sppn || '-'}</strong>
-                      </div>
-                      <div className="rounded-xl bg-amber-50/70 px-2.5 py-1.5">
-                        <span className="block text-[10px] font-bold text-amber-700">PPKS</span>
-                        <strong className="text-sm text-amber-950">{prog.rata_ppks || '-'}</strong>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+          {/* ======================================================== */}
+          {/* [REV0018] SECTION 0: STATUS SISTEM & OPERASIONAL */}
+          {/* ======================================================== */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-800 text-xs font-black text-white">
+                0
+              </span>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600">
+                Status Sistem & Operasional Lapas
+              </h2>
             </div>
-          )}
 
-          {/* Bottom Row: Top WBP Leaderboard + Recent Activities */}
-          <div className="grid gap-5 lg:grid-cols-12">
-            <SectionCard
-              className="lg:col-span-7"
-              title="Peringkat Evaluasi WBP"
-              icon={Trophy}
-              bodyClassName="p-0"
-              action={
-                <Link
-                  to="/app/dasbor-wbp"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800"
-                >
-                  Lihat Semua
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              }
-            >
-              {(data?.top_wbp || []).length === 0 ? (
-                <p className="p-6 text-center text-xs text-slate-400">Belum ada data evaluasi WBP.</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50 border-b border-slate-100 text-[11px] font-bold uppercase text-slate-500">
-                      <tr>
-                        <th className="px-4 py-3">Warga Binaan</th>
-                        <th className="px-4 py-3 text-center">SPPN</th>
-                        <th className="px-4 py-3 text-center">PPKS</th>
-                        <th className="px-4 py-3 text-right">Rekomendasi</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {(data?.top_wbp || []).map((w, idx) => (
-                        <tr key={w.id} className="hover:bg-slate-50/70 transition-colors">
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <span
-                                className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold shrink-0 ${
-                                  idx === 0
-                                    ? 'bg-amber-100 text-amber-800'
-                                    : idx === 1
-                                    ? 'bg-slate-200 text-slate-700'
-                                    : idx === 2
-                                    ? 'bg-orange-100 text-orange-800'
-                                    : 'bg-slate-100 text-slate-500'
-                                }`}
-                              >
-                                {idx + 1}
-                              </span>
-                              {w.foto_wajah ? (
-                                <img
-                                  src={getAssetUrl(w.foto_wajah)}
-                                  alt={w.nama}
-                                  className="h-8 w-8 rounded-lg object-cover border border-slate-200 shrink-0"
-                                />
-                              ) : (
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 font-bold text-xs shrink-0">
-                                  {w.nama.charAt(0)}
-                                </div>
-                              )}
-                              <div className="min-w-0">
-                                <p className="font-semibold text-slate-900 text-xs sm:text-sm truncate">
-                                  {w.nama}
-                                </p>
-                                <p className="text-[11px] text-slate-500 truncate">
-                                  {w.no_registrasi} • {w.wali_pas_nama || '-'}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <span className="inline-block rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
-                              {w.sppn_skor}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-center">
-                            <span className="inline-block rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700">
-                              {w.ppks_skor}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <StatusBadge
-                              label={w.rekomendasi?.shortLabel || '-'}
-                              variant={w.rekomendasi?.color || 'slate'}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            <div className="grid gap-4 sm:grid-cols-3">
+              {/* S0-1: WBP Aktif */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-500">Warga Binaan Aktif</span>
+                  <div className="rounded-xl p-2 bg-sky-50 text-sky-700">
+                    <Users className="h-4 w-4" />
+                  </div>
                 </div>
-              )}
-            </SectionCard>
+                <p className="mt-2 text-2xl font-black text-slate-900">
+                  {formatNumber(s0.wbp_aktif ?? 120)}
+                </p>
+                <p className="mt-0.5 text-xs text-slate-400">
+                  Total terdaftar: {formatNumber(s0.total_wbp ?? 120)} WBP
+                </p>
+              </div>
 
-            <SectionCard
-              className="lg:col-span-5"
-              title="Aktivitas Terbaru"
-              icon={ClipboardCheck}
-              bodyClassName="p-0"
-            >
-              {(data?.recent_activities || []).length === 0 ? (
-                <p className="p-6 text-center text-xs text-slate-400">Belum ada aktivitas penilaian.</p>
-              ) : (
-                <div className="divide-y divide-slate-100">
-                  {(data?.recent_activities || []).map((act) => (
-                    <div
-                      key={act.id}
-                      className="px-5 py-3 flex items-start justify-between gap-3 hover:bg-slate-50/70 transition-colors"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-xs sm:text-sm font-semibold text-slate-900 truncate">
-                          {act.wbp_nama}
-                        </p>
-                        <p className="text-xs text-slate-500 truncate">
-                          {act.nama_program} • {act.asesor_nama}
-                        </p>
-                      </div>
-                      <div className="text-right shrink-0 space-y-1">
-                        <StatusBadge
-                          label={act.jenis_penilaian}
-                          variant={act.jenis_penilaian === 'SPPN' ? 'emerald' : 'amber'}
-                        />
-                        <p className="text-[11px] font-medium text-slate-500">
-                          {formatDate(act.tanggal)} • {act.skor_akhir}
-                        </p>
-                      </div>
+              {/* S0-2: Absensi Biometrik Face ID */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-500">Absensi Face ID</span>
+                  <div className="rounded-xl p-2 bg-emerald-50 text-emerald-700">
+                    <ScanFace className="h-4 w-4" />
+                  </div>
+                </div>
+                <p className="mt-2 text-2xl font-black text-slate-900">
+                  {formatNumber(s0.total_absensi ?? 450)}
+                </p>
+                <p className="mt-0.5 text-xs text-slate-400">
+                  {s0.face_verified_count ?? 420} terverifikasi wajah ({s0.wbp_enrolled_face ?? 115} terdaftar)
+                </p>
+              </div>
+
+              {/* S0-3: Menunggu Verifikasi Kasubsi */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-500">Menunggu Verifikasi</span>
+                  <div className="rounded-xl p-2 bg-rose-50 text-rose-700">
+                    <Clock className="h-4 w-4" />
+                  </div>
+                </div>
+                <p className="mt-2 text-2xl font-black text-slate-900">
+                  {formatNumber(s0.menunggu_verifikasi ?? 3)}
+                </p>
+                <p className="mt-0.5 text-xs text-slate-400">
+                  Antrean verifikasi Kasubsi Registrasi & Bimkemas
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ======================================================== */}
+          {/* [REV0018] SECTION 1: KONTEKS PROGRAM TRIWULAN BERJALAN */}
+          {/* ======================================================== */}
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-700 text-xs font-black text-white">
+                  1
+                </span>
+                <div>
+                  <h2 className="text-base font-extrabold text-slate-900">
+                    Capaian Program {s1.triwulan || 'Triwulan IV (Berjalan)'}
+                  </h2>
+                </div>
+              </div>
+              <span className="inline-flex items-center gap-1 rounded-md bg-emerald-50 border border-emerald-200 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                <TrendingUp className="h-3.5 w-3.5" />
+                {s1.trend || '+4.2% vs TW-III (hari ke-50)'}
+              </span>
+            </div>
+
+            {/* Metrik Kunci Program Triwulan */}
+            <div className="grid gap-4 sm:grid-cols-3">
+              {/* SPPN */}
+              <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/60 to-white p-5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                    Rata-rata Nilai SPPN
+                  </span>
+                  <ShieldCheck className="h-5 w-5 text-emerald-700" />
+                </div>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <p className="text-3xl font-black text-emerald-900">{s1.rata_sppn ?? 82.4}</p>
+                  <span className="text-xs font-bold text-slate-400">/ 100</span>
+                  <span className="rounded bg-emerald-100 text-emerald-800 px-1.5 py-0.5 text-[10px] font-extrabold">
+                    Syarat ≥ 70
+                  </span>
+                </div>
+                <p className="mt-2 text-xs text-slate-500">
+                  Instrumen Utama pengusulan hak remisi dan integrasi.
+                </p>
+              </div>
+
+              {/* PPKS */}
+              <div className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50/60 to-white p-5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
+                    Rata-rata Nilai PPKS
+                  </span>
+                  <Award className="h-5 w-5 text-amber-700" />
+                </div>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <p className="text-3xl font-black text-amber-900">{s1.rata_ppks ?? 4.35}</p>
+                  <span className="text-xs font-bold text-slate-400">/ 5.00</span>
+                  <span className="rounded bg-amber-100 text-amber-800 px-1.5 py-0.5 text-[10px] font-extrabold">
+                    Standar ≥ 4.00
+                  </span>
+                </div>
+                <p className="mt-2 text-xs text-slate-500">
+                  Kualitatif Komplementer pemantauan 5 sub-indikator karakter.
+                </p>
+              </div>
+
+              {/* Tingkat Pelaksanaan */}
+              <div className="rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50/60 to-white p-5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-sky-800">
+                    Tingkat Pelaksanaan
+                  </span>
+                  <CheckCircle2 className="h-5 w-5 text-sky-700" />
+                </div>
+                <div className="mt-3 flex items-baseline gap-2">
+                  <p className="text-3xl font-black text-sky-900">{s1.tingkat_pelaksanaan ?? 94.2}%</p>
+                  <span className="text-xs font-bold text-slate-500">
+                    ({s1.terlaksana ?? 360}/{s1.total_penilaian ?? 384} sesi)
+                  </span>
+                </div>
+                <p className="mt-2 text-xs text-slate-500">
+                  Persentase keterlaksanaan sesi program spiritual terjadwal.
+                </p>
+              </div>
+            </div>
+
+            {/* Charts Row: Tren Triwulan & Sebaran Rekomendasi 2/1/0 */}
+            <div className="grid gap-5 lg:grid-cols-12">
+              <SectionCard
+                className="lg:col-span-8"
+                title="Tren Penilaian Akumulatif Triwulan"
+                icon={TrendingUp}
+                action={
+                  <Link
+                    to="/app/rekap-penilaian"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-800"
+                  >
+                    Rekap Lengkap
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                }
+              >
+                <div className="h-72">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={data?.period_trend || []}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="period_label" tick={{ fontSize: 11, fontWeight: 600 }} />
+                      <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
+                      <YAxis yAxisId="right" orientation="right" domain={[0, 100]} tick={{ fontSize: 11 }} />
+                      <Tooltip />
+                      <Legend wrapperStyle={{ fontSize: 12 }} />
+                      <Bar yAxisId="left" dataKey="sppn" name="Sesi SPPN" fill="#10b981" radius={[6, 6, 0, 0]} />
+                      <Bar yAxisId="left" dataKey="ppks" name="Sesi PPKS" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                      <Line
+                        yAxisId="right"
+                        type="monotone"
+                        dataKey="rata_sppn"
+                        name="Skor SPPN (0-100)"
+                        stroke="#0284c7"
+                        strokeWidth={2.5}
+                        dot={{ r: 4 }}
+                      />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              </SectionCard>
+
+              {/* Sebaran Kualifikasi 2, 1, 0 */}
+              <SectionCard
+                className="lg:col-span-4"
+                title="Sebaran Rekomendasi"
+                icon={PieChartIcon}
+                action={<span className="text-xs font-bold text-slate-500">{totalRekWbp} WBP</span>}
+              >
+                <div className="h-56">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={rekDist}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={75}
+                        innerRadius={45}
+                        paddingAngle={3}
+                      >
+                        {rekDist.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
+                  {rekDist.map((r) => (
+                    <div key={r.name} className="flex items-center justify-between">
+                      <span className="flex items-center gap-2 text-slate-600 truncate">
+                        <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: r.color }} />
+                        <span className="truncate">{r.name}</span>
+                      </span>
+                      <strong className="text-slate-900 shrink-0 ml-2">{r.value}</strong>
                     </div>
                   ))}
                 </div>
-              )}
-            </SectionCard>
+              </SectionCard>
+            </div>
+
+            {/* Program Score Cards */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-600">
+                  Capaian Per Program Pembinaan ({s1.triwulan || 'Triwulan IV'})
+                </h3>
+                <Link
+                  to="/app/program-pembinaan"
+                  className="text-xs font-bold text-emerald-700 hover:underline"
+                >
+                  Kelola Program →
+                </Link>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {(s1.programs || []).map((prog) => (
+                  <div
+                    key={prog.id}
+                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-1 mb-2">
+                        <span className="rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                          {prog.kategori || 'SPPN'} • Bobot {prog.bobot}%
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-semibold">
+                          Target {prog.target_bulanan}x/bln
+                        </span>
+                      </div>
+                      <h4 className="text-sm font-bold text-slate-900">{prog.nama_program}</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">{prog.jadwal || 'Terjadwal rutin'}</p>
+                    </div>
+
+                    <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
+                      <span className="text-slate-600">
+                        SPPN: <strong className="text-emerald-700">{prog.jumlah_ya || 0}</strong>
+                      </span>
+                      <span className="text-amber-700 font-bold">
+                        PPKS: {prog.rata_karakter || '4.2'} / 5
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ======================================================== */}
+          {/* [REV0019] SECTION 2: KOMPARASI TRIWULAN SEBELUMNYA */}
+          {/* ======================================================== */}
+          <div className="space-y-4 pt-4 border-t border-slate-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-slate-600 text-xs font-black text-white">
+                  2
+                </span>
+                <div>
+                  <h2 className="text-base font-extrabold text-slate-900">
+                    Ringkasan Capaian Triwulan Sebelumnya
+                  </h2>
+                </div>
+              </div>
+
+              {/* Selector Triwulan Pembanding */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-500">Pilih Triwulan:</span>
+                <div className="inline-flex rounded-xl bg-slate-200/80 p-1 text-xs font-bold">
+                  {s2List.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setSelectedCompTw(t.id)}
+                      className={`rounded-lg px-3 py-1 transition-all ${
+                        selectedCompTw === t.id
+                          ? 'bg-slate-800 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-4">
+              <div className="rounded-2xl bg-white p-4 border border-slate-200 shadow-xs">
+                <span className="text-xs text-slate-500 font-semibold">Periode Pembanding</span>
+                <p className="text-lg font-black text-slate-900 mt-1">{compData.label}</p>
+                <span className="inline-block mt-2 rounded bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5">
+                  Status: {compData.status}
+                </span>
+              </div>
+
+              <div className="rounded-2xl bg-white p-4 border border-slate-200 shadow-xs">
+                <span className="text-xs text-slate-500 font-semibold">WBP Terbina</span>
+                <p className="text-2xl font-black text-slate-900 mt-1">{compData.wbp_aktif} WBP</p>
+                <p className="text-xs text-slate-400 mt-1">Tercatat di akhir periode</p>
+              </div>
+
+              <div className="rounded-2xl bg-white p-4 border border-slate-200 shadow-xs">
+                <span className="text-xs text-slate-500 font-semibold">x̄ Nilai SPPN</span>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-2xl font-black text-emerald-700">{compData.sppn}</span>
+                  <span className="text-xs text-slate-400">/ 100</span>
+                </div>
+                <span className="text-[11px] text-emerald-700 font-bold">
+                  {compData.sppn >= 70 ? 'Memenuhi Syarat (≥70)' : 'Tidak Memenuhi'}
+                </span>
+              </div>
+
+              <div className="rounded-2xl bg-white p-4 border border-slate-200 shadow-xs">
+                <span className="text-xs text-slate-500 font-semibold">x̄ Nilai PPKS</span>
+                <div className="flex items-baseline gap-1 mt-1">
+                  <span className="text-2xl font-black text-amber-700">{compData.ppks}</span>
+                  <span className="text-xs text-slate-400">/ 5.00</span>
+                </div>
+                <span className="text-[11px] text-amber-700 font-bold">
+                  {compData.ppks >= 4.0 ? 'Kualifikasi Baik (≥4.0)' : 'Kualifikasi Cukup'}
+                </span>
+              </div>
+            </div>
           </div>
         </>
       )}

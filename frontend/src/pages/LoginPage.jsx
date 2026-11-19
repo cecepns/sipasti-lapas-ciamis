@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Eye, EyeOff, Loader2, Lock, Mail, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, ShieldCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import { extractErrorMessage } from '@/utils/request';
@@ -40,6 +40,9 @@ export function LoginPage() {
     }
   };
 
+  const WA_RESET_URL =
+    'https://wa.me/6285169841951?text=Halo%20Admin%20SIPASTI%20Lapas%20Ciamis,%20mohon%20bantuan%20reset%20kata%20sandi%20akun%20saya';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-emerald-900 to-slate-900 flex flex-col justify-center p-4 sm:p-6">
       <div className="mx-auto w-full max-w-md">
@@ -59,8 +62,9 @@ export function LoginPage() {
               className="mx-auto h-20 w-20 rounded-2xl object-contain bg-white border border-emerald-100 p-1 shadow-xs"
             />
             <h1 className="mt-3 text-xl font-extrabold text-slate-900">Portal Masuk SIPASTI</h1>
-            <p className="text-xs text-slate-500 mt-1">
-              Lapas Kelas IIB Ciamis — Admin, Wali PAS, Mitra & Pimpinan
+            {/* [REV0008] Subtitle bersih tanpa rentetan nama role yang bertele-tele */}
+            <p className="text-xs text-slate-500 mt-1 font-medium">
+              Lembaga Pemasyarakatan Kelas IIB Ciamis
             </p>
           </div>
 
@@ -81,7 +85,19 @@ export function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Kata Sandi</label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-slate-700">Kata Sandi</label>
+                {/* [REV0010] Permintaan Ubah Password WhatsApp */}
+                <a
+                  href={WA_RESET_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
+                >
+                  <MessageSquare className="h-3 w-3" />
+                  Lupa / Ubah Kata Sandi?
+                </a>
+              </div>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
@@ -134,10 +150,11 @@ export function LoginPage() {
             </div>
           </div>
 
+          {/* [REV0009] Ubah teks link registrasi */}
           <div className="mt-5 text-center text-xs text-slate-500">
-            Ingin bergabung sebagai Mitra Keagamaan?{' '}
+            Mitra Keagamaan belum memiliki akun?{' '}
             <Link to="/registrasi-mitra" className="font-bold text-emerald-700 hover:underline">
-              Registrasi Mitra
+              Mendaftar sebagai Mitra Pembina Spiritual
             </Link>
           </div>
         </div>
