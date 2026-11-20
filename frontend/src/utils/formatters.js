@@ -51,10 +51,30 @@ export const REKOMENDASI_RULES = [
 ];
 
 export const TRIWULAN_OPTIONS = [
-  { key: 'TW-4', label: 'Triwulan IV (Berjalan)', sub: 'Okt – Des 2026', startDate: '2026-10-01', endDate: '2026-12-31' },
-  { key: 'TW-3', label: 'Triwulan III', sub: 'Jul – Sep 2026', startDate: '2026-07-01', endDate: '2026-09-30' },
-  { key: 'TW-2', label: 'Triwulan II', sub: 'Apr – Jun 2026', startDate: '2026-04-01', endDate: '2026-06-30' },
-  { key: 'TW-1', label: 'Triwulan I', sub: 'Jan – Mar 2026', startDate: '2026-01-01', endDate: '2026-03-31' },
+  { key: 'TW-4', id: 'tw4', label: 'Triwulan IV (Berjalan)', sub: 'Okt – Des 2026', startDate: '2026-10-01', endDate: '2026-12-31', months: ['Semua Bulan', 'Oktober', 'November', 'Desember'] },
+  { key: 'TW-3', id: 'tw3', label: 'Triwulan III', sub: 'Jul – Sep 2026', startDate: '2026-07-01', endDate: '2026-09-30', months: ['Semua Bulan', 'Juli', 'Agustus', 'September'] },
+  { key: 'TW-2', id: 'tw2', label: 'Triwulan II', sub: 'Apr – Jun 2026', startDate: '2026-04-01', endDate: '2026-06-30', months: ['Semua Bulan', 'April', 'Mei', 'Juni'] },
+  { key: 'TW-1', id: 'tw1', label: 'Triwulan I', sub: 'Jan – Mar 2026', startDate: '2026-01-01', endDate: '2026-03-31', months: ['Semua Bulan', 'Januari', 'Februari', 'Maret'] },
+];
+
+export const TREND_OPTIONS = [
+  { value: 'all', label: 'Semua Trend' },
+  { value: 'meningkat', label: 'Meningkat (Positif)' },
+  { value: 'stabil', label: 'Stabil' },
+  { value: 'menurun', label: 'Menurun' },
+];
+
+export const KUALIFIKASI_AKHIR_OPTIONS = [
+  { value: 'all', label: 'Semua Kualifikasi' },
+  { value: '2', label: 'Kualifikasi 2: Memenuhi Syarat & Direkomendasikan' },
+  { value: '1', label: 'Kualifikasi 1: Memenuhi Syarat dg Pertimbangan' },
+  { value: '0', label: 'Kualifikasi 0: Tidak Memenuhi Syarat' },
+];
+
+export const TIPE_ASESOR_OPTIONS = [
+  { value: 'all', label: 'Semua Tipe Asesor' },
+  { value: 'wali_pas', label: 'Wali PAS' },
+  { value: 'mitra', label: 'Mitra Pembina' },
 ];
 
 export const PERIOD_LABELS = {
