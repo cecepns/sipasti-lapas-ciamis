@@ -34,72 +34,81 @@ async function loadImageAsDataUrl(url) {
 }
 
 /**
- * Kop Surat Resmi Lapas Kelas IIB Ciamis:
- * - Atas: Logo Kemenimpas baku (/logo-kemenas.png) + Teks Kop Lapas Kelas IIB Ciamis (REV0013)
- * - Pembatas: Garis ganda pembatas Kop
- * - Di Bawah Kop: Logo SIPASTI (/logo-sipasti.png) + Header SIPASTI + Judul Dokumen (REV0014)
+ * Kop Surat Resmi Lapas Kelas IIB Ciamis Sesuai Standar IMIPAS (REV0015):
+ * - Kiri Atas: Logo Kementerian Imigrasi & Pemasyarakatan (Lingkaran)
+ * - Teks Kop: Kemenimpas (Bold), Ditjen & Kanwil (Normal/Tidak Bold), Lapas Ciamis (Bold), Alamat (Normal) — Semua Warna HITAM PEKAT
+ * - Pembatas: Garis ganda pembatas Kop (Hitam)
+ * - Di Bawah Garis: Logo SIPASTI + Header SIPASTI + Judul Dokumen Laporan
  */
 async function drawOfficialHeader(doc, title, subtitle) {
   const pageWidth = doc.internal.pageSize.getWidth();
-  const [logoKemenas, logoSipasti] = await Promise.all([
+  const [logoImipas, logoSipasti] = await Promise.all([
     loadImageAsDataUrl('/logo-kemenas.png'),
     loadImageAsDataUrl('/logo-sipasti.png'),
   ]);
 
-  // 1. Logo Kemenimpas (Lingkaran) pada Kop Baku
-  if (logoKemenas) {
-    doc.addImage(logoKemenas, 'PNG', 14, 7, 23, 23);
+  // 1. Logo Kementerian Imigrasi & Pemasyarakatan (IMIPAS) Lingkaran di Kiri Atas Kop
+  if (logoImipas) {
+    doc.addImage(logoImipas, 'PNG', 14, 7.5, 23, 23);
   }
 
-  // 2. Teks Kop Surat Baku Lembaga Pemasyarakatan Kelas IIB Ciamis
-  doc.setTextColor(15, 23, 42);
+  // 2. Teks Kop Surat Resmi Lembaga Pemasyarakatan Kelas IIB Ciamis (Warna Hitam Semua Sesuai Standar)
+  const centerX = (pageWidth + 24) / 2;
+  doc.setTextColor(0, 0, 0);
+
+  // Baris 1: KEMENTERIAN IMIGRASI DAN PEMASYARAKATAN (Bold, 9.5pt, Hitam)
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9.5);
-  doc.text('KEMENTERIAN IMIGRASI DAN PEMASYARAKATAN REPUBLIK INDONESIA', pageWidth / 2 + 8, 11, { align: 'center' });
+  doc.text('KEMENTERIAN IMIGRASI DAN PEMASYARAKATAN REPUBLIK INDONESIA', centerX, 10.5, { align: 'center' });
 
+  // Baris 2 & 3: DIREKTORAT JENDERAL & KANWIL (Tidak Di-bold, Standar Dinas, 8.5pt, Hitam)
+  doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
-  doc.setTextColor(51, 65, 85);
-  doc.text('DIREKTORAT JENDERAL PEMASYARAKATAN', pageWidth / 2 + 8, 15.5, { align: 'center' });
-  doc.text('KANTOR WILAYAH JAWA BARAT', pageWidth / 2 + 8, 19.5, { align: 'center' });
+  doc.text('DIREKTORAT JENDERAL PEMASYARAKATAN', centerX, 14.5, { align: 'center' });
+  doc.text('KANTOR WILAYAH JAWA BARAT', centerX, 18.2, { align: 'center' });
 
-  doc.setFontSize(12);
-  doc.setTextColor(4, 120, 87);
-  doc.text('LEMBAGA PEMASYARAKATAN KELAS IIB CIAMIS', pageWidth / 2 + 8, 24.5, { align: 'center' });
+  // Baris 4: LEMBAGA PEMASYARAKATAN KELAS IIB CIAMIS (Bold, 11pt, Hitam Pekat)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('LEMBAGA PEMASYARAKATAN KELAS IIB CIAMIS', centerX, 22.8, { align: 'center' });
 
+  // Baris 5, 6, 7: Alamat, Telepon/Faksimile, Laman & Pos-el (Tidak Di-bold, Hitam Pekat)
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
-  doc.setTextColor(71, 85, 105);
-  doc.text('Jl. Ir. H. Juanda No.146, Ciamis — Jawa Barat 46211 | Telp/WA: 0851-6984-1951', pageWidth / 2 + 8, 28.5, { align: 'center' });
+  doc.text('Jalan Ir. H. Juanda No. 146, Kab. Ciamis, Ciamis', centerX, 26.5, { align: 'center' });
+  doc.text('Telepon : 0265-771013, Faksimile : 0265-771013', centerX, 29.8, { align: 'center' });
+  doc.setFontSize(7.2);
+  doc.text('Laman : http://lapasciamis.kemenkumham.go.id, Pos-el :lp.ciamis@kemenkumham.go.id', centerX, 33.1, { align: 'center' });
 
-  // 3. Garis Pembatas Kop Baku (Double Line)
-  doc.setDrawColor(4, 120, 87);
-  doc.setLineWidth(1.0);
-  doc.line(14, 32, pageWidth - 14, 32);
-  doc.setLineWidth(0.35);
-  doc.line(14, 33.6, pageWidth - 14, 33.6);
+  // 3. Garis Pembatas Kop Baku (Double Line Hitam Standar)
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.8);
+  doc.line(14, 35.5, pageWidth - 14, 35.5);
+  doc.setLineWidth(0.25);
+  doc.line(14, 36.6, pageWidth - 14, 36.6);
 
-  // 4. Di Bawah Kop: Logo SIPASTI + Header SIPASTI + Judul Dokumen (REV0014)
+  // 4. Di Bawah Garis: Logo SIPASTI + Header SIPASTI + Judul Dokumen (Sesuai Permintaan)
   if (logoSipasti) {
-    doc.addImage(logoSipasti, 'PNG', 14, 36.5, 15, 15);
+    doc.addImage(logoSipasti, 'PNG', 14, 39.5, 13.5, 13.5);
   }
 
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setTextColor(4, 120, 87);
-  doc.text('SIPASTI (SISTEM INFORMASI PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI)', 33, 41.5);
+  doc.text('SIPASTI (SISTEM INFORMASI PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI)', 31, 43.5);
 
-  doc.setFontSize(11);
+  doc.setFontSize(10.5);
   doc.setTextColor(15, 23, 42);
-  doc.text(title.toUpperCase(), 33, 47);
+  doc.text(title.toUpperCase(), 31, 48.5);
 
   if (subtitle) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(71, 85, 105);
-    doc.text(subtitle, 33, 51.5);
+    doc.text(subtitle, 31, 53);
   }
 
-  return subtitle ? 56 : 52;
+  return subtitle ? 58 : 54;
 }
 
 function drawSignatureFooter(doc, startY) {
@@ -203,7 +212,7 @@ export async function exportWbpProfilePdf(detail, dateRange = {}) {
     theme: 'grid',
     styles: { fontSize: 8.2, cellPadding: 2.1 },
     headStyles: { fillColor: [4, 120, 87], textColor: 255, fontStyle: 'bold' },
-    head: [['Biodata Warga Binaan Pemasyarakatan (WBP)', '']],
+    head: [['Biodata Warga Binaan', '']],
     body: [
       ['Nama Lengkap', detail.nama || '-'],
       ['No. Registrasi / NIK', `${detail.no_registrasi || '-'} / ${detail.nik || '-'}`],
