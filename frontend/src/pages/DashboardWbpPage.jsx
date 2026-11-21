@@ -19,7 +19,6 @@ import {
 import {
   Activity,
   AlertTriangle,
-  ArrowDownRight,
   ArrowUpRight,
   Award,
   BookOpen,
@@ -30,12 +29,8 @@ import {
   FileDown,
   Filter,
   Layers,
-  Minus,
   PlusCircle,
-  ScanFace,
   ShieldCheck,
-  TrendingDown,
-  TrendingUp,
   User,
   Users,
   XCircle,
@@ -61,7 +56,7 @@ import { getAssetUrl } from '@/utils/api';
 export function DashboardWbpPage() {
   const { user } = useAuth();
 
-  // Filter Bar Global State (Sesuai Wireframe Image 2: Dasbor WBP)
+  // Filter Bar State
   const [selectedTw, setSelectedTw] = useState(TRIWULAN_OPTIONS[0]);
   const [selectedBulan, setSelectedBulan] = useState('Semua Bulan');
   const [selectedProgram, setSelectedProgram] = useState(null);
@@ -76,7 +71,7 @@ export function DashboardWbpPage() {
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState('');
 
-  // Profile Modal State (untuk rincian riwayat asesmen WBP)
+  // Profile Modal State
   const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileDetails, setProfileDetails] = useState(null);
@@ -105,7 +100,7 @@ export function DashboardWbpPage() {
     fetchPrograms();
   }, []);
 
-  // Fetch Dashboard Data from Backend
+  // Fetch Dashboard Data
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -121,7 +116,6 @@ export function DashboardWbpPage() {
       const opts = res.wbp_options || [];
       setWbpOptions(opts);
 
-      // Default select first WBP if none selected
       if (!selectedWbp && opts.length > 0) {
         setSelectedWbp(opts[0]);
       }
@@ -138,7 +132,6 @@ export function DashboardWbpPage() {
     fetchData();
   }, [fetchData]);
 
-  // Open Full Profile Modal
   const openProfileModal = async (wbpId) => {
     if (!wbpId) return;
     setProfileModalOpen(true);
@@ -154,7 +147,6 @@ export function DashboardWbpPage() {
     }
   };
 
-  // Export PDF
   const handleExportPdf = async () => {
     if (!dashboardData) return;
     setExporting(true);
@@ -169,7 +161,6 @@ export function DashboardWbpPage() {
     }
   };
 
-  // Data Fallbacks strictly matching Wireframe Image 2
   const d = dashboardData || {
     identitas: {
       id: 1,
@@ -185,17 +176,17 @@ export function DashboardWbpPage() {
       predikat_label: 'Kualifikasi 2: Memenuhi Syarat & Direkomendasikan',
       deskripsi:
         'Nilai telah memenuhi seluruh standar penilaian dan pengajuan berhak mendapatkan rekomendasi.',
-      status_tren: 'Meningkat (+4.2% vs TW-III)',
+      status_tren: 'Meningkat (+4.2% vs TW Lalu)',
     },
     sppn: {
       nilai: 84.5,
       predikat: 'Kualifikasi 1 (Memenuhi Syarat)',
-      tren: '+4.5% vs Kuartal Sebelumnya',
+      tren: '+4.5% vs TW Lalu',
     },
     ppks: {
       nilai: 4.35,
       predikat: 'Kualifikasi 2 (Sangat Baik)',
-      tren: '+0.18 vs Kuartal Sebelumnya',
+      tren: '+0.18 vs TW Lalu',
     },
     sppn_threshold: {
       nilai: 84.5,
@@ -221,95 +212,25 @@ export function DashboardWbpPage() {
     ],
     sppn_benchmark: [
       { label: 'SPPN WBP', value: 84.5, fill: '#10b981' },
-      { label: 'All-WBP (Lapas)', value: 82.4, fill: '#64748b' },
+      { label: 'Rata-rata Lapas', value: 82.4, fill: '#64748b' },
     ],
     ppks_benchmark: [
       { label: 'PPKS WBP', value: 4.35, fill: '#f59e0b' },
-      { label: 'All-WBP (Lapas)', value: 4.12, fill: '#64748b' },
+      { label: 'Rata-rata Lapas', value: 4.12, fill: '#64748b' },
     ],
     tabel_program_pivot: [
-      {
-        program: 'Pembelajaran Al-Quran & Tahsin',
-        bulan1: 12,
-        bulan2: 12,
-        bulan3: 11,
-        count: 35,
-        avg_pelaksanaan: '97.2%',
-      },
-      {
-        program: 'Sholat Fardhu Berjamaah',
-        bulan1: 15,
-        bulan2: 16,
-        bulan3: 15,
-        count: 46,
-        avg_pelaksanaan: '95.8%',
-      },
-      {
-        program: 'Kajian Fiqih & Ibadah',
-        bulan1: 8,
-        bulan2: 8,
-        bulan3: 7,
-        count: 23,
-        avg_pelaksanaan: '95.8%',
-      },
-      {
-        program: 'Bimbingan Konseling Rohani',
-        bulan1: 6,
-        bulan2: 6,
-        bulan3: 6,
-        count: 18,
-        avg_pelaksanaan: '100.0%',
-      },
-      {
-        program: 'Peringatan Hari Besar Islam',
-        bulan1: 2,
-        bulan2: 3,
-        bulan3: 3,
-        count: 8,
-        avg_pelaksanaan: '100.0%',
-      },
+      { program: 'Pembelajaran Al-Quran & Tahsin', bulan1: 12, bulan2: 12, bulan3: 11, count: 35, avg_pelaksanaan: '97.2%' },
+      { program: 'Sholat Fardhu Berjamaah', bulan1: 15, bulan2: 16, bulan3: 15, count: 46, avg_pelaksanaan: '95.8%' },
+      { program: 'Kajian Fiqih & Ibadah', bulan1: 8, bulan2: 8, bulan3: 7, count: 23, avg_pelaksanaan: '95.8%' },
+      { program: 'Bimbingan Konseling Rohani', bulan1: 6, bulan2: 6, bulan3: 6, count: 18, avg_pelaksanaan: '100.0%' },
+      { program: 'Peringatan Hari Besar Islam', bulan1: 2, bulan2: 3, bulan3: 3, count: 8, avg_pelaksanaan: '100.0%' },
     ],
     tabel_ppks_pivot: [
-      {
-        dimensi: '1. Kesadaran & Praktik Ibadah',
-        bulan1: 4.4,
-        bulan2: 4.5,
-        bulan3: 4.6,
-        avg_nilai: 4.5,
-        status: 'Baik (≥4.0)',
-      },
-      {
-        dimensi: '2. Pemahaman Nilai Keagamaan',
-        bulan1: 4.2,
-        bulan2: 4.3,
-        bulan3: 4.4,
-        avg_nilai: 4.3,
-        status: 'Baik (≥4.0)',
-      },
-      {
-        dimensi: '3. Kedisiplinan Waktu & Aturan',
-        bulan1: 4.1,
-        bulan2: 4.2,
-        bulan3: 4.3,
-        avg_nilai: 4.2,
-        status: 'Baik (≥4.0)',
-      },
-      {
-        dimensi: '4. Perilaku Keseharian & Akhlak',
-        bulan1: 4.3,
-        bulan2: 4.4,
-        bulan3: 4.5,
-        avg_nilai: 4.4,
-        status: 'Baik (≥4.0)',
-      },
-      {
-        dimensi: '5. Hubungan Sosial & Toleransi',
-        bulan1: 4.2,
-        bulan2: 4.3,
-        bulan3: 4.4,
-        avg_nilai: 4.3,
-        status: 'Baik (≥4.0)',
-      },
+      { dimensi: '1. Kesadaran & Praktik Ibadah', bulan1: 4.4, bulan2: 4.5, bulan3: 4.6, avg_nilai: 4.5, status: 'Baik (≥4.0)' },
+      { dimensi: '2. Pemahaman Nilai Keagamaan', bulan1: 4.2, bulan2: 4.3, bulan3: 4.4, avg_nilai: 4.3, status: 'Baik (≥4.0)' },
+      { dimensi: '3. Kedisiplinan Waktu & Aturan', bulan1: 4.1, bulan2: 4.2, bulan3: 4.3, avg_nilai: 4.2, status: 'Baik (≥4.0)' },
+      { dimensi: '4. Perilaku Keseharian & Akhlak', bulan1: 4.3, bulan2: 4.4, bulan3: 4.5, avg_nilai: 4.4, status: 'Baik (≥4.0)' },
+      { dimensi: '5. Hubungan Sosial & Toleransi', bulan1: 4.2, bulan2: 4.3, bulan3: 4.4, avg_nilai: 4.3, status: 'Baik (≥4.0)' },
     ],
   };
 
@@ -318,30 +239,39 @@ export function DashboardWbpPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Top Institutional Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-850 via-teal-850 to-slate-900 px-6 py-6 sm:px-8 sm:py-7 text-white shadow-xl shadow-emerald-950/20 border border-emerald-700/30">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-4 sm:gap-5">
-            <div className="flex items-center gap-2.5 shrink-0">
+      {/* ========================================================================= */}
+      {/* 1. HEADER UTAMA (Clean, Modern, Executive)                                */}
+      {/* ========================================================================= */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 shrink-0">
               <img
                 src="/logo-kemenas.png"
-                alt="Logo Kementerian"
-                className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl object-contain bg-white p-1.5 shadow-md border border-white/20"
+                alt="Logo Kemenkumham"
+                className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
+              />
+              <img
+                src="/logo-sipasti.png"
+                alt="Logo SIPASTI"
+                className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
               />
             </div>
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold backdrop-blur-md border border-white/10 text-emerald-100">
-                <span>Lapas Kelas IIB Ciamis</span>
-                <span className="h-1 w-1 rounded-full bg-emerald-400" />
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-semibold mb-1">
+                <span className="rounded-md bg-emerald-50 text-emerald-800 px-2 py-0.5 border border-emerald-200/80">
+                  Lapas Kelas IIB Ciamis
+                </span>
+                <span>•</span>
                 <span>{ROLE_LABELS[user?.role] || 'Petugas'}</span>
+                <span>•</span>
+                <span>{formatDate(new Date(), 'EEEE, dd MMMM yyyy')}</span>
               </div>
-              <h1 className="mt-1.5 text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight">
-                Dasbor WBP
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Dasbor Evaluasi Warga Binaan
               </h1>
-              <p className="mt-1 max-w-2xl text-xs sm:text-sm text-emerald-100/80 leading-relaxed">
-                Konteks peserta, posisi capaian program, eligibilitas rekomendasi, serta diagnosa
-                performa individual WBP.
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
+                Konteks peserta, capaian SPPN, PPKS, kualifikasi rekomendasi, dan perbandingan benchmark.
               </p>
             </div>
           </div>
@@ -350,7 +280,7 @@ export function DashboardWbpPage() {
             {['admin', 'wali_pas', 'mitra'].includes(user?.role) && (
               <Link
                 to="/app/penilaian"
-                className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-950 shadow-md hover:bg-amber-300 transition-colors"
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-950 shadow-xs hover:bg-amber-300 transition-colors"
               >
                 <PlusCircle className="h-4 w-4" />
                 Input Penilaian
@@ -359,65 +289,62 @@ export function DashboardWbpPage() {
             <button
               type="button"
               onClick={() => openProfileModal(d.identitas?.id)}
-              className="inline-flex items-center gap-2 rounded-xl bg-white/15 border border-white/20 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-white/25 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 transition-colors"
             >
-              <Eye className="h-4 w-4" />
-              Detail WBP
+              <Eye className="h-4 w-4 text-slate-500" />
+              Detail Lengkap
             </button>
             <button
               type="button"
               onClick={handleExportPdf}
               disabled={exporting || loading}
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-emerald-850 shadow-sm hover:bg-emerald-50 disabled:opacity-50 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs disabled:opacity-50 transition-colors"
             >
               <FileDown className="h-4 w-4" />
               {exporting ? 'Menyiapkan...' : 'Ekspor Rapor WBP'}
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Segmented Switcher Tabs between Dashboards */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/80 w-fit max-w-full overflow-x-auto">
-        <Link
-          to="/app/dasbor-umum"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all whitespace-nowrap"
-        >
-          <Layers className="h-4 w-4 text-slate-500" />
-          <span>Dasbor Umum</span>
-        </Link>
-        <Link
-          to="/app/dasbor-wbp"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-emerald-800 bg-white shadow-xs border border-slate-200/60 whitespace-nowrap"
-        >
-          <Award className="h-4 w-4 text-emerald-600" />
-          <span>Dasbor WBP</span>
-          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800">
-            Aktif
-          </span>
-        </Link>
-        <Link
-          to="/app/dasbor-program"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all whitespace-nowrap"
-        >
-          <BookOpen className="h-4 w-4 text-slate-500" />
-          <span>Dasbor Program</span>
-        </Link>
+        {/* Segmented Switcher Tabs between Dashboards */}
+        <div className="mt-5 pt-4 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto">
+          <Link
+            to="/app/dasbor-umum"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
+          >
+            <Layers className="h-4 w-4 text-slate-400" />
+            <span>Dasbor Umum</span>
+          </Link>
+          <Link
+            to="/app/dasbor-wbp"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-700 text-white shadow-xs whitespace-nowrap"
+          >
+            <Award className="h-4 w-4 text-white" />
+            <span>Dasbor WBP</span>
+          </Link>
+          <Link
+            to="/app/dasbor-program"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
+          >
+            <BookOpen className="h-4 w-4 text-slate-400" />
+            <span>Dasbor Program</span>
+          </Link>
+        </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* FILTER BAR GLOBAL (Sesuai Wireframe Image 2: Pilih WBP, Triwulan, Program, Tipe Asesor, > Pilih Bulan) */}
+      {/* 2. FILTER BAR GLOBAL                                                      */}
       {/* ========================================================================= */}
-      <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-emerald-700" />
             <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              Filter Bar Global
+              Filter Target WBP &amp; Periode
             </span>
           </div>
-          <span className="text-[11px] text-slate-500">
-            Secara triwulan, tanpa date range acak. Filter waktu terkunci dalam rentang triwulan.
+          <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+            {selectedTw.label} • {selectedBulan}
           </span>
         </div>
 
@@ -425,7 +352,7 @@ export function DashboardWbpPage() {
         <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
           {/* Pilih WBP */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">Pilih WBP</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Pilih Warga Binaan</label>
             <SelectInput
               options={wbpOptions}
               value={selectedWbp}
@@ -435,7 +362,7 @@ export function DashboardWbpPage() {
             />
           </div>
 
-          {/* Pilih Triwulan (Pills) */}
+          {/* Pilih Triwulan */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">Pilih Triwulan</label>
             <div className="grid grid-cols-4 gap-1 rounded-xl bg-slate-100 p-1 border border-slate-200/80">
@@ -453,7 +380,7 @@ export function DashboardWbpPage() {
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                   }`}
                 >
-                  {tw.label.slice(0, 5)}
+                  {tw.key}
                 </button>
               ))}
             </div>
@@ -468,6 +395,7 @@ export function DashboardWbpPage() {
               onChange={setSelectedProgram}
               placeholder="Semua Program..."
               isSearchable={false}
+              compact
             />
           </div>
 
@@ -480,26 +408,27 @@ export function DashboardWbpPage() {
               onChange={setSelectedAsesor}
               placeholder="Pilih Tipe Asesor..."
               isSearchable={false}
+              compact
             />
           </div>
         </div>
 
-        {/* Sub-filter: > Pilih Bulan (Rentang Triwulan) */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
-          <span className="text-xs font-bold text-slate-600 flex items-center gap-1.5 mr-1">
+        {/* Sub-filter Bulan */}
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
+          <span className="font-bold text-slate-600 flex items-center gap-1.5 mr-1">
             <Calendar className="h-3.5 w-3.5 text-emerald-600" />
-            &gt; Pilih Bulan:
+            Rentang Bulan ({selectedTw.label}):
           </span>
           <button
             type="button"
             onClick={() => setSelectedBulan('Semua Bulan')}
             className={`rounded-lg px-3 py-1 text-xs font-bold transition-all ${
               selectedBulan === 'Semua Bulan'
-                ? 'bg-emerald-850 text-white'
+                ? 'bg-slate-800 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            Semua Bulan ({selectedTw.label})
+            Semua Bulan
           </button>
           {selectedTw.months.map((m, idx) => (
             <button
@@ -508,7 +437,7 @@ export function DashboardWbpPage() {
               onClick={() => setSelectedBulan(m)}
               className={`rounded-lg px-3 py-1 text-xs font-bold transition-all ${
                 selectedBulan === m
-                  ? 'bg-emerald-850 text-white'
+                  ? 'bg-slate-800 text-white shadow-xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
@@ -525,27 +454,22 @@ export function DashboardWbpPage() {
       ) : (
         <>
           {/* ========================================================================= */}
-          {/* BAGIAN UTAMA (Konteks Peserta dan Posisi - 6 Cards Berdasarkan Wireframe Image 2) */}
+          {/* 3. PROFIL & KUALIFIKASI WBP (6 Cards)                                     */}
           {/* ========================================================================= */}
           <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
-              <div>
-                <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
-                  <User className="h-4 w-4 text-emerald-700" />
-                  Bagian Utama — Konteks Peserta dan Posisi
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Goals: Memberikan gambaran siapa WBP, di mana posisi dan capaian dalam programnya, serta eligibilitas kualifikasi rekomendasi.
-                </p>
-              </div>
-              <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
-                {selectedTw.label} • {selectedBulan}
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                <User className="h-4 w-4 text-emerald-700" />
+                Profil &amp; Kualifikasi Warga Binaan
+              </h2>
+              <span className="text-xs text-slate-500 font-medium">
+                {d.identitas?.nama} ({d.identitas?.no_registrasi})
               </span>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
               {/* Card 1: Identitas WBP */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs flex flex-col justify-between">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between">
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
                     Identitas WBP
@@ -593,7 +517,7 @@ export function DashboardWbpPage() {
               </div>
 
               {/* Card 2: Kualifikasi */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs flex flex-col justify-between">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between">
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
                     Kualifikasi
@@ -621,7 +545,7 @@ export function DashboardWbpPage() {
                 </div>
 
                 <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400">Status Tren:</span>
+                  <span className="text-slate-400">Tren:</span>
                   <span className="font-bold text-emerald-700 flex items-center gap-1">
                     <ArrowUpRight className="h-3 w-3" />
                     {d.kualifikasi?.status_tren}
@@ -630,7 +554,7 @@ export function DashboardWbpPage() {
               </div>
 
               {/* Card 3: SPPN */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs flex flex-col justify-between">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -660,13 +584,13 @@ export function DashboardWbpPage() {
                 </div>
 
                 <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] flex items-center justify-between text-slate-500">
-                  <span>v. TW Sebelumnya:</span>
+                  <span>v. TW Lalu:</span>
                   <span className="font-bold text-emerald-700">{d.sppn?.tren}</span>
                 </div>
               </div>
 
               {/* Card 4: PPKS */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs flex flex-col justify-between">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
@@ -696,19 +620,19 @@ export function DashboardWbpPage() {
                 </div>
 
                 <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] flex items-center justify-between text-slate-500">
-                  <span>v. TW Sebelumnya:</span>
+                  <span>v. TW Lalu:</span>
                   <span className="font-bold text-emerald-700">{d.ppks?.tren}</span>
                 </div>
               </div>
 
-              {/* Card 5: SPPN vs Treshold (Progress Bar) */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs flex flex-col justify-between">
+              {/* Card 5: SPPN vs Treshold */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                       SPPN vs Threshold
                     </span>
-                    <span className="text-[10px] font-bold text-slate-500">Ambang: 70</span>
+                    <span className="text-[10px] font-bold text-slate-500">Batas: 70</span>
                   </div>
                   <div className="mt-2 flex items-baseline justify-between">
                     <span className="text-lg font-black text-slate-900">
@@ -719,7 +643,6 @@ export function DashboardWbpPage() {
                     </span>
                   </div>
 
-                  {/* Progress Bar with 70 Threshold indicator */}
                   <div className="mt-2 relative">
                     <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
                       <div
@@ -729,7 +652,6 @@ export function DashboardWbpPage() {
                         style={{ width: `${Math.min(100, (Number(d.sppn_threshold?.nilai) / 100) * 100)}%` }}
                       />
                     </div>
-                    {/* Marker line at 70% */}
                     <div
                       className="absolute top-0 bottom-0 w-0.5 bg-slate-900 z-10"
                       style={{ left: '70%' }}
@@ -742,7 +664,7 @@ export function DashboardWbpPage() {
                   {Number(d.sppn_threshold?.nilai) >= 70 ? (
                     <span className="text-emerald-700 font-bold flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      Melampaui Ambang Batas (+{(Number(d.sppn_threshold?.nilai) - 70).toFixed(1)})
+                      Di Atas Ambang (+{(Number(d.sppn_threshold?.nilai) - 70).toFixed(1)})
                     </span>
                   ) : (
                     <span className="text-rose-700 font-bold flex items-center gap-1">
@@ -753,14 +675,14 @@ export function DashboardWbpPage() {
                 </div>
               </div>
 
-              {/* Card 6: PPKS vs Treshold (Progress Bar) */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs flex flex-col justify-between">
+              {/* Card 6: PPKS vs Treshold */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                       PPKS vs Threshold
                     </span>
-                    <span className="text-[10px] font-bold text-slate-500">Ambang: 4.00</span>
+                    <span className="text-[10px] font-bold text-slate-500">Batas: 4.00</span>
                   </div>
                   <div className="mt-2 flex items-baseline justify-between">
                     <span className="text-lg font-black text-slate-900">
@@ -771,7 +693,6 @@ export function DashboardWbpPage() {
                     </span>
                   </div>
 
-                  {/* Progress Bar with 4.00 / 5.00 (80%) indicator */}
                   <div className="mt-2 relative">
                     <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
                       <div
@@ -783,7 +704,6 @@ export function DashboardWbpPage() {
                         }}
                       />
                     </div>
-                    {/* Marker line at 80% (which represents 4.00 on 1-5 scale) */}
                     <div
                       className="absolute top-0 bottom-0 w-0.5 bg-slate-900 z-10"
                       style={{ left: '80%' }}
@@ -796,7 +716,7 @@ export function DashboardWbpPage() {
                   {Number(d.ppks_threshold?.nilai) >= 4.0 ? (
                     <span className="text-emerald-700 font-bold flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      Melampaui Ambang (+{(Number(d.ppks_threshold?.nilai) - 4.0).toFixed(2)})
+                      Di Atas Ambang (+{(Number(d.ppks_threshold?.nilai) - 4.0).toFixed(2)})
                     </span>
                   ) : (
                     <span className="text-amber-700 font-bold flex items-center gap-1">
@@ -810,31 +730,24 @@ export function DashboardWbpPage() {
           </div>
 
           {/* ========================================================================= */}
-          {/* BAGIAN SEKUNDER (Keseimbangan dalam Program & Arah Pembinaan - 4 Charts)   */}
+          {/* 4. PERFORMA & KOMPARASI BENCHMARK (4 Charts)                              */}
           {/* ========================================================================= */}
           <div className="space-y-3 pt-2">
-            <div>
-              <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
-                <Activity className="h-4 w-4 text-emerald-700" />
-                Bagian Sekunder — Keseimbangan dalam Program dan Arah Pembinaan
-              </h2>
-              <p className="text-xs text-slate-500">
-                Goals: Menunjukkan di mana kekuatan dan kekurangan WBP di semua program dan sepanjang triwulan, dan bagaimana performanya bergerak.
-              </p>
-            </div>
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <Activity className="h-4 w-4 text-emerald-700" />
+              Performa Aktivitas &amp; Komparasi Standar
+            </h2>
 
             <div className="grid gap-4 lg:grid-cols-4">
-              {/* Chart 1: Pelaksanaan/Aktivitas (Line Chart) */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                      Pelaksanaan/Aktivitas
-                    </h3>
-                    <p className="text-[11px] text-slate-500">
-                      TW Berjalan vs Komparasi TW Sebelumnya
-                    </p>
-                  </div>
+              {/* Chart 1: Pelaksanaan/Aktivitas */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+                <div className="mb-2">
+                  <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                    Pelaksanaan / Aktivitas
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    TW Berjalan vs Komparasi TW Sebelumnya
+                  </p>
                 </div>
                 <div className="h-56 w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -866,15 +779,13 @@ export function DashboardWbpPage() {
                 </div>
               </div>
 
-              {/* Chart 2: Distribusi Pelaksanaan (Donut Chart) */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                      Distribusi Pelaksanaan
-                    </h3>
-                    <p className="text-[11px] text-slate-500">% Pelaksanaan 1 vs Pelaksanaan 0</p>
-                  </div>
+              {/* Chart 2: Distribusi Pelaksanaan */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+                <div className="mb-2">
+                  <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                    Distribusi Pelaksanaan
+                  </h3>
+                  <p className="text-[11px] text-slate-500">Hadir vs Tidak Hadir</p>
                 </div>
                 <div className="h-56 w-full flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
@@ -900,15 +811,13 @@ export function DashboardWbpPage() {
                 </div>
               </div>
 
-              {/* Chart 3: SPPN vs Benchmark (Bar Chart) */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                      SPPN vs Benchmark
-                    </h3>
-                    <p className="text-[11px] text-slate-500">SPPN WBP vs Rata-rata All-WBP Lapas</p>
-                  </div>
+              {/* Chart 3: SPPN vs Benchmark */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+                <div className="mb-2">
+                  <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                    SPPN vs Benchmark Lapas
+                  </h3>
+                  <p className="text-[11px] text-slate-500">Skor WBP vs Rata-rata All-WBP</p>
                 </div>
                 <div className="h-56 w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -917,7 +826,7 @@ export function DashboardWbpPage() {
                       <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                       <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
                       <Tooltip formatter={(v) => [`${v}`, 'Skor SPPN']} />
-                      <ReferenceLine y={70} stroke="#ef4444" strokeDasharray="3 3" label={{ value: 'Ambang (70)', fontSize: 10, fill: '#ef4444' }} />
+                      <ReferenceLine y={70} stroke="#ef4444" strokeDasharray="3 3" label={{ value: 'Batas (70)', fontSize: 10, fill: '#ef4444' }} />
                       <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                         {d.sppn_benchmark.map((entry, index) => (
                           <Cell key={`sppn-b-${index}`} fill={entry.fill} />
@@ -928,15 +837,13 @@ export function DashboardWbpPage() {
                 </div>
               </div>
 
-              {/* Chart 4: PPKS vs Benchmark (Bar Chart) */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs">
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
-                      PPKS vs Benchmark
-                    </h3>
-                    <p className="text-[11px] text-slate-500">PPKS WBP vs Rata-rata All-WBP Lapas</p>
-                  </div>
+              {/* Chart 4: PPKS vs Benchmark */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+                <div className="mb-2">
+                  <h3 className="font-extrabold text-slate-900 text-xs sm:text-sm">
+                    PPKS vs Benchmark Lapas
+                  </h3>
+                  <p className="text-[11px] text-slate-500">Skor WBP vs Rata-rata All-WBP</p>
                 </div>
                 <div className="h-56 w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -945,7 +852,7 @@ export function DashboardWbpPage() {
                       <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                       <YAxis domain={[0, 5]} tick={{ fontSize: 11 }} />
                       <Tooltip formatter={(v) => [`${v}`, 'Skor PPKS']} />
-                      <ReferenceLine y={4.0} stroke="#ef4444" strokeDasharray="3 3" label={{ value: 'Ambang (4.00)', fontSize: 10, fill: '#ef4444' }} />
+                      <ReferenceLine y={4.0} stroke="#ef4444" strokeDasharray="3 3" label={{ value: 'Batas (4.00)', fontSize: 10, fill: '#ef4444' }} />
                       <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                         {d.ppks_benchmark.map((entry, index) => (
                           <Cell key={`ppks-b-${index}`} fill={entry.fill} />
@@ -959,34 +866,29 @@ export function DashboardWbpPage() {
           </div>
 
           {/* ========================================================================= */}
-          {/* BAGIAN TAMBAHAN (Analisa Kekuatan, Hambatan & Pengecualian - 2 Tabel Pivot) */}
+          {/* 5. MATRIKS CAPAIAN PROGRAM & SUB-INDIKATOR PPKS (2 Pivot Tables)           */}
           {/* ========================================================================= */}
           <div className="space-y-3 pt-2">
-            <div>
-              <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
-                <Layers className="h-4 w-4 text-emerald-700" />
-                Bagian Tambahan — Analisa Kekuatan, Hambatan, Perbaikan, dan Pengecualian
-              </h2>
-              <p className="text-xs text-slate-500">
-                Goals: Menampilkan fakta kuantitatif analisa spesifik untuk verifikasi dan perencanaan pembinaan lanjutan.
-              </p>
-            </div>
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <Layers className="h-4 w-4 text-emerald-700" />
+              Matriks Capaian Program &amp; Sub-Indikator PPKS
+            </h2>
 
             <div className="grid gap-4 lg:grid-cols-2">
               {/* Tabel Program Pivot */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                     <div>
                       <h3 className="font-extrabold text-slate-900 text-sm">
-                        Tabel Matriks Pelaksanaan Program
+                        Matriks Pelaksanaan Program
                       </h3>
                       <p className="text-[11px] text-slate-500">
-                        Dimensi: Program | Kolom: Bulan 1, Bulan 2, Bulan 3 | Metrik: Avg. Keterlaksanaan
+                        Kehadiran sesi per bulan dalam triwulan terpilih
                       </p>
                     </div>
                     <span className="rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-bold text-emerald-800 border border-emerald-200">
-                      Pivot Program
+                      Program
                     </span>
                   </div>
 
@@ -1033,25 +935,25 @@ export function DashboardWbpPage() {
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                  <span>Satuan: Jumlah Kehadiran Sesi / Bulan</span>
-                  <span className="font-bold text-slate-700">Keterlaksanaan Sangat Tinggi</span>
+                  <span>Satuan: Jumlah Kehadiran Sesi</span>
+                  <span className="font-bold text-slate-700">Tingkat Kehadiran Tinggi</span>
                 </div>
               </div>
 
               {/* Tabel PPKS Pivot */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs flex flex-col justify-between">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                     <div>
                       <h3 className="font-extrabold text-slate-900 text-sm">
-                        Tabel Matriks Sub-Indikator PPKS
+                        Matriks 5 Sub-Indikator PPKS
                       </h3>
                       <p className="text-[11px] text-slate-500">
-                        Dimensi: 5 Sub-Indikator PPKS | Kolom: Bulan 1, 2, 3 | Metrik: Avg. Nilai (1.00 - 5.00)
+                        Observasi perilaku karakter spiritual (Skala 1.00 - 5.00)
                       </p>
                     </div>
                     <span className="rounded-lg bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-800 border border-amber-200">
-                      Pivot PPKS
+                      PPKS
                     </span>
                   </div>
 

@@ -21,6 +21,7 @@ import {
   ZAxis,
 } from 'recharts';
 import {
+  Activity,
   AlertTriangle,
   ArrowDownRight,
   ArrowUpRight,
@@ -67,7 +68,7 @@ import { exportAssessmentsPdf } from '@/utils/pdfGenerator';
 export function DashboardUmumPage() {
   const { user } = useAuth();
 
-  // Filter Bar Global State (Berdasarkan Wireframe Image 1)
+  // Filter Bar Global State
   const [selectedTw, setSelectedTw] = useState(TRIWULAN_OPTIONS[0]);
   const [selectedBulan, setSelectedBulan] = useState('Semua Bulan');
   const [selectedProgram, setSelectedProgram] = useState(null);
@@ -92,7 +93,6 @@ export function DashboardUmumPage() {
         }));
         setProgramsList([{ value: 'all', label: 'Semua Program' }, ...opts]);
       } catch {
-        // Fallback options
         setProgramsList([
           { value: 'all', label: 'Semua Program' },
           { value: 1, label: 'Pembelajaran Al-Quran (30%)' },
@@ -138,11 +138,12 @@ export function DashboardUmumPage() {
         triwulan: selectedTw.key,
       });
       await exportAssessmentsPdf(res.data || [], {
-        triwulan: selectedTw.key,
+        triwulan: selectedTw.label,
+        bulan: selectedBulan,
       });
-      toast.success('Laporan PDF Dasbor berhasil diunduh');
+      toast.success('Laporan Dasbor Eksekutif (PDF) berhasil diunduh');
     } catch (err) {
-      toast.error(extractErrorMessage(err, 'Gagal mengunduh PDF'));
+      toast.error(extractErrorMessage(err, 'Gagal mengunduh PDF Dasbor'));
     } finally {
       setExporting(false);
     }
@@ -150,24 +151,24 @@ export function DashboardUmumPage() {
 
   // Fallback structures if backend values are null
   const bu = data?.bagian_utama || {
-    wbp_aktif: { title: 'WBP Aktif', value: 120, unit: 'WBP', trend: '+1.7%', trend_status: 'up', trend_label: 'v. Trimester Sebelumnya' },
-    program_aktif: { title: 'Program Aktif', value: 5, unit: 'Program', trend: '0%', trend_status: 'stable', trend_label: 'v. Trimester Sebelumnya' },
-    walipas_aktif: { title: 'Walipas Aktif', value: 8, unit: 'Orang', trend: '+12.5%', trend_status: 'up', trend_label: 'v. Trimester Sebelumnya' },
-    mitra_aktif: { title: 'Mitra Aktif', value: 4, unit: 'Instansi', trend: '+25.0%', trend_status: 'up', trend_label: 'v. Trimester Sebelumnya' },
-    rata_sppn: { title: 'Rata-rata SPPN', value: 82.4, unit: '/ 100', trend: '+4.2%', trend_status: 'up', trend_label: 'v. Trimester Sebelumnya' },
-    rata_ppks: { title: 'Rata-rata PPKS', value: 4.35, unit: '/ 5.00', trend: '+0.18', trend_status: 'up', trend_label: 'v. Trimester Sebelumnya' },
-    total_direkomendasikan: { title: 'Total Direkomendasikan', value: 85, unit: 'WBP', trend: '+5.2%', trend_status: 'up', trend_label: 'v. Trimester Sebelumnya' },
+    wbp_aktif: { title: 'WBP Aktif', value: 120, unit: 'Warga Binaan', trend: '+1.7%', trend_status: 'up', trend_label: 'v. TW Sebelumnya' },
+    program_aktif: { title: 'Program Aktif', value: 5, unit: 'Program Spiritual', trend: '0%', trend_status: 'stable', trend_label: 'v. TW Sebelumnya' },
+    walipas_aktif: { title: 'Walipas Aktif', value: 8, unit: 'Petugas Asesor', trend: '+12.5%', trend_status: 'up', trend_label: 'v. TW Sebelumnya' },
+    mitra_aktif: { title: 'Mitra Aktif', value: 4, unit: 'Instansi Pembina', trend: '+25.0%', trend_status: 'up', trend_label: 'v. TW Sebelumnya' },
+    rata_sppn: { title: 'Rata-rata SPPN', value: 82.4, unit: 'Skala 0 - 100', trend: '+4.2%', trend_status: 'up', trend_label: 'v. TW Sebelumnya' },
+    rata_ppks: { title: 'Rata-rata PPKS', value: 4.35, unit: 'Skala 1.0 - 5.0', trend: '+0.18', trend_status: 'up', trend_label: 'v. TW Sebelumnya' },
+    total_direkomendasikan: { title: 'Total Direkomendasikan', value: 85, unit: 'WBP Kualifikasi 2', trend: '+5.2%', trend_status: 'up', trend_label: 'v. TW Sebelumnya' },
   };
 
   const bs = data?.bagian_sekunder || {
     sebaran_pelaksanaan: [
-      { name: 'Pelaksanaan = 1 (Ya)', count: 360, pct: 94.2, color: '#10b981' },
-      { name: 'Pelaksanaan = 0 (Tidak)', count: 24, pct: 5.8, color: '#ef4444' },
+      { name: 'Terlaksana (Ya)', count: 360, pct: 94.2, color: '#10b981' },
+      { name: 'Tidak Terlaksana (Absen)', count: 24, pct: 5.8, color: '#ef4444' },
     ],
     sebaran_predikat: [
-      { name: 'Direkomendasikan (Kual 2)', count: 85, pct: 70.8, color: '#10b981' },
-      { name: 'Dg Pertimbangan (Kual 1)', count: 25, pct: 20.8, color: '#f59e0b' },
-      { name: 'Tidak Memenuhi (Kual 0)', count: 10, pct: 8.4, color: '#ef4444' },
+      { name: 'Kualifikasi 2 (Direkomendasikan)', count: 85, pct: 70.8, color: '#10b981' },
+      { name: 'Kualifikasi 1 (Pertimbangan)', count: 25, pct: 20.8, color: '#f59e0b' },
+      { name: 'Kualifikasi 0 (Tidak Memenuhi)', count: 10, pct: 8.4, color: '#ef4444' },
     ],
     pelaksanaan_line: [
       { hari: 'H-10', tw_berjalan: 92.0, tw_sebelumnya: 85.0 },
@@ -200,11 +201,11 @@ export function DashboardUmumPage() {
       { nama_program: 'PHBI', bobot: 10, pelaksanaan: 12, target: 12 },
     ],
     hambatan_pareto: [
-      { alasan: 'Sakit / Rawat Klinik', count: 18, persentase: 40.0, kumulatif: 40.0 },
-      { alasan: 'Jadwal Sidang Pengadilan', count: 12, persentase: 26.7, kumulatif: 66.7 },
-      { alasan: 'Kunjungan / Besukan Keluarga', count: 7, persentase: 15.6, kumulatif: 82.3 },
-      { alasan: 'Piket / Kebersihan Lingkungan', count: 5, persentase: 11.1, kumulatif: 93.4 },
-      { alasan: 'Dispensasi Lainnya', count: 3, persentase: 6.6, kumulatif: 100.0 },
+      { alasan: 'Sakit / Klinik', count: 18, persentase: 40.0, kumulatif: 40.0 },
+      { alasan: 'Sidang Pengadilan', count: 12, persentase: 26.7, kumulatif: 66.7 },
+      { alasan: 'Kunjungan Besuk', count: 7, persentase: 15.6, kumulatif: 82.3 },
+      { alasan: 'Piket Lingkungan', count: 5, persentase: 11.1, kumulatif: 93.4 },
+      { alasan: 'Dispensasi Khusus', count: 3, persentase: 6.6, kumulatif: 100.0 },
     ],
     aktivitas_walipas_mitra: [
       { periode: 'Mg 1', walipas: 38, mitra: 24 },
@@ -238,34 +239,39 @@ export function DashboardUmumPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Institutional Top Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-850 via-teal-850 to-slate-900 px-6 py-6 sm:px-8 sm:py-7 text-white shadow-xl shadow-emerald-950/20 border border-emerald-700/30">
-        <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
-        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-4 sm:gap-5">
-            <div className="flex items-center gap-2.5 shrink-0">
+      {/* ========================================================================= */}
+      {/* 1. HEADER UTAMA (Clean, Modern, Executive)                                */}
+      {/* ========================================================================= */}
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 shrink-0">
               <img
                 src="/logo-kemenas.png"
-                alt="Logo Kementerian"
-                className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl object-contain bg-white p-1.5 shadow-md border border-white/20"
+                alt="Logo Kemenkumham"
+                className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
               />
               <img
                 src="/logo-sipasti.png"
                 alt="Logo SIPASTI"
-                className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl object-contain bg-white p-1.5 shadow-md border border-white/20"
+                className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
               />
             </div>
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-emerald-200 border border-white/15">
-                <span>{ROLE_LABELS[user?.role] || user?.role}</span>
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-semibold mb-1">
+                <span className="rounded-md bg-emerald-50 text-emerald-800 px-2 py-0.5 border border-emerald-200/80">
+                  Lapas Kelas IIB Ciamis
+                </span>
+                <span>•</span>
+                <span>{ROLE_LABELS[user?.role] || 'Administrator'}</span>
                 <span>•</span>
                 <span>{formatDate(new Date(), 'EEEE, dd MMMM yyyy')}</span>
               </div>
-              <h1 className="mt-2 text-2xl sm:text-3xl font-black tracking-tight text-white">
-                Selamat Datang, {user?.nama}
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Dasbor Umum Eksekutif
               </h1>
-              <p className="text-xs sm:text-sm text-emerald-100/80 mt-1 font-medium">
-                Dasbor Pemantauan Pembinaan Spiritual • Lapas Kelas IIB Ciamis
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
+                Pemantauan komprehensif keterlaksanaan program pembinaan spiritual, SPPN, dan PPKS.
               </p>
             </div>
           </div>
@@ -274,7 +280,7 @@ export function DashboardUmumPage() {
             {['admin', 'wali_pas', 'mitra'].includes(user?.role) && (
               <Link
                 to="/app/penilaian"
-                className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-950 shadow-md hover:bg-amber-300 transition-colors"
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-400 px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-950 shadow-xs hover:bg-amber-300 transition-colors"
               >
                 <PlusCircle className="h-4 w-4" />
                 Input Penilaian
@@ -282,81 +288,71 @@ export function DashboardUmumPage() {
             )}
             <Link
               to="/app/rekap-penilaian"
-              className="inline-flex items-center gap-2 rounded-xl bg-white/15 border border-white/20 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-white/25 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-slate-700 transition-colors"
             >
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-4 w-4 text-slate-500" />
               Rekap Triwulan
-            </Link>
-            <Link
-              to="/app/panduan"
-              className="inline-flex items-center gap-2 rounded-xl bg-white/15 border border-white/20 px-3.5 py-2.5 text-xs sm:text-sm font-semibold text-white hover:bg-white/25 transition-colors"
-            >
-              <BookOpen className="h-4 w-4" />
-              Buku Panduan
             </Link>
             <button
               type="button"
               onClick={handleExportPdf}
               disabled={exporting || loading}
-              className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-emerald-850 shadow-sm hover:bg-emerald-50 disabled:opacity-50 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs disabled:opacity-50 transition-colors"
             >
               <FileDown className="h-4 w-4" />
               {exporting ? 'Menyiapkan...' : 'Unduh PDF'}
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Segmented Switcher Tabs between Dashboards */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/80 w-fit max-w-full overflow-x-auto">
-        <Link
-          to="/app/dasbor-umum"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-emerald-800 bg-white shadow-xs border border-slate-200/60 whitespace-nowrap"
-        >
-          <Layers className="h-4 w-4 text-emerald-600" />
-          <span>Dasbor Umum</span>
-          <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800">
-            Aktif
-          </span>
-        </Link>
-        <Link
-          to="/app/dasbor-wbp"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all whitespace-nowrap"
-        >
-          <Award className="h-4 w-4 text-slate-500" />
-          <span>Dasbor WBP</span>
-        </Link>
-        <Link
-          to="/app/dasbor-program"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all whitespace-nowrap"
-        >
-          <BookOpen className="h-4 w-4 text-slate-500" />
-          <span>Dasbor Program</span>
-        </Link>
+        {/* Segmented Switcher Tabs between Dashboards */}
+        <div className="mt-5 pt-4 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto">
+          <Link
+            to="/app/dasbor-umum"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-700 text-white shadow-xs whitespace-nowrap"
+          >
+            <Layers className="h-4 w-4 text-white" />
+            <span>Dasbor Umum</span>
+          </Link>
+          <Link
+            to="/app/dasbor-wbp"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
+          >
+            <Award className="h-4 w-4 text-slate-400" />
+            <span>Dasbor WBP</span>
+          </Link>
+          <Link
+            to="/app/dasbor-program"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
+          >
+            <BookOpen className="h-4 w-4 text-slate-400" />
+            <span>Dasbor Program</span>
+          </Link>
+        </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* FILTER BAR GLOBAL (Sesuai Wireframe Image 1: Triwulan, Program, Trend, dll) */}
+      {/* 2. FILTER BAR PERIODE & KRITERIA (Clean & Rapi)                           */}
       {/* ========================================================================= */}
-      <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-emerald-700" />
             <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-              Filter Bar Global
+              Filter Periode &amp; Kriteria Penilaian
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 font-medium">
-            Secara triwulan, tanpa date range acak. Jika pun difilter lebih kecil (bulan/minggu/hari) tetap dalam rentang triwulan.
-          </p>
+          <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+            {selectedTw.label} • {selectedBulan}
+          </span>
         </div>
 
-        {/* Global Controls Row 1 */}
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {/* Global Controls Row */}
+        <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-5">
           {/* Pilih Triwulan */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 mb-1">Pilih Triwulan</label>
-            <div className="inline-flex w-full rounded-xl bg-slate-100 p-1 text-xs font-bold">
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Pilih Triwulan</label>
+            <div className="grid grid-cols-4 gap-1 rounded-xl bg-slate-100 p-1 border border-slate-200/80">
               {TRIWULAN_OPTIONS.map((tw) => (
                 <button
                   key={tw.key}
@@ -365,10 +361,10 @@ export function DashboardUmumPage() {
                     setSelectedTw(tw);
                     setSelectedBulan('Semua Bulan');
                   }}
-                  className={`flex-1 rounded-lg py-1.5 px-2 text-center transition-all ${
+                  className={`rounded-lg py-1.5 text-center text-xs font-bold transition-all ${
                     selectedTw.key === tw.key
                       ? 'bg-emerald-700 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
                   }`}
                 >
                   {tw.key}
@@ -379,7 +375,7 @@ export function DashboardUmumPage() {
 
           {/* Pilih Program */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 mb-1">Pilih Program</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Pilih Program</label>
             <SelectInput
               options={programsList}
               value={selectedProgram}
@@ -392,7 +388,7 @@ export function DashboardUmumPage() {
 
           {/* Pilih Trend */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 mb-1">Pilih Trend</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Pilih Trend</label>
             <SelectInput
               options={TREND_OPTIONS}
               value={selectedTrend}
@@ -404,7 +400,7 @@ export function DashboardUmumPage() {
 
           {/* Pilih Kualifikasi Akhir */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 mb-1">Pilih Kualifikasi Akhir</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Pilih Kualifikasi Akhir</label>
             <SelectInput
               options={KUALIFIKASI_AKHIR_OPTIONS}
               value={selectedKualifikasi}
@@ -416,7 +412,7 @@ export function DashboardUmumPage() {
 
           {/* Pilih Tipe Asesor */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-600 mb-1">Pilih Tipe Asesor</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1.5">Pilih Tipe Asesor</label>
             <SelectInput
               options={TIPE_ASESOR_OPTIONS}
               value={selectedAsesor}
@@ -427,60 +423,67 @@ export function DashboardUmumPage() {
           </div>
         </div>
 
-        {/* Sub-Filter Bulan (> Pilih Bulan) */}
-        <div className="flex items-center gap-2 pt-1 border-t border-slate-100 text-xs">
-          <span className="font-bold text-slate-500 whitespace-nowrap">&gt; Pilih Bulan ({selectedTw.label}):</span>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {selectedTw.months.map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setSelectedBulan(m)}
-                className={`rounded-lg px-3 py-1 text-xs font-semibold transition-all ${
-                  selectedBulan === m
-                    ? 'bg-slate-800 text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`}
-              >
-                {m}
-              </button>
-            ))}
-          </div>
+        {/* Sub-Filter Bulan */}
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
+          <span className="font-bold text-slate-600 flex items-center gap-1.5 mr-1">
+            <Calendar className="h-3.5 w-3.5 text-emerald-600" />
+            Rentang Bulan ({selectedTw.label}):
+          </span>
+          <button
+            type="button"
+            onClick={() => setSelectedBulan('Semua Bulan')}
+            className={`rounded-lg px-3 py-1 text-xs font-bold transition-all ${
+              selectedBulan === 'Semua Bulan'
+                ? 'bg-slate-800 text-white shadow-xs'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+            }`}
+          >
+            Semua Bulan
+          </button>
+          {selectedTw.months.map((m, idx) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setSelectedBulan(m)}
+              className={`rounded-lg px-3 py-1 text-xs font-bold transition-all ${
+                selectedBulan === m
+                  ? 'bg-slate-800 text-white shadow-xs'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Bulan {idx + 1} ({m})
+            </button>
+          ))}
         </div>
       </div>
 
       {loading ? (
-        <LoadingSpinner label="Memuat dasbor..." />
+        <LoadingSpinner label="Memuat data dasbor..." />
       ) : error ? (
         <ErrorState message={error} onRetry={fetchData} />
       ) : (
         <>
           {/* ========================================================================= */}
-          {/* BAGIAN UTAMA (Cuplikan triwulan & Eligibilitas rekomendasi - 7 Scorecards) */}
+          {/* 3. INDIKATOR UTAMA (7 Scorecards)                                         */}
           {/* ========================================================================= */}
           <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-              <div>
-                <h2 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-md bg-emerald-700 text-white text-[11px] font-bold">1</span>
-                  Bagian Utama — Cuplikan Triwulan &amp; Eligibilitas Rekomendasi
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Memberikan cuplikan cepat terkait kondisi terakhir triwulan: jumlah aktif, capaian standar, dan eligibilitas rekomendasi.
-                </p>
-              </div>
-              <span className="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full shrink-0">
-                Periode: {selectedTw.label} {selectedBulan !== 'Semua Bulan' ? `• ${selectedBulan}` : ''}
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                <Activity className="h-4 w-4 text-emerald-700" />
+                Indikator Utama Triwulan
+              </h2>
+              <span className="text-xs text-slate-500 font-medium">
+                Kondisi aktual Lapas Kelas IIB Ciamis
               </span>
             </div>
 
             <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
               {/* 1. WBP Aktif */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs flex flex-col justify-between hover:border-emerald-300 transition-colors">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
                 <span className="text-xs font-bold text-slate-500">{bu.wbp_aktif.title}</span>
                 <div className="my-2">
                   <p className="text-2xl font-black text-slate-900">{formatNumber(bu.wbp_aktif.value)}</p>
-                  <span className="text-[10px] text-slate-400 font-medium">{bu.wbp_aktif.unit}</span>
+                  <span className="text-[11px] text-slate-400 font-medium">{bu.wbp_aktif.unit}</span>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 pt-2 border-t border-slate-100">
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -490,11 +493,11 @@ export function DashboardUmumPage() {
               </div>
 
               {/* 2. Program Aktif */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs flex flex-col justify-between hover:border-emerald-300 transition-colors">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
                 <span className="text-xs font-bold text-slate-500">{bu.program_aktif.title}</span>
                 <div className="my-2">
                   <p className="text-2xl font-black text-slate-900">{formatNumber(bu.program_aktif.value)}</p>
-                  <span className="text-[10px] text-slate-400 font-medium">{bu.program_aktif.unit}</span>
+                  <span className="text-[11px] text-slate-400 font-medium">{bu.program_aktif.unit}</span>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-slate-600 pt-2 border-t border-slate-100">
                   <Minus className="h-3.5 w-3.5 text-slate-400" />
@@ -504,11 +507,11 @@ export function DashboardUmumPage() {
               </div>
 
               {/* 3. Walipas Aktif */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs flex flex-col justify-between hover:border-emerald-300 transition-colors">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
                 <span className="text-xs font-bold text-slate-500">{bu.walipas_aktif.title}</span>
                 <div className="my-2">
                   <p className="text-2xl font-black text-slate-900">{formatNumber(bu.walipas_aktif.value)}</p>
-                  <span className="text-[10px] text-slate-400 font-medium">{bu.walipas_aktif.unit}</span>
+                  <span className="text-[11px] text-slate-400 font-medium">{bu.walipas_aktif.unit}</span>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 pt-2 border-t border-slate-100">
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -518,11 +521,11 @@ export function DashboardUmumPage() {
               </div>
 
               {/* 4. Mitra Aktif */}
-              <div className="rounded-2xl border border-slate-200/90 bg-white p-4 shadow-xs flex flex-col justify-between hover:border-emerald-300 transition-colors">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between hover:border-slate-300 transition-colors">
                 <span className="text-xs font-bold text-slate-500">{bu.mitra_aktif.title}</span>
                 <div className="my-2">
                   <p className="text-2xl font-black text-slate-900">{formatNumber(bu.mitra_aktif.value)}</p>
-                  <span className="text-[10px] text-slate-400 font-medium">{bu.mitra_aktif.unit}</span>
+                  <span className="text-[11px] text-slate-400 font-medium">{bu.mitra_aktif.unit}</span>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 pt-2 border-t border-slate-100">
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -532,11 +535,11 @@ export function DashboardUmumPage() {
               </div>
 
               {/* 5. Rata-rata SPPN */}
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 shadow-xs flex flex-col justify-between hover:border-emerald-400 transition-colors">
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 shadow-xs flex flex-col justify-between">
                 <span className="text-xs font-bold text-emerald-900">{bu.rata_sppn.title}</span>
                 <div className="my-2 flex items-baseline gap-1">
                   <p className="text-2xl font-black text-emerald-800">{bu.rata_sppn.value}</p>
-                  <span className="text-[11px] font-bold text-slate-400">{bu.rata_sppn.unit}</span>
+                  <span className="text-[11px] font-bold text-slate-500">{bu.rata_sppn.unit}</span>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 pt-2 border-t border-emerald-200/60">
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -546,11 +549,11 @@ export function DashboardUmumPage() {
               </div>
 
               {/* 6. Rata-rata PPKS */}
-              <div className="rounded-2xl border border-amber-200 bg-amber-50/40 p-4 shadow-xs flex flex-col justify-between hover:border-amber-400 transition-colors">
+              <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 shadow-xs flex flex-col justify-between">
                 <span className="text-xs font-bold text-amber-900">{bu.rata_ppks.title}</span>
                 <div className="my-2 flex items-baseline gap-1">
                   <p className="text-2xl font-black text-amber-800">{Number(bu.rata_ppks.value).toFixed(2)}</p>
-                  <span className="text-[11px] font-bold text-slate-400">{bu.rata_ppks.unit}</span>
+                  <span className="text-[11px] font-bold text-slate-500">{bu.rata_ppks.unit}</span>
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-amber-700 pt-2 border-t border-amber-200/60">
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -560,13 +563,13 @@ export function DashboardUmumPage() {
               </div>
 
               {/* 7. Total Direkomendasikan */}
-              <div className="rounded-2xl border border-emerald-300 bg-emerald-600 text-white p-4 shadow-sm flex flex-col justify-between">
+              <div className="rounded-2xl border border-emerald-700 bg-emerald-700 text-white p-4 shadow-xs flex flex-col justify-between">
                 <span className="text-xs font-bold text-emerald-100">{bu.total_direkomendasikan.title}</span>
                 <div className="my-2">
                   <p className="text-2xl font-black">{formatNumber(bu.total_direkomendasikan.value)}</p>
-                  <span className="text-[10px] text-emerald-200 font-medium">Kualifikasi 2 (Memenuhi)</span>
+                  <span className="text-[11px] text-emerald-200 font-medium">Kualifikasi 2 (Direkomendasikan)</span>
                 </div>
-                <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-100 pt-2 border-t border-emerald-500">
+                <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-100 pt-2 border-t border-emerald-600">
                   <ArrowUpRight className="h-3.5 w-3.5" />
                   <span>{bu.total_direkomendasikan.trend}</span>
                   <span className="text-[10px] font-normal text-emerald-200 truncate">{bu.total_direkomendasikan.trend_label}</span>
@@ -576,25 +579,20 @@ export function DashboardUmumPage() {
           </div>
 
           {/* ========================================================================= */}
-          {/* BAGIAN SEKUNDER (Alignmen & Diagnosa Program Secara Holistik) */}
+          {/* 4. SEBARAN KUALIFIKASI & TREN PELAKSANAAN                                 */}
           {/* ========================================================================= */}
           <div className="space-y-3 pt-2">
-            <div>
-              <h2 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-teal-700 text-white text-[11px] font-bold">2</span>
-                Bagian Sekunder — Alignmen &amp; Diagnosa Program Secara Holistik
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Menampilkan informasi lebih luas untuk mencari korelasi, pemetaan sebaran, dan tren perbandingan pelaksanaan.
-              </p>
-            </div>
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <PieChartIcon className="h-4 w-4 text-emerald-700" />
+              Sebaran Kualifikasi &amp; Tren Aktivitas
+            </h2>
 
             <div className="grid gap-4 lg:grid-cols-12">
               {/* 1. Sebaran Pelaksanaan (Donut) */}
-              <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs lg:col-span-3 flex flex-col justify-between">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs lg:col-span-3 flex flex-col justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">Sebaran Pelaksanaan</h3>
-                  <p className="text-[11px] text-slate-400">% Count Pelaksanaan = 1 vs 0</p>
+                  <p className="text-[11px] text-slate-400">Rasio Hadir vs Tidak Hadir</p>
                   <div className="h-44 mt-2">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -631,10 +629,10 @@ export function DashboardUmumPage() {
               </div>
 
               {/* 2. Sebaran Predikat (Donut) */}
-              <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs lg:col-span-4 flex flex-col justify-between">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs lg:col-span-4 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Sebaran Predikat Akhir</h3>
-                  <p className="text-[11px] text-slate-400">% Count Direkomendasikan, Dg Pertimbangan, Tidak Memenuhi</p>
+                  <h3 className="text-sm font-bold text-slate-900">Sebaran Predikat Kualifikasi</h3>
+                  <p className="text-[11px] text-slate-400">Direkomendasikan, Dg Pertimbangan, Tidak Memenuhi</p>
                   <div className="h-44 mt-2">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -671,14 +669,14 @@ export function DashboardUmumPage() {
               </div>
 
               {/* 3. Pelaksanaan (Line Chart Komparasi TW Berjalan vs TW Sebelumnya) */}
-              <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs lg:col-span-5 flex flex-col justify-between">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs lg:col-span-5 flex flex-col justify-between">
                 <div className="flex items-center justify-between mb-2">
                   <div>
                     <h3 className="text-sm font-bold text-slate-900">Pelaksanaan / Hari</h3>
-                    <p className="text-[11px] text-slate-400">Avg Pelaksanaan triwulan berjalan vs triwulan sebelumnya</p>
+                    <p className="text-[11px] text-slate-400">Rata-rata pelaksanaan TW Berjalan vs TW Sebelumnya</p>
                   </div>
                   <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                    Tren +4.2% Positif
+                    Tren +4.2%
                   </span>
                 </div>
                 <div className="h-56">
@@ -714,39 +712,34 @@ export function DashboardUmumPage() {
           </div>
 
           {/* ========================================================================= */}
-          {/* BAGIAN TAMBAHAN (Analisis lebih dalam dan memahami hasil secara granular) */}
+          {/* 5. MATRIKS KOMPARASI, TANTANGAN & HAMBATAN                                */}
           {/* ========================================================================= */}
           <div className="space-y-4 pt-2">
-            <div>
-              <h2 className="text-base font-black text-slate-900 tracking-tight flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-md bg-sky-700 text-white text-[11px] font-bold">3</span>
-                Bagian Tambahan — Analisis Granular &amp; Diagnosa Mitigasi
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Menjelaskan korelasi aktivitas kuantitatif (SPPN) dan kualitatif (PPKS), tantangan bobot, hambatan pareto, serta pergerakan tren WBP.
-              </p>
-            </div>
+            <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+              <Layers className="h-4 w-4 text-emerald-700" />
+              Matriks Komparasi &amp; Analisis Hambatan
+            </h2>
 
             {/* Row 1: Komparasi Scatter Plot & Tantangan Bar Chart */}
             <div className="grid gap-4 lg:grid-cols-12">
               {/* 1. Komparasi Scatter Plot (SPPN Threshold 70 vs PPKS Threshold 4.00) */}
-              <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs lg:col-span-7">
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs lg:col-span-7">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900">Komparasi Kuadran SPPN vs PPKS</h3>
+                    <h3 className="text-sm font-bold text-slate-900">Kuadran SPPN vs PPKS</h3>
                     <p className="text-[11px] text-slate-400">
-                      Garis Batas: Ambang Batas SPPN = 70 • Standar Mutu PPKS = 4.00
+                      Ambang Batas SPPN = 70 • Standar Mutu PPKS = 4.00
                     </p>
                   </div>
                   <div className="flex items-center gap-2 text-[10px] font-bold">
                     <span className="flex items-center gap-1 text-emerald-700">
-                      <span className="h-2 w-2 rounded-full bg-emerald-500" /> Kual 2 (Memenuhi)
+                      <span className="h-2 w-2 rounded-full bg-emerald-500" /> Kual 2
                     </span>
                     <span className="flex items-center gap-1 text-amber-700">
-                      <span className="h-2 w-2 rounded-full bg-amber-500" /> Kual 1 (Pertimbangan)
+                      <span className="h-2 w-2 rounded-full bg-amber-500" /> Kual 1
                     </span>
                     <span className="flex items-center gap-1 text-rose-700">
-                      <span className="h-2 w-2 rounded-full bg-rose-500" /> Kual 0 (Belum)
+                      <span className="h-2 w-2 rounded-full bg-rose-500" /> Kual 0
                     </span>
                   </div>
                 </div>
@@ -791,8 +784,8 @@ export function DashboardUmumPage() {
                           return null;
                         }}
                       />
-                      <ReferenceLine x={70} stroke="#ef4444" strokeDasharray="3 3" label={{ value: 'Batas SPPN 70', fontSize: 10, fill: '#ef4444' }} />
-                      <ReferenceLine y={4.0} stroke="#f59e0b" strokeDasharray="3 3" label={{ value: 'Batas PPKS 4.0', fontSize: 10, fill: '#f59e0b' }} />
+                      <ReferenceLine x={70} stroke="#ef4444" strokeDasharray="3 3" label={{ value: 'Ambang SPPN (70)', fontSize: 10, fill: '#ef4444' }} />
+                      <ReferenceLine y={4.0} stroke="#f59e0b" strokeDasharray="3 3" label={{ value: 'Ambang PPKS (4.00)', fontSize: 10, fill: '#f59e0b' }} />
                       <Scatter data={bt.komparasi_scatter}>
                         {bt.komparasi_scatter.map((entry, index) => (
                           <Cell key={`cell-scatter-${index}`} fill={entry.color} />
@@ -803,11 +796,11 @@ export function DashboardUmumPage() {
                 </div>
               </div>
 
-              {/* 2. Tantangan (Bar Chart: Bobot vs Pelaksanaan & Target) */}
-              <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs lg:col-span-5">
+              {/* 2. Tantangan Program */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs lg:col-span-5">
                 <div className="mb-3">
                   <h3 className="text-sm font-bold text-slate-900">Tantangan Program</h3>
-                  <p className="text-[11px] text-slate-400">Komparasi Bobot, Pelaksanaan Sesi, dan Target Kolektif</p>
+                  <p className="text-[11px] text-slate-400">Komparasi Bobot, Realisasi Sesi, dan Target Kolektif</p>
                 </div>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
@@ -828,8 +821,8 @@ export function DashboardUmumPage() {
 
             {/* Row 2: Hambatan Pareto Chart & Aktivitas Walipas vs Mitra */}
             <div className="grid gap-4 lg:grid-cols-12">
-              {/* 3. Hambatan (Pareto Chart: Alasan tidak hadir WBP) */}
-              <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs lg:col-span-6">
+              {/* 3. Hambatan Pareto Chart */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs lg:col-span-6">
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <h3 className="text-sm font-bold text-slate-900">Hambatan Ketidakhadiran (Pareto)</h3>
@@ -853,27 +846,25 @@ export function DashboardUmumPage() {
                 </div>
               </div>
 
-              {/* 4. Aktivitas Walipas vs Mitra (Line Chart) */}
-              <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs lg:col-span-6">
+              {/* 4. Aktivitas Walipas vs Mitra */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs lg:col-span-6">
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <h3 className="text-sm font-bold text-slate-900">Aktivitas Input Walipas vs Mitra</h3>
-                    <p className="text-[11px] text-slate-400">Volume pencatatan sesi pembinaan berkala per minggu</p>
+                    <h3 className="text-sm font-bold text-slate-900">Aktivitas Wali PAS vs Mitra</h3>
+                    <p className="text-[11px] text-slate-400">Perbandingan jumlah sesi log penilaian per minggu</p>
                   </div>
-                  <span className="text-[10px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-2.5 py-0.5 rounded-full">
-                    Kolaborasi Aktif
-                  </span>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Kolaboratif</span>
                 </div>
                 <div className="h-60">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={bt.aktivitas_walipas_mitra}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                      <XAxis dataKey="periode" tick={{ fontSize: 10, fontWeight: 600 }} />
+                      <XAxis dataKey="periode" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip />
                       <Legend wrapperStyle={{ fontSize: 11 }} />
-                      <Line type="monotone" dataKey="walipas" name="Aktivitas Wali PAS" stroke="#059669" strokeWidth={2.5} dot={{ r: 3 }} />
-                      <Line type="monotone" dataKey="mitra" name="Aktivitas Mitra" stroke="#9333ea" strokeWidth={2.5} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="walipas" name="Wali PAS" stroke="#059669" strokeWidth={2.5} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="mitra" name="Mitra Kemenag/Pesantren" stroke="#8b5cf6" strokeWidth={2.5} dot={{ r: 3 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -882,53 +873,43 @@ export function DashboardUmumPage() {
 
             {/* Row 3: Tabel Ranking Predikat & Tabel Tren */}
             <div className="grid gap-4 lg:grid-cols-12">
-              {/* 5. Tabel Ranking Predikat (Descending) */}
-              <div className="rounded-3xl border border-slate-200/90 bg-white shadow-xs overflow-hidden lg:col-span-6 flex flex-col justify-between">
+              {/* Tabel Ranking Predikat */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs lg:col-span-6 flex flex-col justify-between">
                 <div>
-                  <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
                     <div>
-                      <h3 className="text-sm font-bold text-slate-900">Tabel Ranking Predikat WBP</h3>
-                      <p className="text-[11px] text-slate-400">Urutan skor tertinggi ke terendah (Descending)</p>
+                      <h3 className="text-sm font-bold text-slate-900">Ranking Predikat Teratas</h3>
+                      <p className="text-[11px] text-slate-400">Urutan WBP berdasarkan capaian SPPN &amp; PPKS</p>
                     </div>
-                    <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full">
-                      Top Performers
-                    </span>
+                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Tertinggi</span>
                   </div>
-
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
-                        <tr>
-                          <th className="px-3.5 py-2.5">Warga Binaan</th>
-                          <th className="px-3.5 py-2.5 text-center">SPPN</th>
-                          <th className="px-3.5 py-2.5 text-center">PPKS</th>
-                          <th className="px-3.5 py-2.5 text-center">Predikat Kelayakan</th>
+                      <thead>
+                        <tr className="border-b border-slate-200 text-slate-500 font-bold bg-slate-50">
+                          <th className="py-2 px-3">Nama Warga Binaan</th>
+                          <th className="py-2 px-2 text-center">SPPN</th>
+                          <th className="py-2 px-2 text-center">PPKS</th>
+                          <th className="py-2 px-3 text-right">Predikat</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {bt.tabel_ranking_predikat.slice(0, 7).map((w, idx) => (
-                          <tr key={w.id} className="hover:bg-slate-50/70">
-                            <td className="px-3.5 py-2.5">
-                              <p className="font-bold text-slate-900">{w.nama}</p>
-                              <span className="text-[10px] text-slate-400">Peringkat #{idx + 1}</span>
-                            </td>
-                            <td className="px-3.5 py-2.5 text-center font-black text-emerald-800">
-                              {w.sppn}
-                            </td>
-                            <td className="px-3.5 py-2.5 text-center font-black text-amber-800">
-                              {Number(w.ppks).toFixed(2)}
-                            </td>
-                            <td className="px-3.5 py-2.5 text-center">
+                        {bt.tabel_ranking_predikat.map((w, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/60 transition-colors">
+                            <td className="py-2 px-3 font-semibold text-slate-800">{w.nama}</td>
+                            <td className="py-2 px-2 text-center font-bold text-emerald-700">{w.sppn}</td>
+                            <td className="py-2 px-2 text-center font-bold text-amber-700">{w.ppks}</td>
+                            <td className="py-2 px-3 text-right">
                               <span
-                                className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                className={`rounded px-2 py-0.5 text-[10px] font-bold ${
                                   w.kualifikasi === 2
-                                    ? 'bg-emerald-100 text-emerald-800'
+                                    ? 'bg-emerald-50 text-emerald-700'
                                     : w.kualifikasi === 1
-                                    ? 'bg-amber-100 text-amber-800'
-                                    : 'bg-rose-100 text-rose-800'
+                                    ? 'bg-amber-50 text-amber-700'
+                                    : 'bg-rose-50 text-rose-700'
                                 }`}
                               >
-                                {w.kualifikasi === 2 ? 'Direkomendasikan' : w.kualifikasi === 1 ? 'Pertimbangan' : 'Tidak Memenuhi'}
+                                {w.predikat}
                               </span>
                             </td>
                           </tr>
@@ -937,65 +918,48 @@ export function DashboardUmumPage() {
                     </table>
                   </div>
                 </div>
-
-                <div className="p-3 bg-slate-50 border-t border-slate-100 text-right">
-                  <Link to="/app/dasbor-wbp" className="text-xs font-bold text-emerald-700 hover:underline">
-                    Buka Dasbor WBP Lengkap →
-                  </Link>
-                </div>
               </div>
 
-              {/* 6. Tabel Tren (Ascending - Memprioritaskan yang mengalami penurunan) */}
-              <div className="rounded-3xl border border-slate-200/90 bg-white shadow-xs overflow-hidden lg:col-span-6 flex flex-col justify-between">
+              {/* Tabel Tren (Urutan Menurun / Perlu Pembinaan) */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs lg:col-span-6 flex flex-col justify-between">
                 <div>
-                  <div className="p-4 border-b border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-100">
                     <div>
-                      <h3 className="text-sm font-bold text-slate-900">Tabel Tren WBP (Deteksi Penurunan)</h3>
-                      <p className="text-[11px] text-slate-400">Urutan tren terkecil &gt; terbesar (Ascending untuk mitigasi cepat)</p>
+                      <h3 className="text-sm font-bold text-slate-900">Pergerakan Tren (Deteksi Dini)</h3>
+                      <p className="text-[11px] text-slate-400">Diurutkan dari tren menurun untuk mitigasi awal</p>
                     </div>
-                    <span className="text-xs font-bold text-rose-800 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
-                      Evaluasi Pembinaan
-                    </span>
+                    <span className="text-[10px] font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded">Prioritas Evaluasi</span>
                   </div>
-
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase">
-                        <tr>
-                          <th className="px-3.5 py-2.5">Warga Binaan</th>
-                          <th className="px-3.5 py-2.5 text-center">SPPN (Ini v Lalu)</th>
-                          <th className="px-3.5 py-2.5 text-center">Tren SPPN</th>
-                          <th className="px-3.5 py-2.5 text-center">Status Tren</th>
+                      <thead>
+                        <tr className="border-b border-slate-200 text-slate-500 font-bold bg-slate-50">
+                          <th className="py-2 px-3">Nama Warga Binaan</th>
+                          <th className="py-2 px-2 text-center">SPPN Kini (Lalu)</th>
+                          <th className="py-2 px-2 text-center">% Tren SPPN</th>
+                          <th className="py-2 px-3 text-right">Status Tren</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {bt.tabel_tren.slice(0, 7).map((w) => (
-                          <tr key={w.id} className="hover:bg-slate-50/70">
-                            <td className="px-3.5 py-2.5">
-                              <p className="font-bold text-slate-900">{w.nama}</p>
-                              <span className="text-[10px] text-slate-400">PPKS: {w.ppks_ini} (Tren {w.ppks_trend_pct}%)</span>
+                        {bt.tabel_tren.map((w, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/60 transition-colors">
+                            <td className="py-2 px-3 font-semibold text-slate-800">{w.nama}</td>
+                            <td className="py-2 px-2 text-center font-mono text-slate-600">
+                              {w.sppn_ini} ({w.sppn_lalu})
                             </td>
-                            <td className="px-3.5 py-2.5 text-center font-semibold text-slate-700">
-                              {w.sppn_ini} <span className="text-slate-400">vs</span> {w.sppn_lalu}
-                            </td>
-                            <td className="px-3.5 py-2.5 text-center">
-                              <span
-                                className={`inline-flex items-center gap-0.5 font-bold ${
-                                  w.sppn_trend_pct < 0 ? 'text-rose-600' : w.sppn_trend_pct > 0 ? 'text-emerald-600' : 'text-slate-600'
-                                }`}
-                              >
-                                {w.sppn_trend_pct < 0 ? <ArrowDownRight className="h-3 w-3" /> : <ArrowUpRight className="h-3 w-3" />}
-                                {w.sppn_trend_pct}%
+                            <td className="py-2 px-2 text-center font-mono font-bold">
+                              <span className={w.sppn_trend_pct < 0 ? 'text-rose-600' : 'text-emerald-600'}>
+                                {w.sppn_trend_pct > 0 ? `+${w.sppn_trend_pct}%` : `${w.sppn_trend_pct}%`}
                               </span>
                             </td>
-                            <td className="px-3.5 py-2.5 text-center">
+                            <td className="py-2 px-3 text-right">
                               <span
-                                className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                className={`rounded px-2 py-0.5 text-[10px] font-bold ${
                                   w.status_tren === 'Menurun'
-                                    ? 'bg-rose-100 text-rose-800'
-                                    : w.status_tren === 'Meningkat'
-                                    ? 'bg-emerald-100 text-emerald-800'
-                                    : 'bg-slate-100 text-slate-700'
+                                    ? 'bg-rose-50 text-rose-700'
+                                    : w.status_tren === 'Stabil'
+                                    ? 'bg-slate-100 text-slate-700'
+                                    : 'bg-emerald-50 text-emerald-700'
                                 }`}
                               >
                                 {w.status_tren}
@@ -1006,12 +970,6 @@ export function DashboardUmumPage() {
                       </tbody>
                     </table>
                   </div>
-                </div>
-
-                <div className="p-3 bg-slate-50 border-t border-slate-100 text-right">
-                  <span className="text-[11px] text-slate-500 font-medium">
-                    *Gunakan data tren menurun untuk penjadwalan bimbingan konseling rohani intensif.
-                  </span>
                 </div>
               </div>
             </div>
