@@ -633,12 +633,61 @@ export async function exportBukuPanduanPdf() {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(4, 120, 87);
-  doc.text('3. Alur Penggunaan Berdasarkan Peran (Role)', 14, y);
+  doc.text('3. Tata Cara Penginputan Data (SPPN, PPKS & Alasan Ketidakhadiran)', 14, y);
+
+  autoTable(doc, {
+    startY: y + 3,
+    theme: 'grid',
+    styles: { fontSize: 8, cellPadding: 2.2 },
+    headStyles: { fillColor: [4, 120, 87], textColor: 255 },
+    head: [['Tahap / Komponen', 'Ketentuan & Alur Operasional']],
+    body: [
+      ['Penginputan SPPN (Utama)', 'Asesor memilih status kehadiran WBP (Ya / Tidak). Hadir (Ya) = bobot kehadiran 100%, Tidak = 0%. Menjadi syarat mutlak ambang batas kelulusan minimal 70.'],
+      ['Alasan Ketidakhadiran (Wajib)', 'Jika WBP Tidak Hadir atau kegiatan batal, WAJIB memilih 1 dari 5 alasan baku: Sakit (SKD), Sidang / Kejaksaan, Kunjungan Keluarga, Piket Kebersihan / Dapur, atau Dispensasi Petugas. Data ini otomatis mengalir ke Grafik Pareto 80/20 di Dashboard Umum.'],
+      ['Penginputan PPKS (5 Sub-Indikator)', 'Asesor memberi skor 1-5 pada 5 aspek: (1) Kesadaran Ibadah, (2) Pemahaman Nilai, (3) Kedisiplinan Waktu, (4) Perilaku & Akhlak, (5) Hubungan Sosial & Toleransi. Rata-rata membentuk Skor PPKS (Skala 1.00 - 5.00).'],
+      ['Verifikasi Kasubsi Reg & Bimkemas', 'Setiap penilaian yang masuk dapat ditinjau Kasubsi. Kasubsi memberikan status "Terverifikasi" atau "Perlu Revisi" bersama catatan pembinaan sebelum disahkan.'],
+    ],
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 48 } },
+  });
+
+  // Halaman 2 untuk Panduan Dashboard, Peran & Face ID
+  doc.addPage();
+  y = await drawOfficialHeader(
+    doc,
+    'Buku Panduan Penggunaan Aplikasi SI PASTI (Lanjutan)',
+    'Petunjuk Pembacaan Dashboard Analitik, Peran Pengguna & Biometrik Face ID'
+  );
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(4, 120, 87);
+  doc.text('4. Panduan Pembacaan Dashboard Analitik & Grafik Pareto', 14, y);
+
+  autoTable(doc, {
+    startY: y + 3,
+    theme: 'grid',
+    styles: { fontSize: 8, cellPadding: 2.2 },
+    headStyles: { fillColor: [15, 23, 42], textColor: 255 },
+    head: [['Komponen Dashboard', 'Cara Membaca & Interpretasi Data']],
+    body: [
+      ['8 Scorecard KPI Eksekutif', 'Memantau instan: Total WBP Terbina, Tingkat Kehadiran %, Rata-rata Skor SPPN, Rata-rata Skor PPKS, Kualifikasi 2 (Hijau), Kualifikasi 1 (Kuning), Kualifikasi 0 (Merah), dan Tingkat Partisipasi Mitra.'],
+      ['Scatter Plot Kuadran (Cartesius)', 'Memetakan posisi WBP berdasarkan Garis X=70 (Ambang Lulus SPPN) dan Garis Y=4.00 (Standar Mutu PPKS). Kuadran Kanan-Atas = Prioritas Hak Integrasi (PB/CB/CMB); Kiri-Bawah = Wajib Intervensi Khusus.'],
+      ['Grafik Pareto 80/20 Hambatan', 'Diagram batang frekuensi ketidakhadiran WBP disusun dari terbesar ke terkecil dilengkapi garis kumulatif 80%. Digunakan Pimpinan untuk mengidentifikasi 20% penyebab utama yang memicu 80% ketidakhadiran (misal jadwal bentrok sidang/sakit).'],
+      ['Dashboard WBP & Dashboard Program', 'Dashboard WBP menampilkan tren historis personal & pas foto biometrik. Dashboard Program mengevaluasi serapan materi tiap kegiatan spiritual (Tadarus, Fiqih, Kebaktian, Rohani).'],
+    ],
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 48 } },
+  });
+
+  y = doc.lastAutoTable.finalY + 6;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(4, 120, 87);
+  doc.text('5. Alur Penggunaan Berdasarkan Peran (Role)', 14, y);
 
   autoTable(doc, {
     startY: y + 3,
     theme: 'striped',
-    styles: { fontSize: 8, cellPadding: 2.4 },
+    styles: { fontSize: 8, cellPadding: 2.2 },
     headStyles: { fillColor: [4, 120, 87], textColor: 255 },
     head: [['Peran / Aktor', 'Hak Akses & Tugas Utama di Aplikasi SIPASTI']],
     body: [
@@ -646,29 +695,29 @@ export async function exportBukuPanduanPdf() {
       ['Wali PAS', 'Mendaftarkan Face ID WBP binaannya, mencatat Absensi Face ID, menginput Nilai SPPN (Utama) & Nilai PPKS (Pendukung) secara terpisah, serta memantau profil WBP.'],
       ['Mitra Keagamaan', 'Mendaftar via halaman Registrasi Mitra, lalu setelah disetujui Admin dapat menginput Nilai SPPN & PPKS kegiatan pembinaan spiritual.'],
       ['Kasubsi Reg & Bimkemas', 'Memonitor & memverifikasi respon data penilaian SPPN/PPKS (Terverifikasi / Perlu Revisi) serta mengunduh rekap periodik (Harian, Mingguan, Bulanan, Triwulan).'],
-      ['Kasi Binadik & Ka. Lapas', 'Memantau Dasbor Umum, Dasbor & Profil WBP, Dasbor Program, Dasbor Asesor, Rekap Periodik, serta mengunduh Rapor Profil WBP PDF lengkap dengan Pas Foto.'],
+      ['Kasi Binadik & Ka. Lapas', 'Memantau Dashboard Umum, Dashboard & Profil WBP, Dashboard Program, Dashboard Asesor, Rekap Periodik, serta mengunduh Rapor Profil WBP PDF lengkap dengan Pas Foto.'],
     ],
-    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 42 } },
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 48 } },
   });
 
-  y = doc.lastAutoTable.finalY + 7;
+  y = doc.lastAutoTable.finalY + 6;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(4, 120, 87);
-  doc.text('4. Panduan Absensi Face ID & Rekap Periodik', 14, y);
+  doc.text('6. Panduan Absensi Face ID & Rekap Periodik', 14, y);
 
   autoTable(doc, {
     startY: y + 3,
     theme: 'grid',
-    styles: { fontSize: 8, cellPadding: 2.4 },
+    styles: { fontSize: 8, cellPadding: 2.2 },
     headStyles: { fillColor: [30, 41, 59], textColor: 255 },
     head: [['Fitur', 'Langkah Operasional']],
     body: [
       ['Enroll Face ID WBP', 'Buka menu Data WBP (SDP) -> klik ikon Face ID pada baris WBP -> posisikan wajah di bingkai oval -> klik "Pindai & Simpan Wajah". Foto otomatis menjadi Pas Foto Profil WBP di Rapor PDF.'],
       ['Absensi Selfie Face ID', 'Buka Kiosk Absensi (/absensi-kiosk) atau menu Absensi Face ID -> pilih WBP & Program -> scan wajah di kamera -> sistem mencocokkan biometrik & menyimpan foto selfie.'],
-      ['Rekap Periodik & PDF', 'Buka menu Rekap Periodik -> pilih tab Harian, Mingguan, Bulanan, atau Per 3 Bulan (Triwulan) -> gunakan filter rentang tanggal -> klik Export PDF untuk cetak resmi berkop Kementerian & SIPASTI.'],
+      ['Rekap Periodik & PDF', 'Buka menu Rekap Periodik -> klik angka WBP (misal: "9 WBP") untuk melihat rincian nama, kamar, skor SPPN/PPKS & status kualifikasi -> klik Export PDF untuk cetak resmi berkop Kementerian & SIPASTI.'],
     ],
-    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 42 } },
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 48 } },
   });
 
   drawSignatureFooter(doc, doc.lastAutoTable.finalY);

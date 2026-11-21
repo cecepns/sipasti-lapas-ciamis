@@ -9,6 +9,7 @@ import { LoginPage } from '@/pages/LoginPage';
 import { PublicAbsensiPage } from '@/pages/PublicAbsensiPage';
 import { PublicMitraRegisterPage } from '@/pages/PublicMitraRegisterPage';
 
+import { DashboardPage } from '@/pages/DashboardPage';
 import { DashboardUmumPage } from '@/pages/DashboardUmumPage';
 import { DashboardWbpPage } from '@/pages/DashboardWbpPage';
 import { DashboardProgramPage } from '@/pages/DashboardProgramPage';
@@ -63,11 +64,12 @@ export default function App() {
               </ProtectedRoute>
             }
           >
-            <Route index element={<Navigate to="dasbor-umum" replace />} />
-            <Route path="dasbor-umum" element={<DashboardUmumPage />} />
-            <Route path="dasbor-wbp" element={<DashboardWbpPage />} />
-            <Route path="dasbor-program" element={<DashboardProgramPage />} />
-            <Route path="dasbor-asesor" element={<DashboardAsesorPage />} />
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="dasbor-umum" element={<Navigate to="/app/dashboard?tab=umum" replace />} />
+            <Route path="dasbor-wbp" element={<Navigate to="/app/dashboard?tab=wbp" replace />} />
+            <Route path="dasbor-program" element={<Navigate to="/app/dashboard?tab=program" replace />} />
+            <Route path="dasbor-asesor" element={<Navigate to="/app/dashboard?tab=asesor" replace />} />
             <Route path="penilaian" element={<AssessmentsPage />} />
             <Route path="rekap-penilaian" element={<RekapPeriodikPage />} />
             <Route path="absensi" element={<AttendancesPage />} />

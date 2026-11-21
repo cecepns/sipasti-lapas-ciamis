@@ -25,12 +25,15 @@ import toast from 'react-hot-toast';
 
 const NAV_GROUPS = [
   {
-    title: 'Dasbor',
+    title: 'Dashboard',
     items: [
-      { to: '/app/dasbor-umum', label: 'Dasbor Umum', icon: LayoutDashboard, badge: 'bg-emerald-500/25 text-emerald-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
-      { to: '/app/dasbor-wbp', label: 'Dasbor WBP', icon: Award, badge: 'bg-amber-500/25 text-amber-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
-      { to: '/app/dasbor-program', label: 'Dasbor Program', icon: BookOpenCheck, badge: 'bg-sky-500/25 text-sky-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
-      { to: '/app/dasbor-asesor', label: 'Dasbor Asesor', icon: UserCheck, badge: 'bg-violet-500/25 text-violet-300', roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'] },
+      {
+        to: '/app/dashboard',
+        label: 'Dashboard',
+        icon: LayoutDashboard,
+        badge: 'bg-emerald-500/25 text-emerald-300',
+        roles: ['admin', 'wali_pas', 'mitra', 'kasubsi', 'kasi_binadik', 'kalapas'],
+      },
     ],
   },
   {
@@ -130,7 +133,7 @@ export function AdminLayout() {
         }`}
       >
         <div className="flex items-center justify-between gap-2 border-b border-white/10 px-3.5 py-4">
-          <Link to="/app/dasbor-umum" className="flex items-center gap-2.5 min-w-0">
+          <Link to="/app/dashboard" className="flex items-center gap-2.5 min-w-0">
             <img
               src="/logo-sipasti.png"
               alt="Logo SIPASTI"
@@ -266,16 +269,16 @@ export function AdminLayout() {
                 <Menu className="h-5 w-5" />
               </button>
               <img
-                src="/logo-kemenas.png"
-                alt="Logo Kementerian Imigrasi & Pemasyarakatan"
-                className="hidden sm:block h-8 w-8 rounded-lg object-contain bg-white border border-slate-100 p-0.5 shrink-0"
+                src="/logo-sipasti.png"
+                alt="Logo SIPASTI"
+                className="h-8 w-8 rounded-lg object-contain bg-white border border-slate-100 p-0.5 shrink-0"
               />
               <div className="min-w-0">
                 <p className="text-xs font-extrabold text-emerald-800 uppercase tracking-wider truncate">
                   Sistem Informasi Penilaian Aktivitas Spiritual Terintegrasi
                 </p>
-                <p className="text-[11px] font-medium text-slate-500 hidden sm:block">
-                  Kementerian Imigrasi & Pemasyarakatan RI — Lapas Kelas IIB Ciamis
+                <p className="text-[11px] font-medium text-slate-500 truncate">
+                  Lembaga Pemasyarakatan Kelas IIB Ciamis
                 </p>
               </div>
             </div>

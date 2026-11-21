@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight,
@@ -6,6 +6,7 @@ import {
   BookOpenCheck,
   Calendar,
   CheckCircle2,
+  ChevronDown,
   ChevronRight,
   ClipboardCheck,
   FileText,
@@ -32,6 +33,18 @@ export function LandingPage() {
   const [selectedCompTw, setSelectedCompTw] = useState('tw3');
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -67,16 +80,11 @@ export function LandingPage() {
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col w-full max-w-full overflow-x-hidden">
       {/* Top Navbar */}
       <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-xs w-full">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8 w-full">
-          {/* 1. Left: Brand Identity (Balanced with Right Block) */}
-          <div className="flex items-center justify-start shrink-0 min-w-0 xl:w-[280px]">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8 w-full">
+          {/* 1. Left: Brand Identity */}
+          <div className="flex items-center justify-start shrink-0 min-w-0">
             <Link to="/" className="flex items-center gap-2.5 sm:gap-3">
-              <div className="flex items-center gap-1.5 shrink-0">
-                <img
-                  src="/logo-kemenas.png"
-                  alt="Logo Kementerian Imigrasi & Pemasyarakatan"
-                  className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-lg sm:rounded-xl object-contain bg-white border border-slate-200/80 p-0.5 shadow-xs"
-                />
+              <div className="flex items-center shrink-0">
                 <img
                   src="/logo-sipasti.png"
                   alt="Logo SIPASTI"
@@ -95,15 +103,15 @@ export function LandingPage() {
           </div>
 
           {/* 2. Center: Desktop Navigation Links (Centered, Balanced & Proportional) */}
-          <nav className="hidden lg:flex items-center justify-center gap-5 xl:gap-8 text-xs xl:text-sm font-bold text-slate-600 flex-1 px-2">
+          <nav className="hidden lg:flex items-center justify-center gap-5 xl:gap-8 text-xs xl:text-sm font-bold text-slate-600 flex-1 px-4">
             <a href="#instrumen" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
               Instrumen SPPN &amp; PPKS
             </a>
             <a href="#ringkasan" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
-              <span className="hidden xl:inline">Ringkasan </span>Triwulan
+              Ringkasan Triwulan
             </a>
             <a href="#program" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
-              <span className="hidden xl:inline">Program </span>Pembinaan
+              Program Pembinaan
             </a>
             <Link to="/panduan" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
               Buku Panduan
@@ -113,22 +121,63 @@ export function LandingPage() {
             </Link>
           </nav>
 
-          {/* 3. Right: Action Buttons & Mobile Toggle (Balanced with Left Block) */}
-          <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0 xl:w-[280px]">
-            <Link
-              to="/absensi-kiosk"
-              className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50/80 px-3.5 py-2 text-xs sm:text-sm font-bold text-emerald-800 hover:bg-emerald-100 transition-colors whitespace-nowrap shadow-xs"
-            >
-              <ScanFace className="h-4 w-4 text-emerald-700 shrink-0" />
-              <span>Absensi Face ID</span>
-            </Link>
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-emerald-700 px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-800 transition-colors whitespace-nowrap shrink-0"
-            >
-              <LogIn className="h-4 w-4 shrink-0" />
-              <span>Masuk Portal</span>
-            </Link>
+          {/* 3. Right: Single Unified Button with Dropdown + Mobile Toggle */}
+          <div className="flex items-center justify-end gap-2 shrink-0 relative" ref={dropdownRef}>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-emerald-700 px-3.5 py-2 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-800 transition-all whitespace-nowrap shrink-0"
+                aria-expanded={dropdownOpen}
+                aria-haspopup="true"
+              >
+                <LogIn className="h-4 w-4 shrink-0" />
+                <span>Masuk Portal</span>
+                <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-64 rounded-2xl bg-white border border-slate-200 shadow-xl p-2 z-50">
+                  <div className="px-3 py-2 border-b border-slate-100">
+                    <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Pilih Layanan</p>
+                  </div>
+                  <div className="space-y-1 pt-1.5">
+                    <Link
+                      to="/login"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 transition-colors group"
+                    >
+                      <div className="h-8 w-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-700 group-hover:text-white transition-colors">
+                        <LogIn className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold leading-tight text-slate-900 group-hover:text-emerald-800">
+                          Portal Petugas & Asesor
+                        </p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">Admin, Wali PAS, Kasubsi, Kalapas</p>
+                      </div>
+                    </Link>
+
+                    <Link
+                      to="/absensi-kiosk"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 transition-colors group"
+                    >
+                      <div className="h-8 w-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                        <ScanFace className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold leading-tight text-slate-900 group-hover:text-emerald-800">
+                          Absensi Face ID (Kiosk)
+                        </p>
+                        <p className="text-[10px] text-slate-500 mt-0.5">Pencatatan biometrik mandiri WBP</p>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Mobile Hamburger Button */}
             <button
@@ -212,7 +261,7 @@ export function LandingPage() {
             <div className="lg:col-span-7 space-y-6">
               <div className="inline-flex items-center gap-2 rounded-2xl border border-emerald-400/30 bg-emerald-500/15 px-3.5 py-1.5 text-xs font-semibold text-emerald-200 max-w-full">
                 <Sparkles className="h-3.5 w-3.5 text-amber-300 shrink-0" />
-                <span className="truncate sm:whitespace-normal">Kementerian Imigrasi & Pemasyarakatan RI — Lapas Kelas IIB Ciamis</span>
+                <span className="truncate sm:whitespace-normal">Lembaga Pemasyarakatan Kelas IIB Ciamis</span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
@@ -240,7 +289,7 @@ export function LandingPage() {
                   className="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-3 text-sm font-bold text-white backdrop-blur-sm hover:bg-white/20 transition-all"
                 >
                   <ShieldCheck className="h-5 w-5" />
-                  Dasbor Petugas & Pimpinan
+                  Dashboard Petugas & Pimpinan
                 </Link>
                 <Link
                   to="/registrasi-mitra"

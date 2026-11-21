@@ -44,7 +44,7 @@ import {
 } from '@/utils/formatters';
 import { exportProgramSummaryPdf } from '@/utils/pdfGenerator';
 
-export function DashboardProgramPage() {
+export function DashboardProgramPage({ isEmbedded = false }) {
   const { user } = useAuth();
 
   // Filter Bar Global State
@@ -95,7 +95,7 @@ export function DashboardProgramPage() {
       });
       setData(res);
     } catch (err) {
-      setError(extractErrorMessage(err, 'Gagal memuat Dasbor Program'));
+      setError(extractErrorMessage(err, 'Gagal memuat Dashboard Program'));
     } finally {
       setLoading(false);
     }
@@ -187,16 +187,11 @@ export function DashboardProgramPage() {
       <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 shrink-0">
-              <img
-                src="/logo-kemenas.png"
-                alt="Logo Kemenkumham"
-                className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
-              />
+            <div className="flex items-center shrink-0">
               <img
                 src="/logo-sipasti.png"
                 alt="Logo SIPASTI"
-                className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
+                className="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-xl bg-white border border-slate-100 p-1 shadow-xs"
               />
             </div>
             <div>
@@ -210,7 +205,7 @@ export function DashboardProgramPage() {
                 <span>{formatDate(new Date(), 'EEEE, dd MMMM yyyy')}</span>
               </div>
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                Dasbor Capaian Program Pembinaan
+                Dashboard Capaian Program Pembinaan
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
                 Capaian target, distribusi bobot pembinaan, dan ritme eksekusi program spiritual.
@@ -247,30 +242,39 @@ export function DashboardProgramPage() {
           </div>
         </div>
 
-        {/* Segmented Switcher Tabs between Dashboards */}
-        <div className="mt-5 pt-4 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto">
-          <Link
-            to="/app/dasbor-umum"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
-          >
-            <Layers className="h-4 w-4 text-slate-400" />
-            <span>Dasbor Umum</span>
-          </Link>
-          <Link
-            to="/app/dasbor-wbp"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
-          >
-            <Award className="h-4 w-4 text-slate-400" />
-            <span>Dasbor WBP</span>
-          </Link>
-          <Link
-            to="/app/dasbor-program"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-700 text-white shadow-xs whitespace-nowrap"
-          >
-            <BookOpen className="h-4 w-4 text-white" />
-            <span>Dasbor Program</span>
-          </Link>
-        </div>
+        {/* Segmented Switcher Tabs between Dashboards (only if not embedded) */}
+        {!isEmbedded && (
+          <div className="mt-5 pt-4 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto">
+            <Link
+              to="/app/dashboard?tab=umum"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
+            >
+              <Layers className="h-4 w-4 text-slate-400" />
+              <span>Dashboard Umum</span>
+            </Link>
+            <Link
+              to="/app/dashboard?tab=wbp"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
+            >
+              <Award className="h-4 w-4 text-slate-400" />
+              <span>Dashboard WBP</span>
+            </Link>
+            <Link
+              to="/app/dashboard?tab=program"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-700 text-white shadow-xs whitespace-nowrap"
+            >
+              <BookOpen className="h-4 w-4 text-white" />
+              <span>Dashboard Program</span>
+            </Link>
+            <Link
+              to="/app/dashboard?tab=asesor"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
+            >
+              <Users className="h-4 w-4 text-slate-400" />
+              <span>Dashboard Asesor</span>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* ========================================================================= */}
@@ -377,7 +381,7 @@ export function DashboardProgramPage() {
       </div>
 
       {loading ? (
-        <LoadingSpinner label="Memuat Dasbor Program..." />
+        <LoadingSpinner label="Memuat Dashboard Program..." />
       ) : error ? (
         <ErrorState message={error} onRetry={fetchData} />
       ) : (

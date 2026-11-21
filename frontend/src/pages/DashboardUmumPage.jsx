@@ -65,7 +65,7 @@ import {
 } from '@/utils/formatters';
 import { exportAssessmentsPdf } from '@/utils/pdfGenerator';
 
-export function DashboardUmumPage() {
+export function DashboardUmumPage({ isEmbedded = false }) {
   const { user } = useAuth();
 
   // Filter Bar Global State
@@ -120,7 +120,7 @@ export function DashboardUmumPage() {
       });
       setData(res.data);
     } catch (err) {
-      setError(extractErrorMessage(err, 'Gagal memuat Dasbor Umum'));
+      setError(extractErrorMessage(err, 'Gagal memuat Dashboard Umum'));
     } finally {
       setLoading(false);
     }
@@ -141,9 +141,9 @@ export function DashboardUmumPage() {
         triwulan: selectedTw.label,
         bulan: selectedBulan,
       });
-      toast.success('Laporan Dasbor Eksekutif (PDF) berhasil diunduh');
+      toast.success('Laporan Dashboard Eksekutif (PDF) berhasil diunduh');
     } catch (err) {
-      toast.error(extractErrorMessage(err, 'Gagal mengunduh PDF Dasbor'));
+      toast.error(extractErrorMessage(err, 'Gagal mengunduh PDF Dashboard'));
     } finally {
       setExporting(false);
     }
@@ -245,16 +245,11 @@ export function DashboardUmumPage() {
       <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 shrink-0">
-              <img
-                src="/logo-kemenas.png"
-                alt="Logo Kemenkumham"
-                className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
-              />
+            <div className="flex items-center shrink-0">
               <img
                 src="/logo-sipasti.png"
                 alt="Logo SIPASTI"
-                className="h-12 w-12 sm:h-14 sm:w-14 object-contain"
+                className="h-12 w-12 sm:h-14 sm:w-14 object-contain rounded-xl bg-white border border-slate-100 p-1 shadow-xs"
               />
             </div>
             <div>
@@ -268,7 +263,7 @@ export function DashboardUmumPage() {
                 <span>{formatDate(new Date(), 'EEEE, dd MMMM yyyy')}</span>
               </div>
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                Dasbor Umum Eksekutif
+                Dashboard Umum Eksekutif
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
                 Pemantauan komprehensif keterlaksanaan program pembinaan spiritual, SPPN, dan PPKS.
@@ -305,30 +300,39 @@ export function DashboardUmumPage() {
           </div>
         </div>
 
-        {/* Segmented Switcher Tabs between Dashboards */}
-        <div className="mt-5 pt-4 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto">
-          <Link
-            to="/app/dasbor-umum"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-700 text-white shadow-xs whitespace-nowrap"
-          >
-            <Layers className="h-4 w-4 text-white" />
-            <span>Dasbor Umum</span>
-          </Link>
-          <Link
-            to="/app/dasbor-wbp"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
-          >
-            <Award className="h-4 w-4 text-slate-400" />
-            <span>Dasbor WBP</span>
-          </Link>
-          <Link
-            to="/app/dasbor-program"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
-          >
-            <BookOpen className="h-4 w-4 text-slate-400" />
-            <span>Dasbor Program</span>
-          </Link>
-        </div>
+        {/* Segmented Switcher Tabs between Dashboards (only if not embedded) */}
+        {!isEmbedded && (
+          <div className="mt-5 pt-4 border-t border-slate-100 flex items-center gap-1.5 overflow-x-auto">
+            <Link
+              to="/app/dashboard?tab=umum"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-emerald-700 text-white shadow-xs whitespace-nowrap"
+            >
+              <Layers className="h-4 w-4 text-white" />
+              <span>Dashboard Umum</span>
+            </Link>
+            <Link
+              to="/app/dashboard?tab=wbp"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
+            >
+              <Award className="h-4 w-4 text-slate-400" />
+              <span>Dashboard WBP</span>
+            </Link>
+            <Link
+              to="/app/dashboard?tab=program"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
+            >
+              <BookOpen className="h-4 w-4 text-slate-400" />
+              <span>Dashboard Program</span>
+            </Link>
+            <Link
+              to="/app/dashboard?tab=asesor"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all whitespace-nowrap"
+            >
+              <Users className="h-4 w-4 text-slate-400" />
+              <span>Dashboard Asesor</span>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* ========================================================================= */}
@@ -458,7 +462,7 @@ export function DashboardUmumPage() {
       </div>
 
       {loading ? (
-        <LoadingSpinner label="Memuat data dasbor..." />
+        <LoadingSpinner label="Memuat data dashboard..." />
       ) : error ? (
         <ErrorState message={error} onRetry={fetchData} />
       ) : (

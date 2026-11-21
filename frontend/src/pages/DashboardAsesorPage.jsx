@@ -16,7 +16,7 @@ const ROLE_OPTIONS = [
   { value: 'mitra', label: 'Mitra Pembina Spiritual' },
 ];
 
-export function DashboardAsesorPage() {
+export function DashboardAsesorPage({ isEmbedded = false }) {
   const [dateRange, setDateRange] = useState({ startDate: null, endDate: null });
   const [search, setSearch] = useState('');
   const [roleOption, setRoleOption] = useState(null);
@@ -36,7 +36,7 @@ export function DashboardAsesorPage() {
       });
       setRows(res.data || []);
     } catch (err) {
-      setError(extractErrorMessage(err, 'Gagal memuat Dasbor Asesor'));
+      setError(extractErrorMessage(err, 'Gagal memuat Dashboard Asesor'));
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ export function DashboardAsesorPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-            Dasbor Kinerja Asesor & Wali PAS
+            Dashboard Kinerja Asesor & Wali PAS
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
             Monitoring produktivitas pembina, jumlah warga binaan yang dibina, serta capaian SPPN & PPKS

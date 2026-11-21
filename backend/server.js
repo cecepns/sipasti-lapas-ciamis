@@ -2823,8 +2823,11 @@ app.get('/api/reports/rekap-periodik', authenticate, async (req, res, next) => {
 
     // Compute per-period recommendation counts by evaluating each WBP within each period bucket
     const [rawLogs] = await pool.query(
-      `SELECT ${grouping.keyExpr} AS period_key, a.wbp_id, a.jenis_penilaian, a.pelaksanaan, a.nilai_karakter, a.skor_akhir
+      `SELECT ${grouping.keyExpr} AS period_key, a.wbp_id, a.jenis_penilaian, a.pelaksanaan, a.nilai_karakter, a.skor_akhir,
+              w.nama AS wbp_nama, w.no_registrasi, w.kamar AS wbp_kamar, u.nama AS walipas_nama
        FROM assessments a
+       JOIN wbp w ON a.wbp_id = w.id
+       LEFT JOIN users u ON w.wali_pas_id = u.id
        ${whereSql}`,
       params
     );
@@ -2842,13 +2845,39 @@ app.get('/api/reports/rekap-periodik', authenticate, async (req, res, next) => {
       let direkomendasikan = 0;
       let denganCatatan = 0;
       let tidakDirekomendasikan = 0;
+      const wbpList = [];
 
-      wMap.forEach((logs) => {
+      wMap.forEach((logs, wbpId) => {
         const ev = evaluateSppnPpks(logs);
         if (ev.rekomendasi.code === 'direkomendasikan') direkomendasikan += 1;
         else if (ev.rekomendasi.code === 'direkomendasikan_dengan_catatan') denganCatatan += 1;
         else tidakDirekomendasikan += 1;
+
+        const yaCount = logs.filter((l) => l.pelaksanaan === 'Ya').length;
+        const totalLogs = logs.length;
+        const pelaksanaanPct = totalLogs > 0 ? Number(((yaCount / totalLogs) * 100).toFixed(1)) : 0;
+
+        wbpList.push({
+          id: wbpId,
+          wbp_id: wbpId,
+          nama: logs[0]?.wbp_nama || 'Warga Binaan',
+          no_registrasi: logs[0]?.no_registrasi || '-',
+          kamar: logs[0]?.wbp_kamar || '-',
+          wali_pas: logs[0]?.walipas_nama || '-',
+          total_sesi: totalLogs,
+          pelaksanaan_ya: yaCount,
+          pelaksanaan_pct: pelaksanaanPct,
+          sppn: ev.sppn.avgSkor || 0,
+          sppn_lulus: ev.sppn.memenuhi,
+          ppks: ev.ppks.nilaiPpks || 0,
+          kualifikasi: ev.rekomendasi.kualifikasiAkhir,
+          rekomendasi: ev.rekomendasi.label,
+          rekomendasi_code: ev.rekomendasi.code,
+        });
       });
+
+      // Sort WBP by Kualifikasi descending, then SPPN descending
+      wbpList.sort((x, y) => y.kualifikasi - x.kualifikasi || y.sppn - x.sppn || x.nama.localeCompare(y.nama));
 
       const totalPenilaian = Number(b.total_penilaian || 0);
       const totalYa = Number(b.sppn_ya || 0) + Number(b.ppks_ya || 0);
@@ -2877,6 +2906,7 @@ app.get('/api/reports/rekap-periodik', authenticate, async (req, res, next) => {
         direkomendasikan,
         dengan_catatan: denganCatatan,
         tidak_direkomendasikan: tidakDirekomendasikan,
+        wbp_list: wbpList,
       };
     });
 

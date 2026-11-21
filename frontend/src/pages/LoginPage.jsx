@@ -32,7 +32,7 @@ export function LoginPage() {
     try {
       const user = await login(email.trim(), password);
       toast.success(`Selamat datang, ${user.nama}`);
-      navigate('/app/dasbor-umum', { replace: true });
+      navigate('/app/dashboard', { replace: true });
     } catch (err) {
       toast.error(extractErrorMessage(err, 'Gagal masuk. Periksa email dan kata sandi Anda.'));
     } finally {
