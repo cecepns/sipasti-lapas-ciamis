@@ -122,7 +122,7 @@ export function AdminLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-emerald-50/40 to-sky-50/40 flex">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-emerald-50/40 to-sky-50/40 flex w-full max-w-full overflow-x-hidden">
       {/* Desktop Colorful Institutional Sidebar */}
       <aside
         className={`hidden lg:flex flex-col fixed inset-y-0 left-0 z-30 bg-gradient-to-b from-emerald-950 via-teal-950 to-slate-950 text-white shadow-2xl transition-all duration-300 ease-in-out ${

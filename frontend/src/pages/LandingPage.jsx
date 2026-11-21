@@ -64,44 +64,46 @@ export function LandingPage() {
   const compData = twList.find((t) => t.id === selectedCompTw) || twList[1];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col w-full max-w-full overflow-x-hidden">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-xs">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          {/* Logo & Identity */}
-          <Link to="/" className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            <div className="flex items-center gap-1.5 shrink-0">
-              <img
-                src="/logo-kemenas.png"
-                alt="Logo Kementerian Imigrasi & Pemasyarakatan"
-                className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain bg-white border border-slate-200/80 p-0.5 shadow-xs"
-              />
-              <img
-                src="/logo-sipasti.png"
-                alt="Logo SIPASTI"
-                className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain bg-white border border-emerald-200/80 p-0.5 shadow-xs"
-              />
-            </div>
-            <div className="shrink-0">
-              <span className="block text-base sm:text-lg font-black tracking-tight text-emerald-800 leading-none">
-                SIPASTI
-              </span>
-              <span className="block text-[10px] sm:text-[11px] font-bold text-slate-500 mt-0.5 whitespace-nowrap">
-                Lapas Kelas IIB Ciamis
-              </span>
-            </div>
-          </Link>
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-xs w-full">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8 w-full">
+          {/* 1. Left: Brand Identity (Balanced with Right Block) */}
+          <div className="flex items-center justify-start shrink-0 min-w-0 xl:w-[280px]">
+            <Link to="/" className="flex items-center gap-2.5 sm:gap-3">
+              <div className="flex items-center gap-1.5 shrink-0">
+                <img
+                  src="/logo-kemenas.png"
+                  alt="Logo Kementerian Imigrasi & Pemasyarakatan"
+                  className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-lg sm:rounded-xl object-contain bg-white border border-slate-200/80 p-0.5 shadow-xs"
+                />
+                <img
+                  src="/logo-sipasti.png"
+                  alt="Logo SIPASTI"
+                  className="h-8 w-8 sm:h-9 sm:w-9 lg:h-10 lg:w-10 rounded-lg sm:rounded-xl object-contain bg-white border border-emerald-200/80 p-0.5 shadow-xs"
+                />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-base sm:text-lg font-black tracking-tight text-emerald-800 leading-none">
+                  SIPASTI
+                </span>
+                <span className="block text-[9px] sm:text-[11px] font-bold text-slate-500 mt-0.5 truncate max-w-[120px] xs:max-w-none">
+                  Lapas Kelas IIB Ciamis
+                </span>
+              </div>
+            </Link>
+          </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-5 xl:gap-8 text-xs xl:text-sm font-bold text-slate-600">
+          {/* 2. Center: Desktop Navigation Links (Centered, Balanced & Proportional) */}
+          <nav className="hidden lg:flex items-center justify-center gap-5 xl:gap-8 text-xs xl:text-sm font-bold text-slate-600 flex-1 px-2">
             <a href="#instrumen" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
               Instrumen SPPN &amp; PPKS
             </a>
             <a href="#ringkasan" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
-              Ringkasan Triwulan
+              <span className="hidden xl:inline">Ringkasan </span>Triwulan
             </a>
             <a href="#program" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
-              Program Pembinaan
+              <span className="hidden xl:inline">Program </span>Pembinaan
             </a>
             <Link to="/panduan" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
               Buku Panduan
@@ -111,8 +113,8 @@ export function LandingPage() {
             </Link>
           </nav>
 
-          {/* Action Buttons & Mobile Toggle */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* 3. Right: Action Buttons & Mobile Toggle (Balanced with Left Block) */}
+          <div className="flex items-center justify-end gap-2 sm:gap-3 shrink-0 xl:w-[280px]">
             <Link
               to="/absensi-kiosk"
               className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50/80 px-3.5 py-2 text-xs sm:text-sm font-bold text-emerald-800 hover:bg-emerald-100 transition-colors whitespace-nowrap shadow-xs"
@@ -122,7 +124,7 @@ export function LandingPage() {
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-800 transition-colors whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1.5 sm:gap-2 rounded-xl bg-emerald-700 px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-800 transition-colors whitespace-nowrap shrink-0"
             >
               <LogIn className="h-4 w-4 shrink-0" />
               <span>Masuk Portal</span>
@@ -132,7 +134,7 @@ export function LandingPage() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
+              className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
               aria-label="Toggle Menu"
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -205,12 +207,12 @@ export function LandingPage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-800 to-slate-900 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.16),transparent_45%),radial-gradient(circle_at_bottom_left,rgba(16,185,129,0.22),transparent_45%)]" />
-        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:py-20">
+        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
           <div className="grid gap-10 lg:grid-cols-12 items-center">
             <div className="lg:col-span-7 space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/15 px-3.5 py-1.5 text-xs font-semibold text-emerald-200">
-                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                Kementerian Imigrasi & Pemasyarakatan RI — Lapas Kelas IIB Ciamis
+              <div className="inline-flex items-center gap-2 rounded-2xl border border-emerald-400/30 bg-emerald-500/15 px-3.5 py-1.5 text-xs font-semibold text-emerald-200 max-w-full">
+                <Sparkles className="h-3.5 w-3.5 text-amber-300 shrink-0" />
+                <span className="truncate sm:whitespace-normal">Kementerian Imigrasi & Pemasyarakatan RI — Lapas Kelas IIB Ciamis</span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
@@ -295,7 +297,7 @@ export function LandingPage() {
       </section>
 
       {/* [REV0001] Prominent Cards: Penjelasan Visual Instrumen SPPN & PPKS */}
-      <section id="instrumen" className="mx-auto max-w-7xl w-full px-4 -mt-8 relative z-10 sm:px-6">
+      <section id="instrumen" className="mx-auto max-w-7xl w-full px-4 -mt-8 relative z-10 sm:px-6 lg:px-8">
         <div className="grid gap-6 md:grid-cols-2">
           {/* Card SPPN */}
           <div className="rounded-3xl border border-emerald-200/90 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/50 p-6 sm:p-7 shadow-lg shadow-emerald-900/5 flex flex-col justify-between">
@@ -380,7 +382,7 @@ export function LandingPage() {
       </section>
 
       {/* [REV0002 & REV0003] Live Public Dashboard Preview: Triwulan IV (Berjalan) */}
-      <section id="ringkasan" className="mx-auto max-w-7xl w-full px-4 pt-12 pb-6 sm:px-6">
+      <section id="ringkasan" className="mx-auto max-w-7xl w-full px-4 pt-12 pb-6 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
           <div>
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1.5">
@@ -396,21 +398,23 @@ export function LandingPage() {
           </div>
 
           {/* Triwulan Active Selector */}
-          <div className="inline-flex rounded-xl bg-slate-200/80 p-1 text-xs font-bold">
-            {twList.map((tw) => (
-              <button
-                key={tw.id}
-                type="button"
-                onClick={() => setSelectedTw(tw.id)}
-                className={`rounded-lg px-3 py-1.5 transition-all ${
-                  selectedTw === tw.id
-                    ? 'bg-emerald-700 text-white shadow-xs'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {tw.label}
-              </button>
-            ))}
+          <div className="w-full sm:w-auto overflow-x-auto pb-1 max-w-full">
+            <div className="inline-flex rounded-xl bg-slate-200/80 p-1 text-xs font-bold whitespace-nowrap">
+              {twList.map((tw) => (
+                <button
+                  key={tw.id}
+                  type="button"
+                  onClick={() => setSelectedTw(tw.id)}
+                  className={`rounded-lg px-3 py-1.5 transition-all whitespace-nowrap ${
+                    selectedTw === tw.id
+                      ? 'bg-emerald-700 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  {tw.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -514,25 +518,27 @@ export function LandingPage() {
             </div>
 
             {/* Selector untuk Triwulan Sebelumnya */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-slate-600">Pilih Triwulan:</span>
-              <div className="inline-flex rounded-xl bg-slate-200/80 p-1 text-xs font-bold">
-                {twList
-                  .filter((t) => t.id !== 'tw4')
-                  .map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setSelectedCompTw(t.id)}
-                      className={`rounded-lg px-3 py-1 transition-all ${
-                        selectedCompTw === t.id
-                          ? 'bg-slate-800 text-white shadow-xs'
-                          : 'text-slate-600 hover:text-slate-900'
-                      }`}
-                    >
-                      {t.label}
-                    </button>
-                  ))}
+            <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 max-w-full">
+              <span className="text-xs font-bold text-slate-600 shrink-0">Pilih Triwulan:</span>
+              <div className="w-full xs:w-auto overflow-x-auto pb-1 max-w-full">
+                <div className="inline-flex rounded-xl bg-slate-200/80 p-1 text-xs font-bold whitespace-nowrap">
+                  {twList
+                    .filter((t) => t.id !== 'tw4')
+                    .map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setSelectedCompTw(t.id)}
+                        className={`rounded-lg px-3 py-1 transition-all whitespace-nowrap ${
+                          selectedCompTw === t.id
+                            ? 'bg-slate-800 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                </div>
               </div>
             </div>
           </div>
@@ -578,7 +584,7 @@ export function LandingPage() {
 
         {/* [REV0006 & REV0007] Programs grid: Label SPPN & PPKS, remove Lokasi */}
         <div id="program" className="mt-12">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
             <div>
               <h3 className="text-xl font-extrabold text-slate-900">
                 Program Pembinaan Spiritual & Bobot Penilaian
@@ -587,7 +593,7 @@ export function LandingPage() {
                 Terbagi ke dalam kategori SPPN (Instrumen Utama) dan PPKS (Kualitatif Komplementer)
               </p>
             </div>
-            <span className="rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700">
+            <span className="self-start sm:self-auto rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700 whitespace-nowrap">
               Total Bobot Wajib = 100%
             </span>
           </div>
@@ -647,7 +653,7 @@ export function LandingPage() {
 
       {/* Footer */}
       <footer className="bg-slate-950 text-slate-300 mt-auto">
-        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           <div className="flex items-start gap-3">
             <img
               src="/logo-sipasti.png"
