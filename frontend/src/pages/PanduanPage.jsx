@@ -37,7 +37,7 @@ import { exportBukuPanduanPdf } from '@/utils/pdfGenerator';
 const CHAPTERS = [
   { id: 'konsep', label: '1. Rumus SPPN & PPKS', icon: BookOpen },
   { id: 'rekomendasi', label: '2. Matriks 3 Level Kualifikasi', icon: ShieldCheck },
-  { id: 'input', label: '3. Tata Cara Penginputan Data', icon: ClipboardCheck },
+  { id: 'input', label: '3. SOP & Penginputan Data', icon: ClipboardCheck },
   { id: 'dashboard', label: '4. Panduan Membaca Dashboard Analitik', icon: LayoutDashboard },
   { id: 'peran', label: '5. Panduan Peran Asesor & Petugas', icon: Users },
   { id: 'faceid', label: '6. Absensi Biometrik Face ID', icon: ScanFace },
@@ -139,15 +139,28 @@ export function PanduanPage({ isPublic = false }) {
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleDownloadPdf}
-            disabled={downloading}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-60 transition-colors shrink-0"
-          >
-            <FileDown className="h-4 w-4" />
-            {downloading ? 'Menyiapkan PDF...' : 'Unduh Panduan Resmi (PDF)'}
-          </button>
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <a
+              href="/sop-sipasti.pdf"
+              download="SOP SISTEM PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI (SI PASTI).pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-amber-700 transition-colors"
+            >
+              <FileDown className="h-4 w-4" />
+              Unduh Dokumen SOP (PDF)
+            </a>
+
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              disabled={downloading}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-60 transition-colors"
+            >
+              <FileDown className="h-4 w-4" />
+              {downloading ? 'Menyiapkan PDF...' : 'Unduh Buku Panduan (PDF)'}
+            </button>
+          </div>
         </div>
 
         {/* Chapter Navigation */}
@@ -397,15 +410,43 @@ export function PanduanPage({ isPublic = false }) {
             <div className="space-y-6">
               <div>
                 <span className="rounded-full bg-emerald-100 text-emerald-800 text-xs font-extrabold px-3 py-1 border border-emerald-300">
-                  Panduan Teknis Penginputan
+                  SOP &amp; Panduan Teknis
                 </span>
                 <h2 className="text-xl font-extrabold text-slate-900 mt-2">
-                  Bab 3: Tata Cara Penginputan Data Penilaian & Absensi Spiritual
+                  Bab 3: Standar Operasional Prosedur (SOP) &amp; Tata Cara Penginputan Data
                 </h2>
                 <p className="text-sm text-slate-600 mt-1">
                   Petunjuk praktis tahap demi tahap bagi Wali PAS dan Mitra Keagamaan dalam mencatat kehadiran,
                   menginput alasan ketidakhadiran, mengevaluasi 5 sub-indikator PPKS, serta mekanisme verifikasi oleh Kasubsi.
                 </p>
+              </div>
+
+              {/* Banner Unduh Dokumen SOP Resmi */}
+              <div className="rounded-2xl border-2 border-amber-300 bg-gradient-to-r from-amber-50 to-orange-50/50 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-500 text-white shadow-sm">
+                    <FileText className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900">
+                      Dokumen Asli SOP SIPASTI Lapas Kelas IIB Ciamis
+                    </h3>
+                    <p className="text-xs text-slate-600 mt-0.5">
+                      Standar Operasional Prosedur resmi berformat PDF yang disahkan oleh Lapas Kelas IIB Ciamis.
+                    </p>
+                  </div>
+                </div>
+
+                <a
+                  href="/sop-sipasti.pdf"
+                  download="SOP SISTEM PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI (SI PASTI).pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-amber-700 transition-colors shrink-0 w-full sm:w-auto"
+                >
+                  <FileDown className="h-4 w-4" />
+                  Unduh Dokumen SOP Resmi (PDF)
+                </a>
               </div>
 
               {/* Step 1: Penilaian SPPN & PPKS */}
