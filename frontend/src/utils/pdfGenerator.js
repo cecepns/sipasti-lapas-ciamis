@@ -72,43 +72,41 @@ async function drawOfficialHeader(doc, title, subtitle) {
   doc.setFontSize(11);
   doc.text('LEMBAGA PEMASYARAKATAN KELAS IIB CIAMIS', centerX, 22.8, { align: 'center' });
 
-  // Baris 5, 6, 7: Alamat, Telepon/Faksimile, Laman & Pos-el (Tidak Di-bold, Hitam Pekat)
+  // Baris 5 & 6: Alamat, Telepon/Faksimile (Tidak Di-bold, Hitam Pekat)
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
-  doc.text('Jalan Ir. H. Juanda No. 146, Kab. Ciamis, Ciamis', centerX, 26.5, { align: 'center' });
-  doc.text('Telepon : 0265-771013, Faksimile : 0265-771013', centerX, 29.8, { align: 'center' });
-  doc.setFontSize(7.2);
-  doc.text('Laman : http://lapasciamis.kemenkumham.go.id, Pos-el :lp.ciamis@kemenkumham.go.id', centerX, 33.1, { align: 'center' });
+  doc.text('Jalan Ir. H. Juanda No. 146, Kab. Ciamis, Ciamis', centerX, 26.8, { align: 'center' });
+  doc.text('Telepon : 0265-771013, Faksimile : 0265-771013', centerX, 30.2, { align: 'center' });
 
   // 3. Garis Pembatas Kop Baku (Double Line Hitam Standar)
   doc.setDrawColor(0, 0, 0);
   doc.setLineWidth(0.8);
-  doc.line(14, 35.5, pageWidth - 14, 35.5);
+  doc.line(14, 33.2, pageWidth - 14, 33.2);
   doc.setLineWidth(0.25);
-  doc.line(14, 36.6, pageWidth - 14, 36.6);
+  doc.line(14, 34.3, pageWidth - 14, 34.3);
 
   // 4. Di Bawah Garis: Logo SIPASTI + Header SIPASTI + Judul Dokumen (Sesuai Permintaan)
   if (logoSipasti) {
-    doc.addImage(logoSipasti, 'PNG', 14, 39.5, 13.5, 13.5);
+    doc.addImage(logoSipasti, 'PNG', 14, 37.0, 13.5, 13.5);
   }
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
   doc.setTextColor(4, 120, 87);
-  doc.text('SIPASTI (SISTEM INFORMASI PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI)', 31, 43.5);
+  doc.text('SIPASTI (SISTEM INFORMASI PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI)', 31, 41.0);
 
   doc.setFontSize(10.5);
   doc.setTextColor(15, 23, 42);
-  doc.text(title.toUpperCase(), 31, 48.5);
+  doc.text(title.toUpperCase(), 31, 46.0);
 
   if (subtitle) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(71, 85, 105);
-    doc.text(subtitle, 31, 53);
+    doc.text(subtitle, 31, 50.5);
   }
 
-  return subtitle ? 58 : 54;
+  return subtitle ? 55 : 51;
 }
 
 function drawSignatureFooter(doc, startY) {

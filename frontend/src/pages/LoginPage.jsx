@@ -61,11 +61,20 @@ export function LoginPage() {
               alt="Logo SIPASTI"
               className="mx-auto h-20 w-20 rounded-2xl object-contain bg-white border border-emerald-100 p-1 shadow-xs"
             />
-            <h1 className="mt-3 text-xl font-extrabold text-slate-900">Portal Masuk SIPASTI</h1>
-            {/* [REV0008] Subtitle bersih tanpa rentetan nama role yang bertele-tele */}
-            <p className="text-xs text-slate-500 mt-1 font-medium">
-              Lembaga Pemasyarakatan Kelas IIB Ciamis
-            </p>
+            <div className="mt-3 space-y-0.5">
+              <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                Portal Masuk
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                SIPASTI
+              </h1>
+              <p className="text-xs font-semibold text-slate-600">
+                Sistem Penilaian Aktivitas Spiritual Terintegrasi
+              </p>
+              <p className="text-[11px] font-medium text-slate-500">
+                Lembaga Pemasyarakatan Kelas IIB Ciamis
+              </p>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
