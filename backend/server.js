@@ -2824,7 +2824,7 @@ app.get('/api/reports/rekap-periodik', authenticate, async (req, res, next) => {
     // Compute per-period recommendation counts by evaluating each WBP within each period bucket
     const [rawLogs] = await pool.query(
       `SELECT ${grouping.keyExpr} AS period_key, a.wbp_id, a.jenis_penilaian, a.pelaksanaan, a.nilai_karakter, a.skor_akhir,
-              w.nama AS wbp_nama, w.no_registrasi, w.kamar AS wbp_kamar, u.nama AS walipas_nama
+              w.nama AS wbp_nama, w.no_registrasi, w.blok_kamar AS wbp_kamar, u.nama AS walipas_nama
        FROM assessments a
        JOIN wbp w ON a.wbp_id = w.id
        LEFT JOIN users u ON w.wali_pas_id = u.id
