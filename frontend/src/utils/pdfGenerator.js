@@ -290,14 +290,14 @@ export async function exportWbpProfilePdf(detail, dateRange = {}) {
     body:
       sppnRows.length > 0
         ? sppnRows.slice(0, 20).map((a) => [
-            formatDate(a.tanggal, 'dd/MM/yyyy'),
-            a.nama_program,
-            a.asesor_nama,
-            a.pelaksanaan,
-            a.nilai_karakter ?? '-',
-            a.skor_akhir,
-            a.keterangan || '-',
-          ])
+          formatDate(a.tanggal, 'dd/MM/yyyy'),
+          a.nama_program,
+          a.asesor_nama,
+          a.pelaksanaan,
+          a.nilai_karakter ?? '-',
+          a.skor_akhir,
+          a.keterangan || '-',
+        ])
         : [['-', 'Belum ada catatan penilaian SPPN pada periode ini', '-', '-', '-', '-', '-']],
   });
 
@@ -319,14 +319,14 @@ export async function exportWbpProfilePdf(detail, dateRange = {}) {
     body:
       ppksRows.length > 0
         ? ppksRows.slice(0, 20).map((a) => [
-            formatDate(a.tanggal, 'dd/MM/yyyy'),
-            a.nama_program,
-            a.asesor_nama,
-            a.pelaksanaan,
-            a.nilai_karakter ?? '-',
-            a.skor_akhir,
-            a.keterangan || '-',
-          ])
+          formatDate(a.tanggal, 'dd/MM/yyyy'),
+          a.nama_program,
+          a.asesor_nama,
+          a.pelaksanaan,
+          a.nilai_karakter ?? '-',
+          a.skor_akhir,
+          a.keterangan || '-',
+        ])
         : [['-', 'Belum ada catatan penilaian PPKS pada periode ini (perlu monitoring)', '-', '-', '-', '-', '-']],
   });
 
@@ -340,7 +340,7 @@ export async function exportAssessmentsPdf(rows, filters = {}) {
   const periodLabel = formatDateRangeLabel(filters.startDate, filters.endDate);
   const jenisLabel = filters.jenis_penilaian
     ? ` | Instrumen: ${filters.jenis_penilaian} (${INSTRUMEN_INFO[filters.jenis_penilaian]?.kepanjangan || ''})`
-    : ' | Instrumen: SPPN (Utama) & PPKS (Pendukung Monitoring) — Dipisahkan per Kolom Jenis';
+    : ' | Instrumen: SPPN (Utama) & PPKS (Pendukung Monitoring)';
   const y = await drawOfficialHeader(
     doc,
     'Laporan Rekapitulasi Penilaian SPPN & PPKS',
