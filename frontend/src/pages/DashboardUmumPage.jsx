@@ -487,7 +487,7 @@ export function DashboardUmumPage() {
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 pt-2 border-t border-slate-100">
                   <ArrowUpRight className="h-3.5 w-3.5" />
-                  <span>{bu.wbp_aktif.trend}</span>
+                  <span>{typeof bu.wbp_aktif.trend === 'object' ? (bu.wbp_aktif.trend.pct_change || bu.wbp_aktif.trend.label) : bu.wbp_aktif.trend}</span>
                   <span className="text-[10px] font-normal text-slate-400 truncate">{bu.wbp_aktif.trend_label}</span>
                 </div>
               </div>
@@ -501,7 +501,7 @@ export function DashboardUmumPage() {
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-slate-600 pt-2 border-t border-slate-100">
                   <Minus className="h-3.5 w-3.5 text-slate-400" />
-                  <span>{bu.program_aktif.trend}</span>
+                  <span>{typeof bu.program_aktif.trend === 'object' ? (bu.program_aktif.trend.pct_change || bu.program_aktif.trend.label) : bu.program_aktif.trend}</span>
                   <span className="text-[10px] font-normal text-slate-400 truncate">{bu.program_aktif.trend_label}</span>
                 </div>
               </div>
@@ -515,7 +515,7 @@ export function DashboardUmumPage() {
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 pt-2 border-t border-slate-100">
                   <ArrowUpRight className="h-3.5 w-3.5" />
-                  <span>{bu.walipas_aktif.trend}</span>
+                  <span>{typeof bu.walipas_aktif.trend === 'object' ? (bu.walipas_aktif.trend.pct_change || bu.walipas_aktif.trend.label) : bu.walipas_aktif.trend}</span>
                   <span className="text-[10px] font-normal text-slate-400 truncate">{bu.walipas_aktif.trend_label}</span>
                 </div>
               </div>
@@ -529,7 +529,7 @@ export function DashboardUmumPage() {
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 pt-2 border-t border-slate-100">
                   <ArrowUpRight className="h-3.5 w-3.5" />
-                  <span>{bu.mitra_aktif.trend}</span>
+                  <span>{typeof bu.mitra_aktif.trend === 'object' ? (bu.mitra_aktif.trend.pct_change || bu.mitra_aktif.trend.label) : bu.mitra_aktif.trend}</span>
                   <span className="text-[10px] font-normal text-slate-400 truncate">{bu.mitra_aktif.trend_label}</span>
                 </div>
               </div>
@@ -543,7 +543,7 @@ export function DashboardUmumPage() {
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-700 pt-2 border-t border-emerald-200/60">
                   <ArrowUpRight className="h-3.5 w-3.5" />
-                  <span>{bu.rata_sppn.trend}</span>
+                  <span>{typeof bu.rata_sppn.trend === 'object' ? (bu.rata_sppn.trend.pct_change || bu.rata_sppn.trend.label) : bu.rata_sppn.trend}</span>
                   <span className="text-[10px] font-normal text-slate-500 truncate">{bu.rata_sppn.trend_label}</span>
                 </div>
               </div>
@@ -557,7 +557,7 @@ export function DashboardUmumPage() {
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-amber-700 pt-2 border-t border-amber-200/60">
                   <ArrowUpRight className="h-3.5 w-3.5" />
-                  <span>{bu.rata_ppks.trend}</span>
+                  <span>{typeof bu.rata_ppks.trend === 'object' ? (bu.rata_ppks.trend.pct_change || bu.rata_ppks.trend.label) : bu.rata_ppks.trend}</span>
                   <span className="text-[10px] font-normal text-slate-500 truncate">{bu.rata_ppks.trend_label}</span>
                 </div>
               </div>
@@ -571,7 +571,7 @@ export function DashboardUmumPage() {
                 </div>
                 <div className="flex items-center gap-1 text-[11px] font-bold text-emerald-100 pt-2 border-t border-emerald-600">
                   <ArrowUpRight className="h-3.5 w-3.5" />
-                  <span>{bu.total_direkomendasikan.trend}</span>
+                  <span>{typeof bu.total_direkomendasikan.trend === 'object' ? (bu.total_direkomendasikan.trend.pct_change || bu.total_direkomendasikan.trend.label) : bu.total_direkomendasikan.trend}</span>
                   <span className="text-[10px] font-normal text-emerald-200 truncate">{bu.total_direkomendasikan.trend_label}</span>
                 </div>
               </div>

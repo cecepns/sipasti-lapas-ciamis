@@ -367,7 +367,9 @@ export function LandingPage() {
               </p>
               <span className="inline-flex items-center gap-0.5 rounded-md bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
                 <TrendingUp className="h-3 w-3" />
-                {summary?.trend || '+4.2% vs TW-III (hari ke-50)'}
+                {typeof summary?.trend === 'object'
+                  ? (summary.trend?.label || summary.trend?.pct_change || '+4.2% vs TW-III (hari ke-50)')
+                  : (summary?.trend || '+4.2% vs TW-III (hari ke-50)')}
               </span>
             </div>
             <p className="mt-1 text-xs text-slate-500">
