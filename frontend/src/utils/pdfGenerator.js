@@ -479,7 +479,7 @@ export async function exportWbpRankingPdf(rows, filters = {}) {
       `${r.pelaksanaan_pct ?? (r.total_penilaian > 0 ? Math.round(((r.jumlah_ya || 0) / r.total_penilaian) * 100) : 0)}%`,
       `${r.sppn_skor ?? 0} (Kualifikasi ${r.sppn_kualifikasi ?? (r.sppn_skor >= 70 ? '1' : '0')})`,
       `${r.ppks_skor ?? 0} (Kualifikasi ${r.ppks_kualifikasi ?? (r.ppks_skor >= 4.0 ? '2' : r.ppks_skor >= 3.0 ? '1' : '0')})`,
-      r.rekomendasi?.label || (r.kualifikasi_akhir === 2 ? 'Memenuhi Syarat dan Direkomendasikan' : r.kualifikasi_akhir === 1 ? 'Memenuhi Syarat dengan Pertimbangan' : 'Tidak Memenuhi Syarat'),
+      r.rekomendasi?.label || (r.kualifikasi_akhir === 2 ? 'Direkomendasikan' : r.kualifikasi_akhir === 1 ? 'Direkomendasikan dengan Pertimbangan' : 'Tidak Memenuhi Syarat'),
       `${r.absensi_face_verified ?? 0}/${r.total_absensi ?? 0}`,
     ]),
   });

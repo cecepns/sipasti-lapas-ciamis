@@ -88,7 +88,7 @@ CREATE TABLE `wbp` (
   `foto_wajah` VARCHAR(255) NULL COMMENT 'Path foto referensi wajah untuk Face ID',
   `face_descriptor` LONGTEXT NULL COMMENT 'JSON vector 128-dim fitur wajah untuk verifikasi Face ID',
   `status` ENUM('aktif', 'bebas', 'pindah') NOT NULL DEFAULT 'aktif',
-  `kualifikasi_akhir` TINYINT UNSIGNED NULL DEFAULT 2 COMMENT '2 = Direkomendasikan, 1 = Dg Pertimbangan, 0 = Tidak Memenuhi',
+  `kualifikasi_akhir` TINYINT UNSIGNED NULL DEFAULT 2 COMMENT '2 = Direkomendasikan, 1 = Direkomendasikan dengan Pertimbangan, 0 = Tidak Memenuhi Syarat',
   `sppn_terakhir` DECIMAL(5,2) NULL DEFAULT 82.50 COMMENT 'Skor SPPN periode berjalan (0-100)',
   `ppks_terakhir` DECIMAL(3,2) NULL DEFAULT 4.25 COMMENT 'Skor PPKS periode berjalan (1-5)',
   `status_rekomendasi` VARCHAR(60) NULL DEFAULT 'direkomendasikan',

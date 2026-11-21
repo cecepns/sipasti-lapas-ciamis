@@ -454,9 +454,9 @@ export function DashboardWbpPage() {
       ) : (
         <>
           {/* ========================================================================= */}
-          {/* 3. PROFIL & KUALIFIKASI WBP (6 Cards)                                     */}
+          {/* 3. PROFIL & KUALIFIKASI WBP (Sesuai Wireframe Referensi)                  */}
           {/* ========================================================================= */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
                 <User className="h-4 w-4 text-emerald-700" />
@@ -467,64 +467,78 @@ export function DashboardWbpPage() {
               </span>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
-              {/* Card 1: Identitas WBP */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                    Identitas WBP
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="relative h-12 w-12 rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center shrink-0 border border-slate-200">
-                      {d.identitas?.foto_wajah ? (
-                        <img
-                          src={getAssetUrl(d.identitas.foto_wajah)}
-                          alt={d.identitas.nama}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <User className="h-6 w-6 text-slate-400" />
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-extrabold text-slate-900 text-sm truncate" title={d.identitas?.nama}>
-                        {d.identitas?.nama}
-                      </h3>
-                      <p className="text-xs font-mono font-bold text-slate-500 truncate">
-                        {d.identitas?.no_registrasi}
-                      </p>
-                      <span className="inline-block mt-0.5 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-700">
-                        {d.identitas?.blok_kamar || 'Kamar -'}
-                      </span>
-                    </div>
-                  </div>
+            {/* Profil WBP Lengkap (Top Box) */}
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-xs">
+              <div className="flex flex-col md:flex-row md:items-center gap-5 sm:gap-6">
+                <div className="relative h-28 w-28 sm:h-36 sm:w-36 rounded-2xl bg-slate-100 border-2 border-slate-200 overflow-hidden shrink-0 flex items-center justify-center shadow-inner">
+                  {d.identitas?.foto_wajah ? (
+                    <img
+                      src={getAssetUrl(d.identitas.foto_wajah)}
+                      alt={d.identitas.nama}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-14 w-14 text-slate-300" />
+                  )}
                 </div>
 
-                <div className="mt-3 pt-2.5 border-t border-slate-100 space-y-1 text-[11px]">
-                  <div className="flex justify-between text-slate-600">
-                    <span className="text-slate-400">Walipas:</span>
-                    <span className="font-semibold truncate max-w-[110px]" title={d.identitas?.wali_pas_nama}>
-                      {d.identitas?.wali_pas_nama}
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                    <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-800 border border-emerald-200">
+                      {d.identitas?.blok_kamar || 'Kamar -'}
+                    </span>
+                    <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700">
+                      {d.identitas?.status_aktif || 'Aktif (Santri)'}
                     </span>
                   </div>
-                  <div className="flex justify-between text-slate-600">
-                    <span className="text-slate-400">Mitra:</span>
-                    <span className="font-semibold truncate max-w-[110px]" title={d.identitas?.mitra_nama}>
-                      {d.identitas?.mitra_nama}
-                    </span>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight truncate" title={d.identitas?.nama}>
+                    {d.identitas?.nama}
+                  </h2>
+                  <p className="text-xs sm:text-sm font-mono font-bold text-slate-500 mb-3">
+                    No. Reg: {d.identitas?.no_registrasi}
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2 text-xs pt-3 border-t border-slate-100">
+                    <div className="flex items-center justify-between sm:justify-start gap-2">
+                      <span className="text-slate-400 font-medium">Perkara:</span>
+                      <span className="font-semibold text-slate-800 truncate">{d.identitas?.perkara || 'Narkotika / Pidana Umum'}</span>
+                    </div>
+                    <div className="flex items-center justify-between sm:justify-start gap-2">
+                      <span className="text-slate-400 font-medium">Lama Pidana:</span>
+                      <span className="font-semibold text-slate-800">{d.identitas?.lama_pidana || '5 Tahun'}</span>
+                    </div>
+                    <div className="flex items-center justify-between sm:justify-start gap-2">
+                      <span className="text-slate-400 font-medium">Tgl Masuk:</span>
+                      <span className="font-semibold text-slate-800">{d.identitas?.tgl_masuk ? formatDate(d.identitas.tgl_masuk) : '12/03/2023'}</span>
+                    </div>
+                    <div className="flex items-center justify-between sm:justify-start gap-2">
+                      <span className="text-slate-400 font-medium">Ekspirasi:</span>
+                      <span className="font-semibold text-slate-800">{d.identitas?.tgl_ekspirasi ? formatDate(d.identitas.tgl_ekspirasi) : '15/08/2028'}</span>
+                    </div>
+                    <div className="flex items-center justify-between sm:justify-start gap-2">
+                      <span className="text-slate-400 font-medium">Wali PAS:</span>
+                      <span className="font-semibold text-slate-800 truncate" title={d.identitas?.wali_pas_nama}>{d.identitas?.wali_pas_nama || '-'}</span>
+                    </div>
+                    <div className="flex items-center justify-between sm:justify-start gap-2">
+                      <span className="text-slate-400 font-medium">Mitra Pembina:</span>
+                      <span className="font-semibold text-slate-800 truncate" title={d.identitas?.mitra_nama}>{d.identitas?.mitra_nama || '-'}</span>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Card 2: Kualifikasi */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between">
+            {/* 4 Cards Kualifikasi & Skor (Bawah Profil) */}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {/* Card 1: Kualifikasi */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
                 <div>
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                    Kualifikasi
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                    Kualifikasi Akhir
                   </div>
                   <div className="flex items-center gap-2">
                     <span
-                      className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-xs font-extrabold ${
+                      className={`inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-extrabold ${
                         isKualifikasi2
                           ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                           : isKualifikasi1
@@ -536,43 +550,47 @@ export function DashboardWbpPage() {
                       Kualifikasi {d.kualifikasi?.kualifikasi_akhir}
                     </span>
                   </div>
-                  <p className="mt-2 text-xs font-bold text-slate-900 leading-snug">
-                    {d.kualifikasi?.predikat_label}
+                  <p className="mt-2 text-sm font-bold text-slate-900 leading-snug">
+                    {d.kualifikasi?.kualifikasi_akhir === 2
+                      ? 'Direkomendasikan'
+                      : d.kualifikasi?.kualifikasi_akhir === 1
+                      ? 'Direkomendasikan dengan Pertimbangan'
+                      : 'Tidak Memenuhi Syarat'}
                   </p>
-                  <p className="mt-1 text-[11px] text-slate-500 line-clamp-2">
+                  <p className="mt-1 text-xs text-slate-500 line-clamp-2">
                     {d.kualifikasi?.deskripsi}
                   </p>
                 </div>
 
-                <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-xs">
                   <span className="text-slate-400">Tren:</span>
                   <span className="font-bold text-emerald-700 flex items-center gap-1">
-                    <ArrowUpRight className="h-3 w-3" />
+                    <ArrowUpRight className="h-3.5 w-3.5" />
                     {d.kualifikasi?.status_tren}
                   </span>
                 </div>
               </div>
 
-              {/* Card 3: SPPN */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between">
+              {/* Card 2: SPPN */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      SPPN (0-100)
+                      Skor SPPN (0-100)
                     </span>
-                    <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
-                      Utama
+                    <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                      Nilai Utama
                     </span>
                   </div>
                   <div className="mt-2 flex items-baseline gap-1.5">
-                    <span className="text-2xl font-black text-slate-900">
+                    <span className="text-3xl font-black text-slate-900">
                       {formatNumber(d.sppn?.nilai, 1)}
                     </span>
                     <span className="text-xs text-slate-400 font-semibold">/ 100</span>
                   </div>
-                  <div className="mt-1">
+                  <div className="mt-1.5">
                     <span
-                      className={`inline-block text-[11px] font-bold px-2 py-0.5 rounded ${
+                      className={`inline-block text-xs font-bold px-2 py-0.5 rounded ${
                         Number(d.sppn?.nilai) >= 70
                           ? 'bg-emerald-100 text-emerald-800'
                           : 'bg-rose-100 text-rose-800'
@@ -583,32 +601,32 @@ export function DashboardWbpPage() {
                   </div>
                 </div>
 
-                <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] flex items-center justify-between text-slate-500">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 text-xs flex items-center justify-between text-slate-500">
                   <span>v. TW Lalu:</span>
                   <span className="font-bold text-emerald-700">{d.sppn?.tren}</span>
                 </div>
               </div>
 
-              {/* Card 4: PPKS */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between">
+              {/* Card 3: PPKS */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      PPKS (1-5)
+                      Skor PPKS (1-5)
                     </span>
-                    <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+                    <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200">
                       Karakter
                     </span>
                   </div>
                   <div className="mt-2 flex items-baseline gap-1.5">
-                    <span className="text-2xl font-black text-slate-900">
+                    <span className="text-3xl font-black text-slate-900">
                       {formatNumber(d.ppks?.nilai, 2)}
                     </span>
                     <span className="text-xs text-slate-400 font-semibold">/ 5.00</span>
                   </div>
-                  <div className="mt-1">
+                  <div className="mt-1.5">
                     <span
-                      className={`inline-block text-[11px] font-bold px-2 py-0.5 rounded ${
+                      className={`inline-block text-xs font-bold px-2 py-0.5 rounded ${
                         Number(d.ppks?.nilai) >= 4.0
                           ? 'bg-emerald-100 text-emerald-800'
                           : 'bg-amber-100 text-amber-800'
@@ -619,111 +637,60 @@ export function DashboardWbpPage() {
                   </div>
                 </div>
 
-                <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] flex items-center justify-between text-slate-500">
+                <div className="mt-3 pt-2.5 border-t border-slate-100 text-xs flex items-center justify-between text-slate-500">
                   <span>v. TW Lalu:</span>
                   <span className="font-bold text-emerald-700">{d.ppks?.tren}</span>
                 </div>
               </div>
 
-              {/* Card 5: SPPN vs Treshold */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between">
+              {/* Card 4: Capaian vs Ambang Batas (SPPN & PPKS) */}
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      SPPN vs Threshold
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-500">Batas: 70</span>
-                  </div>
-                  <div className="mt-2 flex items-baseline justify-between">
-                    <span className="text-lg font-black text-slate-900">
-                      {formatNumber(d.sppn_threshold?.nilai, 1)}
-                    </span>
-                    <span className="text-xs font-bold text-emerald-700">
-                      {d.sppn_threshold?.pct_achieved}% Target
-                    </span>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                    Capaian vs Ambang Batas
                   </div>
 
-                  <div className="mt-2 relative">
-                    <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                  {/* SPPN Bar */}
+                  <div className="space-y-1 mb-2.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-slate-700">SPPN (Batas: 70)</span>
+                      <span className="font-bold text-slate-900">{formatNumber(d.sppn_threshold?.nilai, 1)}</span>
+                    </div>
+                    <div className="relative h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${
                           Number(d.sppn_threshold?.nilai) >= 70 ? 'bg-emerald-500' : 'bg-rose-500'
                         }`}
                         style={{ width: `${Math.min(100, (Number(d.sppn_threshold?.nilai) / 100) * 100)}%` }}
                       />
+                      <div className="absolute top-0 bottom-0 w-0.5 bg-slate-900 z-10" style={{ left: '70%' }} />
                     </div>
-                    <div
-                      className="absolute top-0 bottom-0 w-0.5 bg-slate-900 z-10"
-                      style={{ left: '70%' }}
-                      title="Threshold: 70"
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-600">
-                  {Number(d.sppn_threshold?.nilai) >= 70 ? (
-                    <span className="text-emerald-700 font-bold flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3" />
-                      Di Atas Ambang (+{(Number(d.sppn_threshold?.nilai) - 70).toFixed(1)})
-                    </span>
-                  ) : (
-                    <span className="text-rose-700 font-bold flex items-center gap-1">
-                      <XCircle className="h-3 w-3" />
-                      Di Bawah Ambang (-{(70 - Number(d.sppn_threshold?.nilai)).toFixed(1)})
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Card 6: PPKS vs Treshold */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      PPKS vs Threshold
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-500">Batas: 4.00</span>
-                  </div>
-                  <div className="mt-2 flex items-baseline justify-between">
-                    <span className="text-lg font-black text-slate-900">
-                      {formatNumber(d.ppks_threshold?.nilai, 2)}
-                    </span>
-                    <span className="text-xs font-bold text-emerald-700">
-                      {d.ppks_threshold?.pct_achieved}% Target
-                    </span>
                   </div>
 
-                  <div className="mt-2 relative">
-                    <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                  {/* PPKS Bar */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-slate-700">PPKS (Batas: 4.00)</span>
+                      <span className="font-bold text-slate-900">{formatNumber(d.ppks_threshold?.nilai, 2)}</span>
+                    </div>
+                    <div className="relative h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${
                           Number(d.ppks_threshold?.nilai) >= 4.0 ? 'bg-amber-500' : 'bg-slate-400'
                         }`}
-                        style={{
-                          width: `${Math.min(100, (Number(d.ppks_threshold?.nilai) / 5.0) * 100)}%`,
-                        }}
+                        style={{ width: `${Math.min(100, (Number(d.ppks_threshold?.nilai) / 5.0) * 100)}%` }}
                       />
+                      <div className="absolute top-0 bottom-0 w-0.5 bg-slate-900 z-10" style={{ left: '80%' }} />
                     </div>
-                    <div
-                      className="absolute top-0 bottom-0 w-0.5 bg-slate-900 z-10"
-                      style={{ left: '80%' }}
-                      title="Threshold: 4.00"
-                    />
                   </div>
                 </div>
 
-                <div className="mt-3 pt-2.5 border-t border-slate-100 text-[11px] text-slate-600">
-                  {Number(d.ppks_threshold?.nilai) >= 4.0 ? (
-                    <span className="text-emerald-700 font-bold flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3" />
-                      Di Atas Ambang (+{(Number(d.ppks_threshold?.nilai) - 4.0).toFixed(2)})
-                    </span>
-                  ) : (
-                    <span className="text-amber-700 font-bold flex items-center gap-1">
-                      <AlertTriangle className="h-3 w-3" />
-                      Di Bawah Ambang (-{(4.0 - Number(d.ppks_threshold?.nilai)).toFixed(2)})
-                    </span>
-                  )}
+                <div className="mt-3 pt-2.5 border-t border-slate-100 text-xs flex items-center justify-between">
+                  <span className="text-slate-400">Status Ambang:</span>
+                  <span className="font-bold text-emerald-700 flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Memenuhi Syarat
+                  </span>
                 </div>
               </div>
             </div>

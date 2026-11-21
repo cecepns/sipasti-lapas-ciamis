@@ -24,7 +24,7 @@ export const REKOMENDASI_RULES = [
   {
     code: 'direkomendasikan',
     kualifikasiAkhir: 2,
-    label: 'Memenuhi Syarat dan Direkomendasikan',
+    label: 'Direkomendasikan',
     shortLabel: 'Direkomendasikan',
     color: 'emerald',
     syarat: 'Kualifikasi SPPN Baik (≥ 70) DAN Kualifikasi PPKS Baik (≥ 4.0)',
@@ -33,8 +33,8 @@ export const REKOMENDASI_RULES = [
   {
     code: 'direkomendasikan_dengan_catatan',
     kualifikasiAkhir: 1,
-    label: 'Memenuhi Syarat dengan Pertimbangan',
-    shortLabel: 'Dengan Pertimbangan',
+    label: 'Direkomendasikan dengan Pertimbangan',
+    shortLabel: 'Direkomendasikan dengan Pertimbangan',
     color: 'amber',
     syarat: 'Kualifikasi SPPN Baik (≥ 70), namun nilai PPKS berada pada kategori Cukup/Kurang (< 4.0)',
     arti: 'Memenuhi syarat dasar penilaian dan berhak mendapatkan rekomendasi, namun dengan pertimbangan dan catatan khusus.',
@@ -43,7 +43,7 @@ export const REKOMENDASI_RULES = [
     code: 'tidak_direkomendasikan',
     kualifikasiAkhir: 0,
     label: 'Tidak Memenuhi Syarat',
-    shortLabel: 'Tidak Direkomendasikan',
+    shortLabel: 'Tidak Memenuhi Syarat',
     color: 'rose',
     syarat: 'Akumulasi nilai SPPN < 70 (Kualifikasi SPPN 0)',
     arti: 'Nilai belum memenuhi syarat dasar penilaian. Pengajuan tidak mendapatkan rekomendasi.',
@@ -66,8 +66,8 @@ export const TREND_OPTIONS = [
 
 export const KUALIFIKASI_AKHIR_OPTIONS = [
   { value: 'all', label: 'Semua Kualifikasi' },
-  { value: '2', label: 'Kualifikasi 2: Memenuhi Syarat & Direkomendasikan' },
-  { value: '1', label: 'Kualifikasi 1: Memenuhi Syarat dg Pertimbangan' },
+  { value: '2', label: 'Kualifikasi 2: Direkomendasikan' },
+  { value: '1', label: 'Kualifikasi 1: Direkomendasikan dengan Pertimbangan' },
   { value: '0', label: 'Kualifikasi 0: Tidak Memenuhi Syarat' },
 ];
 

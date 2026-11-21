@@ -207,11 +207,12 @@ export function AssessmentsPage() {
       }
       fd.append('pelaksanaan', form.pelaksanaan?.value || 'Ya');
       if (form.pelaksanaan?.value === 'Ya') {
-        fd.append('nilai_karakter', form.nilai_karakter?.value || 4);
-        fd.append('aspek_ibadah', form.aspek_ibadah?.value || 4);
-        fd.append('aspek_kedisiplinan', form.aspek_kedisiplinan?.value || 4);
-        fd.append('aspek_akhlak', form.aspek_akhlak?.value || 4);
-        fd.append('aspek_partisipasi', form.aspek_partisipasi?.value || 4);
+        const valKarakter = typeof form.nilai_karakter === 'object' ? (form.nilai_karakter?.value || 4) : (form.nilai_karakter || 4);
+        fd.append('nilai_karakter', valKarakter);
+        fd.append('aspek_ibadah', valKarakter);
+        fd.append('aspek_kedisiplinan', valKarakter);
+        fd.append('aspek_akhlak', valKarakter);
+        fd.append('aspek_partisipasi', valKarakter);
       }
       fd.append('keterangan', form.keterangan || '');
       if (form.bukti_foto) {
@@ -668,52 +669,65 @@ export function AssessmentsPage() {
             />
           </div>
 
-          {/* [REV0035] Rubrik Skor Karakter 1 - 5 */}
+          {/* [REV0035] 1 Pertanyaan Likert Scale 1 - 5 (Sesuai Referensi cellImage_1169119393_4.jpg) */}
           {form.pelaksanaan?.value === 'Ya' && (
-            <div className="rounded-2xl bg-amber-50/50 border border-amber-200/80 p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-bold uppercase tracking-wider text-amber-900">
-                  Rubrik Penilaian Karakter (Skala 1 s/d 5)
-                </p>
-                <span className="text-[11px] font-semibold text-slate-500">
-                  1 (Sangat Kurang) s/d 5 (Sangat Baik)
-                </span>
-              </div>
-
+            <div className="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-xs space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Penilaian Karakter Spiritual Utama *
+                <label className="block text-sm font-bold text-slate-800">
+                  Penilaian Karakter <span className="text-rose-500">*</span>
                 </label>
-                <SelectInput
-                  options={SCORE_OPTIONS}
-                  value={form.nilai_karakter}
-                  onChange={(v) => setForm({ ...form, nilai_karakter: v })}
-                  isClearable={false}
-                  isSearchable={false}
-                />
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                  Input ini adalah bagian dari Penilaian Perkembangan Karakter Santri (PPKS) untuk mengukur sikap, kedisiplinan, dan penghayatan nilai-nilai keagamaan
+                </p>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
-                {[
-                  { key: 'aspek_ibadah', label: 'Aspek Kesadaran & Praktik Ibadah' },
-                  { key: 'aspek_kedisiplinan', label: 'Aspek Kedisiplinan Waktu' },
-                  { key: 'aspek_akhlak', label: 'Aspek Akhlak & Adab Terhadap Sesama' },
-                  { key: 'aspek_partisipasi', label: 'Aspek Keaktifan / Minat Belajar' },
-                ].map((f) => (
-                  <div key={f.key}>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                      {f.label}
-                    </label>
-                    <SelectInput
-                      options={SCORE_OPTIONS}
-                      value={form[f.key]}
-                      onChange={(v) => setForm({ ...form, [f.key]: v })}
-                      isClearable={false}
-                      isSearchable={false}
-                      compact
-                    />
+              <div className="pt-2 pb-1">
+                <div className="flex items-center justify-between gap-3 max-w-lg mx-auto">
+                  <span className="text-xs font-semibold text-slate-500 select-none shrink-0 w-24 text-left">
+                    Sangat Kurang
+                  </span>
+
+                  <div className="flex items-center justify-between flex-1 px-2 sm:px-6">
+                    {[1, 2, 3, 4, 5].map((val) => {
+                      const currentVal = typeof form.nilai_karakter === 'object' ? form.nilai_karakter?.value : form.nilai_karakter;
+                      const isSelected = Number(currentVal) === val;
+                      return (
+                        <label
+                          key={val}
+                          onClick={() => {
+                            const option = SCORE_OPTIONS.find((s) => s.value === val) || { value: val, label: `${val}` };
+                            setForm({
+                              ...form,
+                              nilai_karakter: option,
+                              aspek_ibadah: option,
+                              aspek_kedisiplinan: option,
+                              aspek_akhlak: option,
+                              aspek_partisipasi: option,
+                            });
+                          }}
+                          className="flex flex-col items-center gap-2 cursor-pointer group p-1.5"
+                        >
+                          <span className={`text-xs sm:text-sm font-bold transition-colors ${
+                            isSelected ? 'text-emerald-700' : 'text-slate-600 group-hover:text-slate-900'
+                          }`}>
+                            {val}
+                          </span>
+                          <div className={`h-6 w-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                            isSelected
+                              ? 'border-emerald-600 bg-emerald-600 shadow-xs'
+                              : 'border-slate-300 bg-white group-hover:border-slate-400'
+                          }`}>
+                            {isSelected && <div className="h-2 w-2 rounded-full bg-white" />}
+                          </div>
+                        </label>
+                      );
+                    })}
                   </div>
-                ))}
+
+                  <span className="text-xs font-semibold text-slate-500 select-none shrink-0 w-24 text-right">
+                    Sangat Baik
+                  </span>
+                </div>
               </div>
             </div>
           )}

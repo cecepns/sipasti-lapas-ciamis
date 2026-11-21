@@ -174,7 +174,7 @@ function evaluateSppnPpks(assessments = []) {
     rekomendasi = {
       code: 'direkomendasikan',
       kualifikasiAkhir: 2,
-      label: 'Memenuhi Syarat dan Direkomendasikan',
+      label: 'Direkomendasikan',
       shortLabel: 'Direkomendasikan',
       color: 'emerald',
       deskripsi: 'Nilai telah memenuhi seluruh standar penilaian dan pengajuan berhak mendapatkan rekomendasi.',
@@ -185,8 +185,8 @@ function evaluateSppnPpks(assessments = []) {
     rekomendasi = {
       code: 'direkomendasikan_dengan_catatan',
       kualifikasiAkhir: 1,
-      label: 'Memenuhi Syarat dengan Pertimbangan',
-      shortLabel: 'Dengan Pertimbangan',
+      label: 'Direkomendasikan dengan Pertimbangan',
+      shortLabel: 'Direkomendasikan dengan Pertimbangan',
       color: 'amber',
       deskripsi: 'Memenuhi syarat dasar penilaian dan berhak mendapatkan rekomendasi, namun dengan pertimbangan dan catatan khusus.',
       keterangan:
@@ -200,7 +200,7 @@ function evaluateSppnPpks(assessments = []) {
       code: 'tidak_direkomendasikan',
       kualifikasiAkhir: 0,
       label: 'Tidak Memenuhi Syarat',
-      shortLabel: 'Tidak Direkomendasikan',
+      shortLabel: 'Tidak Memenuhi Syarat',
       color: 'rose',
       deskripsi: 'Nilai belum memenuhi syarat dasar penilaian. Pengajuan tidak mendapatkan rekomendasi.',
       keterangan:
@@ -2043,12 +2043,15 @@ app.get('/api/dashboard/umum', authenticate, async (req, res, next) => {
       const wLogs = allAssessPeriod.filter((a) => a.wbp_id === w.id);
       const ev = evaluateSppnPpks(wLogs);
       rekomendasiCount[ev.rekomendasi.code] += 1;
+      const ppksVal = ev.ppks.nilaiPpks > 0
+        ? Number(ev.ppks.nilaiPpks)
+        : (ev.ppks.avgSkor > 0 ? Number((ev.ppks.avgSkor / 20).toFixed(2)) : 4.0);
       return {
         ...w,
         sppn_skor: ev.sppn.avgSkor,
         sppn_count: ev.sppn.count,
         sppn_status: ev.sppn.status,
-        ppks_skor: ev.ppks.avgSkor,
+        ppks_skor: ppksVal > 5.0 ? Number((ppksVal / 20).toFixed(2)) : ppksVal,
         ppks_count: ev.ppks.count,
         ppks_status: ev.ppks.status,
         rekomendasi: ev.rekomendasi,
@@ -2159,8 +2162,8 @@ app.get('/api/dashboard/umum', authenticate, async (req, res, next) => {
       ],
       sebaran_predikat: [
         { name: 'Direkomendasikan (Kual 2)', count: kual2Count, pct: Number(((kual2Count / totalActiveWbp) * 100).toFixed(1)), color: '#10b981' },
-        { name: 'Dg Pertimbangan (Kual 1)', count: kual1Count, pct: Number(((kual1Count / totalActiveWbp) * 100).toFixed(1)), color: '#f59e0b' },
-        { name: 'Tidak Memenuhi (Kual 0)', count: kual0Count, pct: Number(((kual0Count / totalActiveWbp) * 100).toFixed(1)), color: '#ef4444' },
+        { name: 'Direkomendasikan dengan Pertimbangan (Kual 1)', count: kual1Count, pct: Number(((kual1Count / totalActiveWbp) * 100).toFixed(1)), color: '#f59e0b' },
+        { name: 'Tidak Memenuhi Syarat (Kual 0)', count: kual0Count, pct: Number(((kual0Count / totalActiveWbp) * 100).toFixed(1)), color: '#ef4444' },
       ],
       pelaksanaan_line: [
         { hari: 'H-10', tw_berjalan: 92.0, tw_sebelumnya: 85.0 },
@@ -2177,7 +2180,10 @@ app.get('/api/dashboard/umum', authenticate, async (req, res, next) => {
     // BAGIAN TAMBAHAN (Analisis lebih dalam dan memahami hasil secara granular)
     const komparasi_scatter = (evaluatedWbp.length ? evaluatedWbp : activeWbpList).map((w, idx) => {
       const sppnVal = w.sppn_skor || (72 + (idx * 3) % 25);
-      const ppksVal = Number(w.ppks_skor || (3.6 + (idx * 0.15) % 1.4).toFixed(2));
+      let ppksVal = Number(w.ppks_skor || (3.6 + (idx * 0.15) % 1.4).toFixed(2));
+      if (ppksVal > 5.0) ppksVal = Number((ppksVal / 20).toFixed(2));
+      if (ppksVal < 1.0) ppksVal = 1.0;
+      if (ppksVal > 5.0) ppksVal = 5.0;
       const kual = sppnVal >= 70 ? (ppksVal >= 4.0 ? 2 : 1) : 0;
       return {
         id: w.id,
@@ -2185,7 +2191,7 @@ app.get('/api/dashboard/umum', authenticate, async (req, res, next) => {
         sppn: sppnVal,
         ppks: ppksVal,
         kualifikasi: kual,
-        predikat: kual === 2 ? 'Kualifikasi 2: Direkomendasikan' : kual === 1 ? 'Kualifikasi 1: Dg Pertimbangan' : 'Kualifikasi 0: Tidak Memenuhi',
+        predikat: kual === 2 ? 'Kualifikasi 2: Direkomendasikan' : kual === 1 ? 'Kualifikasi 1: Direkomendasikan dengan Pertimbangan' : 'Kualifikasi 0: Tidak Memenuhi Syarat',
         color: kual === 2 ? '#10b981' : kual === 1 ? '#f59e0b' : '#ef4444',
       };
     });
@@ -2450,7 +2456,7 @@ app.get('/api/dashboard/wbp', authenticate, async (req, res, next) => {
       },
       kualifikasi: {
         kualifikasi_akhir: kualVal,
-        predikat_label: kualVal === 2 ? 'Kualifikasi 2: Memenuhi Syarat & Direkomendasikan' : kualVal === 1 ? 'Kualifikasi 1: Dg Pertimbangan' : 'Kualifikasi 0: Tidak Memenuhi Syarat',
+        predikat_label: kualVal === 2 ? 'Kualifikasi 2: Direkomendasikan' : kualVal === 1 ? 'Kualifikasi 1: Direkomendasikan dengan Pertimbangan' : 'Kualifikasi 0: Tidak Memenuhi Syarat',
         deskripsi: kualVal === 2 ? 'Nilai telah memenuhi seluruh standar penilaian dan pengajuan berhak mendapatkan rekomendasi.' : kualVal === 1 ? 'Memenuhi syarat dasar penilaian dan berhak mendapatkan rekomendasi, namun dengan pertimbangan dan catatan khusus.' : 'Nilai belum memenuhi syarat dasar penilaian. Pengajuan tidak mendapatkan rekomendasi.',
         status_tren: 'Meningkat (+4.2% vs TW-III)',
       },

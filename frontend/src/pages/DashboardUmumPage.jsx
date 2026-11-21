@@ -166,9 +166,9 @@ export function DashboardUmumPage() {
       { name: 'Tidak Terlaksana (Absen)', count: 24, pct: 5.8, color: '#ef4444' },
     ],
     sebaran_predikat: [
-      { name: 'Kualifikasi 2 (Direkomendasikan)', count: 85, pct: 70.8, color: '#10b981' },
-      { name: 'Kualifikasi 1 (Pertimbangan)', count: 25, pct: 20.8, color: '#f59e0b' },
-      { name: 'Kualifikasi 0 (Tidak Memenuhi)', count: 10, pct: 8.4, color: '#ef4444' },
+      { name: 'Direkomendasikan (Kual 2)', count: 85, pct: 70.8, color: '#10b981' },
+      { name: 'Direkomendasikan dengan Pertimbangan (Kual 1)', count: 25, pct: 20.8, color: '#f59e0b' },
+      { name: 'Tidak Memenuhi Syarat (Kual 0)', count: 10, pct: 8.4, color: '#ef4444' },
     ],
     pelaksanaan_line: [
       { hari: 'H-10', tw_berjalan: 92.0, tw_sebelumnya: 85.0 },
@@ -186,11 +186,11 @@ export function DashboardUmumPage() {
     komparasi_scatter: [
       { id: 1, nama: 'Ahmad bin Zulkifli', sppn: 86, ppks: 4.45, kualifikasi: 2, predikat: 'Kualifikasi 2: Direkomendasikan', color: '#10b981' },
       { id: 2, nama: 'Budi Santoso', sppn: 81, ppks: 4.20, kualifikasi: 2, predikat: 'Kualifikasi 2: Direkomendasikan', color: '#10b981' },
-      { id: 3, nama: 'Cecep Sunandar', sppn: 74, ppks: 3.75, kualifikasi: 1, predikat: 'Kualifikasi 1: Dg Pertimbangan', color: '#f59e0b' },
-      { id: 4, nama: 'Dedi Kurniawan', sppn: 66, ppks: 3.60, kualifikasi: 0, predikat: 'Kualifikasi 0: Tidak Memenuhi', color: '#ef4444' },
+      { id: 3, nama: 'Cecep Sunandar', sppn: 74, ppks: 3.75, kualifikasi: 1, predikat: 'Kualifikasi 1: Direkomendasikan dengan Pertimbangan', color: '#f59e0b' },
+      { id: 4, nama: 'Dedi Kurniawan', sppn: 66, ppks: 3.60, kualifikasi: 0, predikat: 'Kualifikasi 0: Tidak Memenuhi Syarat', color: '#ef4444' },
       { id: 5, nama: 'Eko Prasetyo', sppn: 88, ppks: 4.60, kualifikasi: 2, predikat: 'Kualifikasi 2: Direkomendasikan', color: '#10b981' },
-      { id: 6, nama: 'Fajar Nugraha', sppn: 72, ppks: 3.85, kualifikasi: 1, predikat: 'Kualifikasi 1: Dg Pertimbangan', color: '#f59e0b' },
-      { id: 7, nama: 'Gunawan Wibowo', sppn: 63, ppks: 3.20, kualifikasi: 0, predikat: 'Kualifikasi 0: Tidak Memenuhi', color: '#ef4444' },
+      { id: 6, nama: 'Fajar Nugraha', sppn: 72, ppks: 3.85, kualifikasi: 1, predikat: 'Kualifikasi 1: Direkomendasikan dengan Pertimbangan', color: '#f59e0b' },
+      { id: 7, nama: 'Gunawan Wibowo', sppn: 63, ppks: 3.20, kualifikasi: 0, predikat: 'Kualifikasi 0: Tidak Memenuhi Syarat', color: '#ef4444' },
       { id: 8, nama: 'Hendra Saputra', sppn: 79, ppks: 4.15, kualifikasi: 2, predikat: 'Kualifikasi 2: Direkomendasikan', color: '#10b981' },
     ],
     tantangan_program: [
@@ -222,10 +222,10 @@ export function DashboardUmumPage() {
       { id: 2, nama: 'Ahmad bin Zulkifli', sppn: 86, ppks: 4.45, kualifikasi: 2, predikat: 'Kualifikasi 2: Direkomendasikan' },
       { id: 3, nama: 'Budi Santoso', sppn: 81, ppks: 4.20, kualifikasi: 2, predikat: 'Kualifikasi 2: Direkomendasikan' },
       { id: 4, nama: 'Hendra Saputra', sppn: 79, ppks: 4.15, kualifikasi: 2, predikat: 'Kualifikasi 2: Direkomendasikan' },
-      { id: 5, nama: 'Cecep Sunandar', sppn: 74, ppks: 3.75, kualifikasi: 1, predikat: 'Kualifikasi 1: Dg Pertimbangan' },
-      { id: 6, nama: 'Fajar Nugraha', sppn: 72, ppks: 3.85, kualifikasi: 1, predikat: 'Kualifikasi 1: Dg Pertimbangan' },
-      { id: 7, nama: 'Dedi Kurniawan', sppn: 66, ppks: 3.60, kualifikasi: 0, predikat: 'Kualifikasi 0: Tidak Memenuhi' },
-      { id: 8, nama: 'Gunawan Wibowo', sppn: 63, ppks: 3.20, kualifikasi: 0, predikat: 'Kualifikasi 0: Tidak Memenuhi' },
+      { id: 5, nama: 'Cecep Sunandar', sppn: 74, ppks: 3.75, kualifikasi: 1, predikat: 'Kualifikasi 1: Direkomendasikan dengan Pertimbangan' },
+      { id: 6, nama: 'Fajar Nugraha', sppn: 72, ppks: 3.85, kualifikasi: 1, predikat: 'Kualifikasi 1: Direkomendasikan dengan Pertimbangan' },
+      { id: 7, nama: 'Dedi Kurniawan', sppn: 66, ppks: 3.60, kualifikasi: 0, predikat: 'Kualifikasi 0: Tidak Memenuhi Syarat' },
+      { id: 8, nama: 'Gunawan Wibowo', sppn: 63, ppks: 3.20, kualifikasi: 0, predikat: 'Kualifikasi 0: Tidak Memenuhi Syarat' },
     ],
     tabel_tren: [
       { id: 7, nama: 'Gunawan Wibowo', sppn_ini: 63, sppn_lalu: 70, sppn_trend_pct: -10.0, ppks_ini: 3.20, ppks_lalu: 3.50, ppks_trend_pct: -8.6, status_tren: 'Menurun' },
@@ -632,7 +632,7 @@ export function DashboardUmumPage() {
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs lg:col-span-4 flex flex-col justify-between">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900">Sebaran Predikat Kualifikasi</h3>
-                  <p className="text-[11px] text-slate-400">Direkomendasikan, Dg Pertimbangan, Tidak Memenuhi</p>
+                  <p className="text-[11px] text-slate-400">Direkomendasikan, Direkomendasikan dengan Pertimbangan, Tidak Memenuhi Syarat</p>
                   <div className="h-44 mt-2">
                     <ResponsiveContainer width="100%" height="100%">
                       <PieChart>
@@ -761,7 +761,8 @@ export function DashboardUmumPage() {
                         type="number"
                         dataKey="ppks"
                         name="Nilai PPKS"
-                        domain={[2.5, 5.0]}
+                        domain={[1.0, 5.0]}
+                        ticks={[1.0, 2.0, 3.0, 4.0, 5.0]}
                         unit=""
                         tick={{ fontSize: 10 }}
                         label={{ value: 'Nilai PPKS (1 - 5)', angle: -90, position: 'insideLeft', fontSize: 11, fontWeight: 600 }}
@@ -786,8 +787,16 @@ export function DashboardUmumPage() {
                       />
                       <ReferenceLine x={70} stroke="#ef4444" strokeDasharray="3 3" label={{ value: 'Ambang SPPN (70)', fontSize: 10, fill: '#ef4444' }} />
                       <ReferenceLine y={4.0} stroke="#f59e0b" strokeDasharray="3 3" label={{ value: 'Ambang PPKS (4.00)', fontSize: 10, fill: '#f59e0b' }} />
-                      <Scatter data={bt.komparasi_scatter}>
-                        {bt.komparasi_scatter.map((entry, index) => (
+                      <Scatter
+                        data={(bt.komparasi_scatter || []).map((entry) => {
+                          let pVal = Number(entry.ppks);
+                          if (pVal > 5.0) pVal = Number((pVal / 20).toFixed(2));
+                          if (pVal < 1.0) pVal = 1.0;
+                          if (pVal > 5.0) pVal = 5.0;
+                          return { ...entry, ppks: pVal };
+                        })}
+                      >
+                        {(bt.komparasi_scatter || []).map((entry, index) => (
                           <Cell key={`cell-scatter-${index}`} fill={entry.color} />
                         ))}
                       </Scatter>

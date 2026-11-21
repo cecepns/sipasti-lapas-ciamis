@@ -214,7 +214,7 @@ export function PanduanPage({ isPublic = false }) {
                       </div>
                       <div className="rounded-lg bg-white p-2.5 border border-rose-200">
                         <span className="font-bold text-rose-800 block">Kualifikasi 0 (Kurang)</span>
-                        <span className="text-[11px] text-slate-500">Nilai SPPN &lt; 70 (Tidak Memenuhi)</span>
+                        <span className="text-[11px] text-slate-500">Nilai SPPN &lt; 70 (Tidak Memenuhi Syarat)</span>
                       </div>
                     </div>
                   </div>

@@ -478,7 +478,7 @@ export function LandingPage() {
                 <span className="text-xs text-slate-400">/ 100</span>
               </div>
               <span className="text-[11px] text-emerald-700 font-bold">
-                {compData.sppn >= 70 ? 'Memenuhi Syarat' : 'Tidak Memenuhi'}
+                {compData.sppn >= 70 ? 'Memenuhi Syarat' : 'Tidak Memenuhi Syarat'}
               </span>
             </div>
 
