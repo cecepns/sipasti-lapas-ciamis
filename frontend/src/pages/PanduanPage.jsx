@@ -30,9 +30,7 @@ import {
   Users,
   XCircle,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 import { INSTRUMEN_INFO, REKOMENDASI_RULES } from '@/utils/formatters';
-import { exportBukuPanduanPdf } from '@/utils/pdfGenerator';
 
 const CHAPTERS = [
   { id: 'konsep', label: '1. Rumus SPPN & PPKS', icon: BookOpen },
@@ -101,19 +99,6 @@ const ROLE_GUIDES = [
 
 export function PanduanPage({ isPublic = false }) {
   const [activeTab, setActiveTab] = useState('konsep');
-  const [downloading, setDownloading] = useState(false);
-
-  const handleDownloadPdf = async () => {
-    setDownloading(true);
-    try {
-      await exportBukuPanduanPdf();
-      toast.success('Buku Panduan SIPASTI (PDF) berhasil diunduh');
-    } catch {
-      toast.error('Gagal membuat PDF Buku Panduan');
-    } finally {
-      setDownloading(false);
-    }
-  };
 
   return (
     <div className={isPublic ? 'min-h-screen bg-slate-50 py-8 px-4' : ''}>
@@ -139,28 +124,16 @@ export function PanduanPage({ isPublic = false }) {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            <a
-              href="/sop-sipasti.pdf"
-              download="SOP SISTEM PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI (SI PASTI).pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-amber-700 transition-colors"
-            >
-              <FileDown className="h-4 w-4" />
-              Unduh Dokumen SOP (PDF)
-            </a>
-
-            <button
-              type="button"
-              onClick={handleDownloadPdf}
-              disabled={downloading}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-700 disabled:opacity-60 transition-colors"
-            >
-              <FileDown className="h-4 w-4" />
-              {downloading ? 'Menyiapkan PDF...' : 'Unduh Buku Panduan (PDF)'}
-            </button>
-          </div>
+          <a
+            href="/sop-sipasti.pdf"
+            download="SOP SISTEM PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI (SI PASTI).pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-800 transition-colors shrink-0"
+          >
+            <FileDown className="h-4 w-4" />
+            Unduh Dokumen SOP Resmi (PDF)
+          </a>
         </div>
 
         {/* Chapter Navigation */}

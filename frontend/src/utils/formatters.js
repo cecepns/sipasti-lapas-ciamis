@@ -27,7 +27,7 @@ export const REKOMENDASI_RULES = [
     label: 'Direkomendasikan',
     shortLabel: 'Direkomendasikan',
     color: 'emerald',
-    syarat: 'Kualifikasi SPPN Baik (≥ 70) DAN Kualifikasi PPKS Baik (≥ 4.0)',
+    syarat: 'Kualifikasi SPPN Baik (>= 70) DAN Kualifikasi PPKS Baik (>= 4.0)',
     arti: 'Nilai telah memenuhi seluruh standar penilaian dan pengajuan berhak mendapatkan rekomendasi.',
   },
   {
@@ -36,7 +36,7 @@ export const REKOMENDASI_RULES = [
     label: 'Direkomendasikan dengan Pertimbangan',
     shortLabel: 'Direkomendasikan dengan Pertimbangan',
     color: 'amber',
-    syarat: 'Kualifikasi SPPN Baik (≥ 70), namun nilai PPKS berada pada kategori Cukup/Kurang (< 4.0)',
+    syarat: 'Kualifikasi SPPN Baik (>= 70), namun nilai PPKS berada pada kategori Cukup/Kurang (< 4.0)',
     arti: 'Memenuhi syarat dasar penilaian dan berhak mendapatkan rekomendasi, namun dengan pertimbangan dan catatan khusus.',
   },
   {

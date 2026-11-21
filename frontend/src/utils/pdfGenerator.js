@@ -659,11 +659,24 @@ export async function exportBukuPanduanPdf() {
 
   // Halaman 2 untuk Panduan Dashboard, Peran & Face ID
   doc.addPage();
-  y = await drawOfficialHeader(
-    doc,
-    'Buku Panduan Penggunaan Aplikasi SI PASTI (Lanjutan)',
-    'Petunjuk Pembacaan Dashboard Analitik, Peran Pengguna & Biometrik Face ID'
-  );
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // Header Halaman Lanjutan (Tanpa Mengulang Kop Surat Penuh sesuai Standar Tata Naskah Dinas)
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(4, 120, 87);
+  doc.text('BUKU PANDUAN PENGGUNAAN APLIKASI SIPASTI — HALAMAN 2', 14, 14);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text('Lembaga Pemasyarakatan Kelas IIB Ciamis', pageWidth - 14, 14, { align: 'right' });
+
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.4);
+  doc.line(14, 17, pageWidth - 14, 17);
+
+  y = 24;
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
