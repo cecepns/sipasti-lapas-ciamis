@@ -266,8 +266,8 @@ export function AdminLayout() {
                 <Menu className="h-5 w-5" />
               </button>
               <img
-                src="/logo-kementerian.png"
-                alt="Pemasyarakatan"
+                src="/logo-kemenas.png"
+                alt="Logo Kementerian Imigrasi & Pemasyarakatan"
                 className="hidden sm:block h-8 w-8 rounded-lg object-contain bg-white border border-slate-100 p-0.5 shrink-0"
               />
               <div className="min-w-0">

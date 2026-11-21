@@ -13,12 +13,14 @@ import {
   LogIn,
   Mail,
   MapPin,
+  Menu,
   Phone,
   ScanFace,
   ShieldCheck,
   Sparkles,
   TrendingUp,
   Users,
+  X,
 } from 'lucide-react';
 import { request } from '@/utils/request';
 import { API_ENDPOINTS } from '@/utils/endpoints';
@@ -29,6 +31,7 @@ export function LandingPage() {
   const [selectedTw, setSelectedTw] = useState('tw4');
   const [selectedCompTw, setSelectedCompTw] = useState('tw3');
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -63,64 +66,140 @@ export function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur-md shadow-xs">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Link to="/" className="flex items-center gap-2.5">
-            <img
-              src="/logo-kemenas.png"
-              alt="Logo Kementerian Imigrasi & Pemasyarakatan"
-              className="h-10 w-10 rounded-xl object-contain bg-white border border-slate-100 p-0.5 shadow-xs"
-            />
-            <img
-              src="/logo-sipasti.png"
-              alt="Logo SIPASTI"
-              className="h-10 w-10 rounded-xl object-contain bg-white border border-emerald-100 p-0.5 shadow-xs"
-            />
-            <div>
-              <span className="block text-lg font-extrabold tracking-tight text-emerald-700 leading-none">
+          {/* Logo & Identity */}
+          <Link to="/" className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <img
+                src="/logo-kemenas.png"
+                alt="Logo Kementerian Imigrasi & Pemasyarakatan"
+                className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain bg-white border border-slate-200/80 p-0.5 shadow-xs"
+              />
+              <img
+                src="/logo-sipasti.png"
+                alt="Logo SIPASTI"
+                className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl object-contain bg-white border border-emerald-200/80 p-0.5 shadow-xs"
+              />
+            </div>
+            <div className="shrink-0">
+              <span className="block text-base sm:text-lg font-black tracking-tight text-emerald-800 leading-none">
                 SIPASTI
               </span>
-              <span className="block text-[11px] font-semibold text-slate-500 mt-0.5">
+              <span className="block text-[10px] sm:text-[11px] font-bold text-slate-500 mt-0.5 whitespace-nowrap">
                 Lapas Kelas IIB Ciamis
               </span>
             </div>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
-            <a href="#instrumen" className="hover:text-emerald-700 transition-colors">
-              Instrumen SPPN & PPKS
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-5 xl:gap-8 text-xs xl:text-sm font-bold text-slate-600">
+            <a href="#instrumen" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
+              Instrumen SPPN &amp; PPKS
             </a>
-            <a href="#ringkasan" className="hover:text-emerald-700 transition-colors">
+            <a href="#ringkasan" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
               Ringkasan Triwulan
             </a>
-            <a href="#program" className="hover:text-emerald-700 transition-colors">
+            <a href="#program" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
               Program Pembinaan
             </a>
-            <Link to="/panduan" className="hover:text-emerald-700 transition-colors">
+            <Link to="/panduan" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
               Buku Panduan
             </Link>
-            <Link to="/registrasi-mitra" className="hover:text-emerald-700 transition-colors">
+            <Link to="/registrasi-mitra" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
               Registrasi Mitra
             </Link>
           </nav>
 
-          <div className="flex items-center gap-2">
+          {/* Action Buttons & Mobile Toggle */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <Link
               to="/absensi-kiosk"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs sm:text-sm font-semibold text-emerald-700 hover:bg-emerald-100 transition-colors"
+              className="hidden sm:inline-flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50/80 px-3.5 py-2 text-xs sm:text-sm font-bold text-emerald-800 hover:bg-emerald-100 transition-colors whitespace-nowrap shadow-xs"
             >
-              <ScanFace className="h-4 w-4" />
-              <span className="hidden sm:inline">Absensi Face ID</span>
+              <ScanFace className="h-4 w-4 text-emerald-700 shrink-0" />
+              <span>Absensi Face ID</span>
             </Link>
             <Link
               to="/login"
-              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm shadow-emerald-600/20 hover:bg-emerald-700 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-700 px-4 py-2 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-800 transition-colors whitespace-nowrap shrink-0"
             >
-              <LogIn className="h-4 w-4" />
+              <LogIn className="h-4 w-4 shrink-0" />
               <span>Masuk Portal</span>
             </Link>
+
+            {/* Mobile Hamburger Button */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
+              aria-label="Toggle Menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Dropdown Menu (Clean & Smooth) */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t border-slate-200 bg-white px-4 pt-3 pb-5 space-y-3 shadow-lg">
+            <div className="flex flex-col space-y-1 text-sm font-bold text-slate-700">
+              <a
+                href="#instrumen"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-emerald-700 transition-colors"
+              >
+                Instrumen SPPN &amp; PPKS
+              </a>
+              <a
+                href="#ringkasan"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-emerald-700 transition-colors"
+              >
+                Ringkasan Triwulan
+              </a>
+              <a
+                href="#program"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-emerald-700 transition-colors"
+              >
+                Program Pembinaan
+              </a>
+              <Link
+                to="/panduan"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-emerald-700 transition-colors"
+              >
+                Buku Panduan
+              </Link>
+              <Link
+                to="/registrasi-mitra"
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-3 py-2.5 rounded-xl hover:bg-slate-50 hover:text-emerald-700 transition-colors"
+              >
+                Registrasi Mitra
+              </Link>
+            </div>
+            <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
+              <Link
+                to="/absensi-kiosk"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 text-xs font-bold text-emerald-800"
+              >
+                <ScanFace className="h-4 w-4" />
+                Absensi Face ID
+              </Link>
+              <Link
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-xs font-bold text-white shadow-xs"
+              >
+                <LogIn className="h-4 w-4" />
+                Masuk Portal Petugas
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Hero Section */}
