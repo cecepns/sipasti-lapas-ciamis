@@ -170,9 +170,25 @@ export async function exportWbpProfilePdf(detail, dateRange = {}) {
   );
 
   const ringkasan = detail.ringkasan || {};
-  const sppn = ringkasan.sppn || { avgSkor: 0, count: 0, ya: 0, status: 'Belum Dinilai' };
-  const ppks = ringkasan.ppks || { avgSkor: 0, count: 0, ya: 0, status: 'Belum Dinilai' };
-  const rek = ringkasan.rekomendasi || { label: '-', keterangan: '-', color: 'slate' };
+  const sppn = ringkasan.sppn || {
+    avgSkor: detail.sppn?.nilai ?? 0,
+    count: detail.sppn?.count ?? 0,
+    ya: detail.sppn?.ya ?? 0,
+    status: detail.sppn?.predikat || (detail.sppn?.nilai >= 70 ? 'Memenuhi Syarat' : 'Belum Memenuhi'),
+    avgKarakter: detail.sppn?.avgKarakter || '-',
+  };
+  const ppks = ringkasan.ppks || {
+    avgSkor: detail.ppks?.nilai ?? 0,
+    count: detail.ppks?.count ?? 0,
+    ya: detail.ppks?.ya ?? 0,
+    status: detail.ppks?.predikat || (detail.ppks?.nilai >= 4.0 ? 'Baik' : 'Cukup'),
+    avgKarakter: detail.ppks?.nilai ? `${detail.ppks.nilai}/5` : '-',
+  };
+  const rek = ringkasan.rekomendasi || (detail.kualifikasi ? {
+    label: detail.kualifikasi.predikat_label || (detail.kualifikasi.kualifikasi_akhir === 2 ? 'Memenuhi Syarat & Direkomendasikan' : detail.kualifikasi.kualifikasi_akhir === 1 ? 'Direkomendasikan dengan Pertimbangan' : 'Tidak Memenuhi Syarat'),
+    keterangan: detail.kualifikasi.deskripsi || '-',
+    color: detail.kualifikasi.kualifikasi_akhir === 2 ? 'emerald' : detail.kualifikasi.kualifikasi_akhir === 1 ? 'amber' : 'rose',
+  } : { label: '-', keterangan: '-', color: 'slate' });
 
   // WBP Profile Photo box (left: 30mm x 38mm) + Biodata table (right)
   const photoX = 14;

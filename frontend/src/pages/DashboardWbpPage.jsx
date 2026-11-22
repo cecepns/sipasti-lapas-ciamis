@@ -152,7 +152,14 @@ export function DashboardWbpPage({ isEmbedded = false }) {
     setExporting(true);
     try {
       const res = await request.get(API_ENDPOINTS.WBP.DETAIL(dashboardData.identitas?.id || 1));
-      await exportWbpProfilePdf(res.data || dashboardData.identitas);
+      const payload = {
+        ...(res.data || {}),
+        identitas: dashboardData.identitas,
+        kualifikasi: dashboardData.kualifikasi,
+        sppn: dashboardData.sppn,
+        ppks: dashboardData.ppks,
+      };
+      await exportWbpProfilePdf(payload);
       toast.success(`Rapor Evaluasi WBP ${dashboardData.identitas?.nama || ''} berhasil diekspor`);
     } catch (err) {
       toast.error(extractErrorMessage(err, 'Gagal mengekspor PDF WBP'));
@@ -538,7 +545,7 @@ export function DashboardWbpPage({ isEmbedded = false }) {
               <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xs flex flex-col justify-between">
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                    Kualifikasi Akhir
+                    Perhitungan Kualifikasi Berjalan
                   </div>
                   <div className="flex items-center gap-2">
                     <span

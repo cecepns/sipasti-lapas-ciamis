@@ -67,13 +67,66 @@ export function LandingPage() {
     };
   }, [selectedTw]);
 
-  const twList = summary?.triwulan_list || [
-    { id: 'tw4', label: 'Triwulan IV (Berjalan)', wbp_aktif: 120, pelaksanaan: 94.2, sppn: 82.4, ppks: 4.35, status: 'Aktif' },
-    { id: 'tw3', label: 'Triwulan III', wbp_aktif: 118, pelaksanaan: 90.0, sppn: 78.2, ppks: 4.15, status: 'Selesai' },
-    { id: 'tw2', label: 'Triwulan II', wbp_aktif: 115, pelaksanaan: 88.5, sppn: 76.8, ppks: 4.02, status: 'Selesai' },
-    { id: 'tw1', label: 'Triwulan I', wbp_aktif: 110, pelaksanaan: 85.0, sppn: 74.5, ppks: 3.95, status: 'Selesai' },
+  const twList = [
+    {
+      id: 'tw4',
+      label: 'Triwulan IV (Berjalan)',
+      wbp_aktif: summary?.wbp_aktif ?? 120,
+      total_wbp: summary?.total_wbp ?? 120,
+      pelaksanaan: summary?.tingkat_pelaksanaan ?? 94.2,
+      terlaksana: summary?.terlaksana ?? 360,
+      total_sesi: summary?.total_penilaian ?? 384,
+      sppn: summary?.rata_sppn ?? 82.4,
+      ppks: summary?.rata_ppks_5 ?? 4.35,
+      trend: '+4.2% vs TW-III (hari ke-50)',
+      status: 'Aktif',
+      rekomendasi: 114,
+    },
+    {
+      id: 'tw3',
+      label: 'Triwulan III',
+      wbp_aktif: 118,
+      total_wbp: 118,
+      pelaksanaan: 90.0,
+      terlaksana: 342,
+      total_sesi: 380,
+      sppn: 78.2,
+      ppks: 4.15,
+      trend: '+3.5% vs TW-II',
+      status: 'Selesai',
+      rekomendasi: 108,
+    },
+    {
+      id: 'tw2',
+      label: 'Triwulan II',
+      wbp_aktif: 115,
+      total_wbp: 115,
+      pelaksanaan: 88.5,
+      terlaksana: 330,
+      total_sesi: 373,
+      sppn: 76.8,
+      ppks: 4.02,
+      trend: '+2.8% vs TW-I',
+      status: 'Selesai',
+      rekomendasi: 102,
+    },
+    {
+      id: 'tw1',
+      label: 'Triwulan I',
+      wbp_aktif: 110,
+      total_wbp: 110,
+      pelaksanaan: 85.0,
+      terlaksana: 306,
+      total_sesi: 360,
+      sppn: 74.5,
+      ppks: 3.95,
+      trend: 'Baseline',
+      status: 'Selesai',
+      rekomendasi: 95,
+    },
   ];
 
+  const currentTw = twList.find((t) => t.id === selectedTw) || twList[0];
   const compData = twList.find((t) => t.id === selectedCompTw) || twList[1];
 
   return (
@@ -116,8 +169,12 @@ export function LandingPage() {
             <Link to="/panduan" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
               Buku Panduan
             </Link>
-            <Link to="/registrasi-mitra" className="whitespace-nowrap hover:text-emerald-700 transition-colors py-1">
-              Registrasi Mitra
+            <Link
+              to="/registrasi-mitra"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-600/30 bg-emerald-50 px-3.5 py-1.5 text-xs font-bold text-emerald-800 shadow-xs hover:bg-emerald-100 hover:border-emerald-600/60 transition-all whitespace-nowrap"
+            >
+              <Handshake className="h-3.5 w-3.5 text-emerald-600" />
+              <span>Registrasi Mitra</span>
             </Link>
           </nav>
 
@@ -264,15 +321,15 @@ export function LandingPage() {
                 <span className="truncate sm:whitespace-normal">Lembaga Pemasyarakatan Kelas IIB Ciamis</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
-                Sistem Informasi Penilaian Aktivitas Spiritual Terintegrasi{' '}
-                <span className="text-amber-300">(SI PASTI)</span>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+                SI PASTI
+                <span className="block text-xl sm:text-2xl lg:text-3xl font-bold text-amber-300 mt-1 sm:mt-2">
+                  (Sistem Informasi Penilaian Aktivitas Spiritual Terintegrasi)
+                </span>
               </h1>
 
               <p className="text-sm sm:text-base text-emerald-100/90 leading-relaxed max-w-2xl">
-                Platform digital pemasyarakatan terpadu untuk pencatatan kehadiran biometrik Face ID,
-                evaluasi penilaian pembinaan spiritual berbasis instrumen SPPN (Nilai Utama) & PPKS
-                (Kualitatif Komplementer), serta penerbitan rapor objektif pengusulan hak remisi dan integrasi.
+                Digitalisasi Pembinaan Spiritual Lapas Kelas IIB Ciamis SI PASTI merupakan sistim terpadu tata kelola pendataan aktivitas keagamaan warga binaan yang terstruktur, terukur, dan transparan. Melalui pendekatan berbasis data (data-driven) untuk menjamin penilaian pembinaan kepribadian secara adil dan akuntabel sebagai dasar pertimbangan hak remisi dan program integrasi.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-1">
@@ -364,8 +421,7 @@ export function LandingPage() {
                 Sistem Penilaian Pembinaan Narapidana
               </h3>
               <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Instrumen kuantitatif utama berbasis pengamatan perilaku dan kehadiran pembinaan narapidana.
-                Menjadi syarat mutlak pengusulan hak integrasi (PB, CB, CMB) dan remisi.
+                Sistem penilaian yang digunakan untuk mengukur, mencatat, dan mengevaluasi keaktifan serta perkembangan perilaku narapidana selama mengikuti program pembinaan. Sebagai dasar objektif dan terverifikasi dalam mempertimbangkan hak-hak narapidana, seperti pengusulan remisi dan program integrasi
               </p>
               <div className="mt-4 grid grid-cols-2 gap-3 text-xs bg-white rounded-2xl p-3.5 border border-emerald-100">
                 <div>
@@ -404,8 +460,7 @@ export function LandingPage() {
                 Penilaian Pembinaan Kepribadian Spiritual
               </h3>
               <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Instrumen pendukung kualitatif dari Wali PAS & Mitra Keagamaan untuk memantau penghayatan
-                spiritual melalui 5 sub-indikator karakter. Menentukan rekomendasi tanpa catatan vs dengan pertimbangan.
+                Instrumen evaluasi kualitatif komplementer yang dirancang untuk mengukur dan mendokumentasikan perubahan sikap, kedisiplinan, serta penghayatan nilai-nilai keagamaan warga binaan secara mendalam. PPKS sebagai data pendukung SPPN agar penilaian lebih komprehensif, transparan, dan objektif.
               </p>
               <div className="mt-4 grid grid-cols-2 gap-3 text-xs bg-white rounded-2xl p-3.5 border border-amber-100">
                 <div>
@@ -423,7 +478,7 @@ export function LandingPage() {
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-amber-100 flex items-center justify-between text-xs text-amber-800 font-medium">
-              <span>Status: Tidak menggantikan SPPN</span>
+              <span>Status: Instrumen kualitatif komplementer</span>
               <span className="font-bold">Kualifikasi: 2 / 1 / 0</span>
             </div>
           </div>
@@ -439,7 +494,7 @@ export function LandingPage() {
               Periode Evaluasi Terkini
             </span>
             <h2 className="text-2xl font-extrabold text-slate-900 mt-1">
-              Ringkasan Capaian Triwulan IV (Berjalan)
+              Ringkasan Capaian {currentTw.label}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
               Monitoring akumulatif program pembinaan spiritual Lapas Kelas IIB Ciamis
@@ -478,10 +533,10 @@ export function LandingPage() {
               </div>
             </div>
             <p className="mt-3 text-3xl font-extrabold text-slate-900">
-              {loading ? '...' : formatNumber(summary?.wbp_aktif ?? 120)}
+              {loading && selectedTw === 'tw4' && !summary ? '...' : formatNumber(currentTw.wbp_aktif)}
             </p>
             <p className="mt-1 text-xs text-slate-500">
-              Total terdaftar: {formatNumber(summary?.total_wbp ?? 120)} WBP aktif
+              Total terdaftar: {formatNumber(currentTw.total_wbp)} WBP aktif
             </p>
           </div>
 
@@ -495,17 +550,15 @@ export function LandingPage() {
             </div>
             <div className="mt-3 flex items-baseline gap-2">
               <p className="text-3xl font-extrabold text-slate-900">
-                {loading ? '...' : `${summary?.tingkat_pelaksanaan ?? 94.2}%`}
+                {currentTw.pelaksanaan}%
               </p>
               <span className="inline-flex items-center gap-0.5 rounded-md bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
                 <TrendingUp className="h-3 w-3" />
-                {typeof summary?.trend === 'object'
-                  ? (summary.trend?.label || summary.trend?.pct_change || '+4.2% vs TW-III (hari ke-50)')
-                  : (summary?.trend || '+4.2% vs TW-III (hari ke-50)')}
+                {currentTw.trend}
               </span>
             </div>
             <p className="mt-1 text-xs text-slate-500">
-              {formatNumber(summary?.terlaksana ?? 360)} dari {formatNumber(summary?.total_penilaian ?? 384)} sesi terpenuhi
+              {formatNumber(currentTw.terlaksana)} dari {formatNumber(currentTw.total_sesi)} sesi terpenuhi
             </p>
           </div>
 
@@ -519,11 +572,11 @@ export function LandingPage() {
             </div>
             <div className="mt-3 flex items-baseline gap-2">
               <p className="text-3xl font-extrabold text-slate-900">
-                {loading ? '...' : (summary?.rata_sppn ?? 82.4)}
+                {currentTw.sppn}
               </p>
               <span className="text-xs font-bold text-slate-400">/ 100</span>
               <span className="rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-1.5 py-0.5">
-                Memenuhi (≥70)
+                {currentTw.sppn >= 70 ? 'Memenuhi (≥70)' : 'Kurang (<70)'}
               </span>
             </div>
             <p className="mt-1 text-xs text-slate-500">
@@ -541,11 +594,11 @@ export function LandingPage() {
             </div>
             <div className="mt-3 flex items-baseline gap-2">
               <p className="text-3xl font-extrabold text-slate-900">
-                {loading ? '...' : (summary?.rata_ppks_5 ?? 4.35)}
+                {currentTw.ppks}
               </p>
               <span className="text-xs font-bold text-slate-400">/ 5.00</span>
               <span className="rounded-md bg-amber-100 text-amber-800 text-[10px] font-extrabold px-1.5 py-0.5">
-                Baik (≥4.00)
+                {currentTw.ppks >= 4.0 ? 'Baik (≥4.00)' : 'Cukup (<4.00)'}
               </span>
             </div>
             <p className="mt-1 text-xs text-slate-500">
@@ -554,7 +607,7 @@ export function LandingPage() {
           </div>
         </div>
 
-        {/* [REV0005] Section di Bawah TW-IV: Tampilkan Ringkasan TW-III (Sebelumnya) + Selector TW-II & TW-I */}
+        {/* [REV0005] Section di Bawah TW-IV: Tampilkan Komparasi Triwulan + Selector */}
         <div className="mt-8 rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-100 via-white to-slate-100/70 p-6 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
             <div>
@@ -562,71 +615,95 @@ export function LandingPage() {
                 Perbandingan Historis
               </span>
               <h3 className="text-lg font-black text-slate-900 mt-0.5">
-                Ringkasan Capaian Triwulan Sebelumnya
+                Komparasi Capaian Triwulan ({compData.label})
               </h3>
             </div>
 
-            {/* Selector untuk Triwulan Sebelumnya */}
+            {/* Selector untuk Triwulan Komparasi (Mendukung Seluruh Triwulan) */}
             <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 max-w-full">
               <span className="text-xs font-bold text-slate-600 shrink-0">Pilih Triwulan:</span>
               <div className="w-full xs:w-auto overflow-x-auto pb-1 max-w-full">
                 <div className="inline-flex rounded-xl bg-slate-200/80 p-1 text-xs font-bold whitespace-nowrap">
-                  {twList
-                    .filter((t) => t.id !== 'tw4')
-                    .map((t) => (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => setSelectedCompTw(t.id)}
-                        className={`rounded-lg px-3 py-1 transition-all whitespace-nowrap ${
-                          selectedCompTw === t.id
-                            ? 'bg-slate-800 text-white shadow-xs'
-                            : 'text-slate-600 hover:text-slate-900'
-                        }`}
-                      >
-                        {t.label}
-                      </button>
-                    ))}
+                  {twList.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => setSelectedCompTw(t.id)}
+                      className={`rounded-lg px-3 py-1 transition-all whitespace-nowrap ${
+                        selectedCompTw === t.id
+                          ? 'bg-slate-800 text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900'
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-4 mt-5">
-            <div className="rounded-2xl bg-white p-4 border border-slate-200">
-              <span className="text-xs text-slate-500 font-semibold">Periode Pembanding</span>
-              <p className="text-base font-extrabold text-slate-900 mt-1">{compData.label}</p>
-              <span className="inline-block mt-2 rounded bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5">
-                Status: {compData.status}
-              </span>
-            </div>
-
-            <div className="rounded-2xl bg-white p-4 border border-slate-200">
-              <span className="text-xs text-slate-500 font-semibold">WBP Aktif Terbina</span>
-              <p className="text-2xl font-black text-slate-900 mt-1">{compData.wbp_aktif} WBP</p>
-              <p className="text-[11px] text-slate-400 mt-1">Tercatat di periode akhir</p>
-            </div>
-
-            <div className="rounded-2xl bg-white p-4 border border-slate-200">
-              <span className="text-xs text-slate-500 font-semibold">x̄ Nilai SPPN</span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-black text-emerald-700">{compData.sppn}</span>
-                <span className="text-xs text-slate-400">/ 100</span>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mt-5">
+            {/* Card 1: Rekomendasi (Sum WBP Kualifikasi akhir Direkomendasikan + Direkomendasikan dengan Pertimbangan) */}
+            <div className="rounded-2xl bg-white p-5 border border-slate-200 flex flex-col justify-between shadow-xs">
+              <div>
+                <span className="text-xs text-slate-500 font-semibold block">Rekomendasi</span>
+                <span className="text-[10px] text-slate-400 font-medium block leading-tight mt-0.5">
+                  (Sum WBP Kualifikasi akhir Direkomendasikan + Direkomendasikan dengan Pertimbangan)
+                </span>
+                <p className="text-3xl font-black text-slate-900 mt-2">{compData.rekomendasi} <span className="text-sm font-bold text-slate-500">WBP</span></p>
               </div>
-              <span className="text-[11px] text-emerald-700 font-bold">
-                {compData.sppn >= 70 ? 'Memenuhi Syarat' : 'Tidak Memenuhi Syarat'}
-              </span>
+              <p className="text-[11px] text-emerald-700 font-semibold mt-2 pt-2 border-t border-slate-100">
+                {compData.rekomendasi} dari {compData.wbp_aktif} WBP ({((compData.rekomendasi / compData.wbp_aktif) * 100).toFixed(1)}%)
+              </p>
             </div>
 
-            <div className="rounded-2xl bg-white p-4 border border-slate-200">
-              <span className="text-xs text-slate-500 font-semibold">x̄ Nilai PPKS</span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-black text-amber-700">{compData.ppks}</span>
-                <span className="text-xs text-slate-400">/ 5.00</span>
+            {/* Card 2: % Pelaksanaan */}
+            <div className="rounded-2xl bg-white p-5 border border-slate-200 flex flex-col justify-between shadow-xs">
+              <div>
+                <span className="text-xs text-slate-500 font-semibold block">% Pelaksanaan</span>
+                <span className="text-[10px] text-slate-400 font-medium block leading-tight mt-0.5">
+                  Tingkat partisipasi kegiatan pembinaan
+                </span>
+                <p className="text-3xl font-black text-sky-700 mt-2">{compData.pelaksanaan}%</p>
               </div>
-              <span className="text-[11px] text-amber-700 font-bold">
-                {compData.ppks >= 4.0 ? 'Kualifikasi Baik' : 'Kualifikasi Cukup'}
-              </span>
+              <p className="text-[11px] text-slate-500 font-semibold mt-2 pt-2 border-t border-slate-100">
+                {compData.terlaksana} dari {compData.total_sesi} sesi terpenuhi
+              </p>
+            </div>
+
+            {/* Card 3: x̄ SPPN */}
+            <div className="rounded-2xl bg-white p-5 border border-slate-200 flex flex-col justify-between shadow-xs">
+              <div>
+                <span className="text-xs text-slate-500 font-semibold block">x̄ SPPN</span>
+                <span className="text-[10px] text-slate-400 font-medium block leading-tight mt-0.5">
+                  Rata-rata Skor SPPN (Ambang Batas ≥ 70)
+                </span>
+                <div className="flex items-baseline gap-1.5 mt-2">
+                  <span className="text-3xl font-black text-emerald-700">{compData.sppn}</span>
+                  <span className="text-xs text-slate-400 font-bold">/ 100</span>
+                </div>
+              </div>
+              <p className="text-[11px] font-bold mt-2 pt-2 border-t border-slate-100 text-emerald-700">
+                {compData.sppn >= 70 ? 'Memenuhi Syarat (≥ 70)' : 'Belum Memenuhi (< 70)'}
+              </p>
+            </div>
+
+            {/* Card 4: x̄ PPKS */}
+            <div className="rounded-2xl bg-white p-5 border border-slate-200 flex flex-col justify-between shadow-xs">
+              <div>
+                <span className="text-xs text-slate-500 font-semibold block">x̄ PPKS</span>
+                <span className="text-[10px] text-slate-400 font-medium block leading-tight mt-0.5">
+                  Rata-rata Indeks Karakter (Standar Mutu ≥ 4.00)
+                </span>
+                <div className="flex items-baseline gap-1.5 mt-2">
+                  <span className="text-3xl font-black text-amber-700">{compData.ppks}</span>
+                  <span className="text-xs text-slate-400 font-bold">/ 5.00</span>
+                </div>
+              </div>
+              <p className="text-[11px] font-bold mt-2 pt-2 border-t border-slate-100 text-amber-700">
+                {compData.ppks >= 4.0 ? 'Kualifikasi Baik (≥ 4.00)' : 'Kualifikasi Cukup (< 4.00)'}
+              </p>
             </div>
           </div>
         </div>

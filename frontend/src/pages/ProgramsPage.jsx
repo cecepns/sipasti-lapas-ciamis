@@ -207,7 +207,7 @@ export function ProgramsPage() {
 
       {/* Filter Bar */}
       <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs grid gap-3 md:grid-cols-12">
-        <div className="md:col-span-4">
+        <div className="md:col-span-5">
           <SearchInput
             value={search}
             onChange={(v) => {
@@ -227,19 +227,7 @@ export function ProgramsPage() {
             }}
           />
         </div>
-        <div className="md:col-span-2">
-          <SelectInput
-            options={KATEGORI_OPTIONS}
-            value={filterKategori}
-            onChange={(v) => {
-              setFilterKategori(v);
-              resetPage();
-            }}
-            placeholder="Kategori (SPPN/PPKS)"
-            isSearchable={false}
-          />
-        </div>
-        <div className="md:col-span-2">
+        <div className="md:col-span-3">
           <SelectInput
             options={STATUS_OPTIONS}
             value={filterStatus}
@@ -270,11 +258,10 @@ export function ProgramsPage() {
                 <thead className="bg-slate-50 border-b border-slate-200 text-xs font-bold uppercase text-slate-500">
                   <tr>
                     <th className="px-4 py-3.5">Program</th>
-                    <th className="px-4 py-3.5 text-center">Kategori</th>
-                    <th className="px-4 py-3.5 text-center">Bobot</th>
-                    <th className="px-4 py-3.5 text-center">Target / Bulan</th>
-                    {/* [REV0043] Header Jadwal (Lokasi Dihapus) */}
-                    <th className="px-4 py-3.5">Jadwal</th>
+                    <th className="px-4 py-3.5 text-center">Instrumen SPPN (Bobot &amp; Target)</th>
+                    <th className="px-4 py-3.5 text-center">Instrumen PPKS (Karakter)</th>
+                    {/* Header Jadwal */}
+                    <th className="px-4 py-3.5">Jadwal Pelaksanaan</th>
                     <th className="px-4 py-3.5 text-center">Status</th>
                     {isAdmin && <th className="px-4 py-3.5 text-right">Aksi</th>}
                   </tr>
@@ -287,23 +274,16 @@ export function ProgramsPage() {
                         <p className="text-xs text-slate-400 font-mono mt-0.5">{item.kode_program}</p>
                       </td>
                       <td className="px-4 py-3.5 text-center">
-                        <span
-                          className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-extrabold border ${
-                            item.kategori === 'SPPN'
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                              : 'bg-amber-50 text-amber-800 border-amber-300'
-                          }`}
-                        >
-                          {item.kategori || 'SPPN'}
+                        <div className="inline-flex flex-col items-center">
+                          <span className="font-black text-emerald-800 text-sm">{item.bobot}%</span>
+                          <span className="text-[11px] text-slate-500 font-semibold">{item.target_bulanan} sesi / bln</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3.5 text-center">
+                        <span className="inline-block rounded-full px-2.5 py-0.5 text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                          Skala 1 - 5 (Komplementer)
                         </span>
                       </td>
-                      <td className="px-4 py-3.5 text-center font-black text-emerald-800">
-                        {item.bobot}%
-                      </td>
-                      <td className="px-4 py-3.5 text-center font-bold text-slate-700">
-                        {item.target_bulanan} sesi
-                      </td>
-                      {/* [REV0043] Kolom Jadwal tanpa lokasi */}
                       <td className="px-4 py-3.5 text-xs text-slate-700 font-medium">
                         {item.jadwal || 'Terjadwal rutin'}
                       </td>
@@ -349,12 +329,12 @@ export function ProgramsPage() {
         )}
       </div>
 
-      {/* [REV0044] Modal Dialog Form (Input Lokasi Dihapus) */}
+      {/* Modal Dialog Form (Kategori Dihapus, Lokasi Dihapus) */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title={form.id ? 'Edit Program Pembinaan Spiritual' : 'Tambah Program Pembinaan Spiritual'}
-        subtitle="Alokasikan kategori (SPPN / PPKS) dan bobot penilaian program"
+        subtitle="Konfigurasi bobot penilaian dan target pelaksanaan program spiritual"
         size="lg"
       >
         <form onSubmit={handleSave} className="space-y-4">
@@ -383,20 +363,9 @@ export function ProgramsPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              {/* [REV0040] Opsi kategori hanya SPPN atau PPKS */}
-              <label className="block text-xs font-bold text-slate-700 mb-1">Kategori Instrumen *</label>
-              <SelectInput
-                options={KATEGORI_OPTIONS}
-                value={form.kategori}
-                onChange={(v) => setForm({ ...form, kategori: v })}
-                isClearable={false}
-                isSearchable={false}
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Bobot Penilaian (%) *</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Bobot Penilaian SPPN (%) *</label>
               <input
                 type="number"
                 min="1"

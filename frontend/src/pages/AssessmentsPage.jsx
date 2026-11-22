@@ -112,7 +112,7 @@ export function AssessmentsPage() {
     const res = await request.get(API_ENDPOINTS.PROGRAMS.LIST, { search: q, limit: 25, status: 'aktif' });
     return (res.data || []).map((p) => ({
       value: p.id,
-      label: `${p.nama_program} [${p.kategori || 'SPPN'}] (Bobot ${p.bobot}%)`,
+      label: p.nama_program,
       kategori: p.kategori,
       bobot: p.bobot,
     }));
@@ -172,7 +172,7 @@ export function AssessmentsPage() {
       wbp: { value: item.wbp_id, label: `${item.wbp_nama} (${item.wbp_no_registrasi})` },
       program: {
         value: item.program_id,
-        label: `${item.nama_program} [${item.program_kategori || item.jenis_penilaian}] (Bobot ${item.program_bobot}%)`,
+        label: item.nama_program,
         kategori: item.program_kategori || item.jenis_penilaian,
       },
       asesor: { value: item.asesor_id, label: `${item.asesor_nama} (${item.asesor_role || 'Asesor'})` },
@@ -429,9 +429,9 @@ export function AssessmentsPage() {
                     <th className="px-4 py-3.5">WBP</th>
                     <th className="px-4 py-3.5">Program</th>
                     <th className="px-4 py-3.5">Asesor</th>
-                    <th className="px-4 py-3.5 text-center">Pelaksanaan</th>
+                    <th className="px-4 py-3.5 text-center">SPPN (Pelaksanaan)</th>
                     <th className="px-4 py-3.5">Keterangan Kegiatan</th>
-                    <th className="px-4 py-3.5 text-center">Penilaian Karakter</th>
+                    <th className="px-4 py-3.5 text-center">PPKS (Karakter)</th>
                     <th className="px-4 py-3.5 text-center">Validasi Kasubsi</th>
                     <th className="px-4 py-3.5 text-right">Aksi</th>
                   </tr>
@@ -458,14 +458,8 @@ export function AssessmentsPage() {
                         {/* Program */}
                         <td className="px-4 py-3.5">
                           <p className="font-bold text-slate-900">{item.nama_program}</p>
-                          <span
-                            className={`inline-block text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded border mt-0.5 ${
-                              item.jenis_penilaian === 'SPPN'
-                                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                                : 'bg-amber-50 border-amber-200 text-amber-800'
-                            }`}
-                          >
-                            {item.jenis_penilaian || 'SPPN'} • Bobot {item.program_bobot}%
+                          <span className="inline-block text-[10px] font-bold text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded mt-0.5">
+                            Bobot: {item.program_bobot}%
                           </span>
                         </td>
 
@@ -643,15 +637,6 @@ export function AssessmentsPage() {
                 placeholder="Pilih program pembinaan..."
                 isClearable={false}
               />
-              {/* [REV0033] Auto-detection category indicator */}
-              {form.program && (
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
-                  <span>Kategori Terdeteksi Otomatis:</span>
-                  <span className="font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                    {form.program.kategori || 'SPPN'}
-                  </span>
-                </div>
-              )}
             </div>
           </div>
 

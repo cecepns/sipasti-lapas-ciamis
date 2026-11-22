@@ -169,9 +169,7 @@ export function PanduanPage({ isPublic = false }) {
                   Bab 1: Konsep & Formula Resmi Perhitungan SPPN & PPKS
                 </h2>
                 <p className="text-sm text-slate-600 mt-1">
-                  SIPASTI Lapas Kelas IIB Ciamis menerapkan pemisahan kalkulasi yang tegas antara instrumen kuantitatif{' '}
-                  <strong>SPPN (Nilai Utama)</strong> dan instrumen kualitatif{' '}
-                  <strong>PPKS (Kualitatif Komplementer)</strong>. Keduanya memiliki fungsi dan skala penilaian yang berbeda.
+                  Kombinasi kuantitatif SPPN dan kualitatif PPKS menghadirkan tolak ukur pembinaan spiritual yang objektif sehingga setiap keputusan pengusulan remisi dan pembebasan bersyarat warga binaan didasarkan pada data yang akurat, transparan, dan terverifikasi.
                 </p>
               </div>
 
@@ -464,16 +462,8 @@ export function PanduanPage({ isPublic = false }) {
                       <Award className="h-4 w-4 text-amber-600" /> B. Program PPKS (Kualitatif Komplementer)
                     </p>
                     <ol className="list-decimal pl-4 space-y-1.5 text-xs text-slate-600">
-                      <li>Pilih nama WBP dan program spiritual berkategori PPKS (misal: <em>Kajian Fiqih, Konseling Rohani, PHBI</em>).</li>
-                      <li>Sistem otomatis menampilkan rubrik penilaian <strong>5 Sub-Indikator Karakter Spiritual (Skala 1 - 5)</strong>:
-                        <ul className="list-disc pl-4 mt-1 space-y-0.5 text-[11px] text-slate-500">
-                          <li><strong>Sub 1 (Ibadah):</strong> Praktik dan ketertiban ibadah wajib &amp; sunnah.</li>
-                          <li><strong>Sub 2 (Pemahaman):</strong> Daya serap materi aqidah dan nilai moral.</li>
-                          <li><strong>Sub 3 (Disiplin):</strong> Ketaatan aturan, hadir tepat waktu, tata tertib.</li>
-                          <li><strong>Sub 4 (Akhlak):</strong> Sopan santun, tutur kata, adab pergaulan.</li>
-                          <li><strong>Sub 5 (Sosial):</strong> Sikap rukun, toleransi, tolong-menolong antar WBP.</li>
-                        </ul>
-                      </li>
+                      <li>Pilih nama WBP dan program spiritual.</li>
+                      <li>Sistem otomatis menampilkan penilaian karakter spiritual skala 1-5.</li>
                       <li>Beri skor (1 = Sangat Kurang, 2 = Kurang, 3 = Cukup, 4 = Baik, 5 = Sangat Baik).</li>
                       <li>Sistem otomatis merata-ratakan skor menjadi nilai komposit indeks PPKS (skala 1.00 - 5.00).</li>
                     </ol>

@@ -363,7 +363,23 @@ app.get('/api/health', async (_req, res) => {
 
 app.get('/api/public/summary', async (req, res, next) => {
   try {
-    const { startDate, endDate } = req.query;
+    let { startDate, endDate, triwulan } = req.query;
+    if (triwulan) {
+      const tw = String(triwulan).toLowerCase();
+      if (tw === 'tw4' || tw === 'tw-4') {
+        startDate = '2026-10-01';
+        endDate = '2026-12-31';
+      } else if (tw === 'tw3' || tw === 'tw-3') {
+        startDate = '2026-07-01';
+        endDate = '2026-09-30';
+      } else if (tw === 'tw2' || tw === 'tw-2') {
+        startDate = '2026-04-01';
+        endDate = '2026-06-30';
+      } else if (tw === 'tw1' || tw === 'tw-1') {
+        startDate = '2026-01-01';
+        endDate = '2026-03-31';
+      }
+    }
     const where = [];
     const params = [];
     appendDateRange(where, params, 'a.tanggal', startDate, endDate);
