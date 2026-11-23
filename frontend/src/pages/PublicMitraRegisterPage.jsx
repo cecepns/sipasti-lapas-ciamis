@@ -26,11 +26,16 @@ export function PublicMitraRegisterPage() {
     }
     setSubmitting(true);
     try {
-      const res = await request.post(API_ENDPOINTS.PUBLIC.MITRA_REGISTER, form);
-      toast.success(res.message || 'Registrasi Mitra berhasil dikirim!');
+      const isWaliPas = form.peran_asesor === 'Wali PAS Pembina';
+      const payload = {
+        ...form,
+        role: isWaliPas ? 'wali_pas' : 'mitra',
+      };
+      const res = await request.post(API_ENDPOINTS.PUBLIC.MITRA_REGISTER, payload);
+      toast.success(res.message || `Registrasi ${isWaliPas ? 'Wali PAS' : 'Mitra'} berhasil dikirim!`);
       setSubmitted(true);
     } catch (err) {
-      toast.error(extractErrorMessage(err, 'Gagal mengirim registrasi mitra'));
+      toast.error(extractErrorMessage(err, 'Gagal mengirim registrasi'));
     } finally {
       setSubmitting(false);
     }
@@ -55,8 +60,10 @@ export function PublicMitraRegisterPage() {
               </div>
               <h2 className="text-2xl font-extrabold text-slate-900">Registrasi Terkirim!</h2>
               <p className="text-sm text-slate-600 max-w-md mx-auto">
-                Terima kasih atas pendaftaran Anda sebagai Mitra Pembinaan Spiritual Lapas Kelas IIB
-                Ciamis. Admin akan memverifikasi data dan mengaktifkan akun asesor SIPASTI Anda.
+                Terima kasih atas pendaftaran Anda sebagai{' '}
+                <strong className="text-emerald-800">{form.peran_asesor || 'Mitra Pembina Spiritual'}</strong>.
+                Admin Lapas Kelas IIB Ciamis akan memverifikasi data dan mengaktifkan akun asesor SIPASTI Anda
+                (Hak Akses Role: <strong className="text-slate-900">{form.peran_asesor === 'Wali PAS Pembina' ? 'Wali PAS' : 'Mitra Keagamaan'}</strong>).
               </p>
               <div className="pt-2 flex justify-center gap-3">
                 <Link
@@ -131,14 +138,24 @@ export function PublicMitraRegisterPage() {
                     </label>
                     <select
                       value={form.peran_asesor}
-                      onChange={(e) => setForm({ ...form, peran_asesor: e.target.value })}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setForm((prev) => ({
+                          ...prev,
+                          peran_asesor: val,
+                          lembaga_instansi:
+                            val === 'Wali PAS Pembina' && (!prev.lembaga_instansi || prev.lembaga_instansi.includes('Kemenag'))
+                              ? 'Lapas Kelas IIB Ciamis'
+                              : prev.lembaga_instansi,
+                        }));
+                      }}
                       className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 bg-white"
                     >
-                      <option value="Mitra Pembina Spiritual">Mitra Pembina Spiritual</option>
+                      <option value="Mitra Pembina Spiritual">Mitra Pembina Spiritual (Eksternal)</option>
                       <option value="Penyuluh Agama Islam (Kemenag)">Penyuluh Agama Islam (Kemenag)</option>
                       <option value="Ustadz / Pengajar Pesantren">Ustadz / Pengajar Pesantren</option>
                       <option value="Rohaniwan / Konselor Keagamaan">Rohaniwan / Konselor Keagamaan</option>
-                      <option value="Wali PAS Pembina">Wali PAS Pembina</option>
+                      <option value="Wali PAS Pembina">Wali PAS Pembina (Petugas Lapas Ciamis)</option>
                     </select>
                   </div>
 
@@ -203,7 +220,9 @@ export function PublicMitraRegisterPage() {
                   className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-emerald-700 disabled:opacity-60 transition-all"
                 >
                   {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  {submitting ? 'Mengirim Pendaftaran...' : 'Kirim Registrasi Mitra'}
+                  {submitting
+                    ? 'Mengirim Pendaftaran...'
+                    : `Kirim Registrasi ${form.peran_asesor === 'Wali PAS Pembina' ? 'Wali PAS' : 'Mitra'}`}
                 </button>
               </form>
             </>

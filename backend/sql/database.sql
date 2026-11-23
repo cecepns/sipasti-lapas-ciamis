@@ -111,6 +111,7 @@ CREATE TABLE `mitra_registrations` (
   `user_id` INT UNSIGNED NULL,
   `nama_lengkap` VARCHAR(150) NOT NULL,
   `lembaga_instansi` VARCHAR(160) NOT NULL,
+  `peran_asesor` VARCHAR(100) NULL DEFAULT 'Mitra Pembina Spiritual',
   `bidang_keahlian` VARCHAR(150) NOT NULL,
   `email` VARCHAR(150) NOT NULL,
   `no_hp` VARCHAR(30) NOT NULL,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Edit3, Handshake, Loader2, Plus, Trash2 } from 'lucide-react';
+import { Edit3, Handshake, Loader2, Plus, Trash2, UserCheck } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '@/context/AuthContext';
 import { request, extractErrorMessage } from '@/utils/request';
@@ -19,14 +19,21 @@ import { formatDate, toIsoDate } from '@/utils/formatters';
 
 const STATUS_OPTIONS = [
   { value: 'pending', label: 'Menunggu Persetujuan' },
-  { value: 'disetujui', label: 'Disetujui (Aktifkan Akun Mitra)' },
+  { value: 'disetujui', label: 'Disetujui (Aktifkan Akun Login)' },
   { value: 'ditolak', label: 'Ditolak' },
+];
+
+const ROLE_OPTIONS = [
+  { value: 'wali_pas', label: 'Wali PAS (Petugas Lapas Ciamis)' },
+  { value: 'mitra', label: 'Mitra Keagamaan (Eksternal / Ormas / Kemenag)' },
 ];
 
 const EMPTY_FORM = {
   id: null,
   nama_lengkap: '',
   lembaga_instansi: '',
+  peran_asesor: 'Mitra Pembina Spiritual',
+  role: ROLE_OPTIONS[1],
   bidang_keahlian: '',
   email: '',
   no_hp: '',
@@ -86,10 +93,21 @@ export function MitraPage() {
   };
 
   const openEdit = (item) => {
+    const isWaliPas =
+      item.role === 'wali_pas' ||
+      (item.peran_asesor && item.peran_asesor.toLowerCase().includes('wali pas')) ||
+      (item.bidang_keahlian && item.bidang_keahlian.toLowerCase().includes('wali pas'));
+
+    const selectedRole =
+      ROLE_OPTIONS.find((r) => r.value === (item.role || (isWaliPas ? 'wali_pas' : 'mitra'))) ||
+      (isWaliPas ? ROLE_OPTIONS[0] : ROLE_OPTIONS[1]);
+
     setForm({
       id: item.id,
       nama_lengkap: item.nama_lengkap || '',
       lembaga_instansi: item.lembaga_instansi || '',
+      peran_asesor: item.peran_asesor || (isWaliPas ? 'Wali PAS Pembina' : 'Mitra Pembina Spiritual'),
+      role: selectedRole,
       bidang_keahlian: item.bidang_keahlian || '',
       email: item.email || '',
       no_hp: item.no_hp || '',
@@ -109,19 +127,21 @@ export function MitraPage() {
     try {
       const payload = {
         ...form,
+        role: form.role?.value || (form.peran_asesor?.toLowerCase().includes('wali pas') ? 'wali_pas' : 'mitra'),
+        peran_asesor: form.peran_asesor || (form.role?.value === 'wali_pas' ? 'Wali PAS Pembina' : 'Mitra Pembina Spiritual'),
         status: form.status?.value || 'pending',
       };
       if (form.id) {
         await request.put(API_ENDPOINTS.MITRA.DETAIL(form.id), payload);
-        toast.success('Data mitra berhasil diperbarui');
+        toast.success(`Data ${payload.role === 'wali_pas' ? 'Wali PAS' : 'Mitra'} berhasil diperbarui`);
       } else {
         await request.post(API_ENDPOINTS.MITRA.LIST, payload);
-        toast.success('Registrasi mitra berhasil ditambahkan');
+        toast.success(`Registrasi ${payload.role === 'wali_pas' ? 'Wali PAS' : 'Mitra'} berhasil ditambahkan`);
       }
       setModalOpen(false);
       fetchData();
     } catch (err) {
-      toast.error(extractErrorMessage(err, 'Gagal menyimpan data mitra'));
+      toast.error(extractErrorMessage(err, 'Gagal menyimpan data'));
     } finally {
       setSaving(false);
     }
@@ -209,7 +229,8 @@ export function MitraPage() {
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 border-b border-slate-100 text-xs font-bold uppercase text-slate-500">
                   <tr>
-                    <th className="px-4 py-3.5">Mitra & Lembaga</th>
+                    <th className="px-4 py-3.5">Nama & Lembaga</th>
+                    <th className="px-4 py-3.5">Peran / Hak Akses</th>
                     <th className="px-4 py-3.5">Bidang Keahlian</th>
                     <th className="px-4 py-3.5">Kontak</th>
                     <th className="px-4 py-3.5">Tanggal Daftar</th>
@@ -218,56 +239,77 @@ export function MitraPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {rows.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/70">
-                      <td className="px-4 py-3.5">
-                        <p className="font-bold text-slate-900">{item.nama_lengkap}</p>
-                        <p className="text-xs text-slate-500">{item.lembaga_instansi}</p>
-                      </td>
-                      <td className="px-4 py-3.5 text-xs text-slate-700">{item.bidang_keahlian}</td>
-                      <td className="px-4 py-3.5 text-xs text-slate-600">
-                        <p>{item.email}</p>
-                        <p className="text-slate-400">{item.no_hp}</p>
-                      </td>
-                      <td className="px-4 py-3.5 text-xs text-slate-500">{formatDate(item.created_at)}</td>
-                      <td className="px-4 py-3.5 text-center">
-                        <StatusBadge
-                          label={item.status}
-                          variant={
-                            item.status === 'disetujui'
-                              ? 'emerald'
-                              : item.status === 'ditolak'
-                              ? 'rose'
-                              : 'amber'
-                          }
-                        />
-                      </td>
-                      {canCreate && (
-                        <td className="px-4 py-3.5 text-right whitespace-nowrap">
-                          <div className="inline-flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={() => openEdit(item)}
-                              className="rounded-lg p-1.5 text-amber-600 hover:bg-amber-50"
-                              title="Edit / Verifikasi Mitra"
-                            >
-                              <Edit3 className="h-4 w-4" />
-                            </button>
-                            {isAdmin && (
+                  {rows.map((item) => {
+                    const isWaliPas =
+                      item.role === 'wali_pas' ||
+                      (item.peran_asesor && item.peran_asesor.toLowerCase().includes('wali pas')) ||
+                      (item.bidang_keahlian && item.bidang_keahlian.toLowerCase().includes('wali pas'));
+
+                    return (
+                      <tr key={item.id} className="hover:bg-slate-50/70">
+                        <td className="px-4 py-3.5">
+                          <p className="font-bold text-slate-900">{item.nama_lengkap}</p>
+                          <p className="text-xs text-slate-500">{item.lembaga_instansi}</p>
+                        </td>
+                        <td className="px-4 py-3.5">
+                          {isWaliPas ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                              <UserCheck className="w-3.5 h-3.5" />
+                              Wali PAS
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <Handshake className="w-3.5 h-3.5" />
+                              Mitra Keagamaan
+                            </span>
+                          )}
+                          <p className="text-[11px] text-slate-500 mt-1">{item.peran_asesor || '-'}</p>
+                        </td>
+                        <td className="px-4 py-3.5 text-xs text-slate-700">{item.bidang_keahlian}</td>
+                        <td className="px-4 py-3.5 text-xs text-slate-600">
+                          <p>{item.email}</p>
+                          <p className="text-slate-400">{item.no_hp}</p>
+                        </td>
+                        <td className="px-4 py-3.5 text-xs text-slate-500">{formatDate(item.created_at)}</td>
+                        <td className="px-4 py-3.5 text-center">
+                          <StatusBadge
+                            label={item.status}
+                            variant={
+                              item.status === 'disetujui'
+                                ? 'emerald'
+                                : item.status === 'ditolak'
+                                ? 'rose'
+                                : 'amber'
+                            }
+                          />
+                        </td>
+                        {canCreate && (
+                          <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                            <div className="inline-flex items-center gap-1">
                               <button
                                 type="button"
-                                onClick={() => handleDelete(item)}
-                                className="rounded-lg p-1.5 text-rose-600 hover:bg-rose-50"
-                                title="Hapus Mitra"
+                                onClick={() => openEdit(item)}
+                                className="rounded-lg p-1.5 text-amber-600 hover:bg-amber-50"
+                                title="Edit / Verifikasi Akun"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Edit3 className="h-4 w-4" />
                               </button>
-                            )}
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
+                              {isAdmin && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDelete(item)}
+                                  className="rounded-lg p-1.5 text-rose-600 hover:bg-rose-50"
+                                  title="Hapus Registrasi"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -283,7 +325,7 @@ export function MitraPage() {
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title={form.id ? 'Edit / Persetujuan Registrasi Mitra' : 'Input Data Mitra Baru'}
+        title={form.id ? 'Edit / Persetujuan Registrasi Akun Asesor' : 'Input Data Akun Asesor Baru'}
         size="lg"
       >
         <form onSubmit={handleSave} className="space-y-4">
@@ -310,13 +352,55 @@ export function MitraPage() {
             </div>
           </div>
 
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Hak Akses Akun (Role) *
+              </label>
+              <SelectInput
+                options={ROLE_OPTIONS}
+                value={form.role}
+                onChange={(v) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    role: v,
+                    peran_asesor:
+                      v?.value === 'wali_pas'
+                        ? 'Wali PAS Pembina'
+                        : prev.peran_asesor === 'Wali PAS Pembina'
+                        ? 'Mitra Pembina Spiritual'
+                        : prev.peran_asesor,
+                    lembaga_instansi:
+                      v?.value === 'wali_pas' && (!prev.lembaga_instansi || prev.lembaga_instansi.includes('Kemenag'))
+                        ? 'Lapas Kelas IIB Ciamis'
+                        : prev.lembaga_instansi,
+                  }));
+                }}
+                isClearable={false}
+                isSearchable={false}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Peran / Kategori Asesor *</label>
+              <input
+                type="text"
+                required
+                value={form.peran_asesor}
+                onChange={(e) => setForm({ ...form, peran_asesor: e.target.value })}
+                placeholder="Misal: Wali PAS Pembina atau Mitra Pembina Spiritual"
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Bidang Keahlian *</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Bidang Keahlian / Tugas Asesor *</label>
             <input
               type="text"
               required
               value={form.bidang_keahlian}
               onChange={(e) => setForm({ ...form, bidang_keahlian: e.target.value })}
+              placeholder="Misal: Wali PAS Kamar C / Pembina Spiritual / Tahsin Al-Quran"
               className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
             />
           </div>
@@ -358,7 +442,7 @@ export function MitraPage() {
             <>
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Status Persetujuan (Disetujui otomatis membuat akun login Mitra)
+                  Status Persetujuan (Disetujui otomatis mengaktifkan akun login dengan hak akses di atas)
                 </label>
                 <SelectInput
                   options={STATUS_OPTIONS}
@@ -394,7 +478,7 @@ export function MitraPage() {
               className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-              Simpan Mitra
+              Simpan Data
             </button>
           </div>
         </form>

@@ -138,7 +138,7 @@ export function LoginPage() {
           </form>
 
           {/* Quick demo role picker */}
-          <div className="mt-6 pt-5 border-t border-slate-100">
+          {/* <div className="mt-6 pt-5 border-t border-slate-100">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">
               Akses Demo Cepat (Sandi: sipasti123)
             </p>
@@ -157,7 +157,7 @@ export function LoginPage() {
                 </button>
               ))}
             </div>
-          </div>
+          </div> */}
 
           {/* [REV0009] Ubah teks link registrasi */}
           <div className="mt-5 text-center text-xs text-slate-500">

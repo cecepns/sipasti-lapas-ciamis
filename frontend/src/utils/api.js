@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.kingcreativestudio.my.id/sipasti-lapas/api';
-export const ASSET_BASE_URL = import.meta.env.VITE_ASSET_URL || 'https://api.kingcreativestudio.my.id/sipasti-lapas';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.sipastilapasciamis.my.id/api';
+export const ASSET_BASE_URL = import.meta.env.VITE_ASSET_URL || 'https://api.sipastilapasciamis.my.id';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,

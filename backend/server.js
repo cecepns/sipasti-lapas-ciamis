@@ -39,6 +39,24 @@ const pool = mysql.createPool({
   timezone: '+07:00',
 });
 
+// Ensure database columns exist (e.g. peran_asesor on mitra_registrations)
+(async () => {
+  try {
+    const [cols] = await pool.query(
+      `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'mitra_registrations' AND COLUMN_NAME = 'peran_asesor'`
+    );
+    if (!cols || cols.length === 0) {
+      await pool.query(
+        `ALTER TABLE mitra_registrations ADD COLUMN peran_asesor VARCHAR(100) NULL DEFAULT 'Mitra Pembina Spiritual' AFTER lembaga_instansi`
+      );
+      console.log('[DB Init] Column peran_asesor added to mitra_registrations');
+    }
+  } catch (err) {
+    console.warn('[DB Init Warning]:', err.message);
+  }
+})();
+
 // ============================================================================
 // MIDDLEWARES
 // ============================================================================
@@ -616,11 +634,12 @@ app.post('/api/public/absensi', uploadAbsensi.single('foto_selfie'), async (req,
   }
 });
 
-// Public Registrasi Mitra
+// Public Registrasi Mitra & Wali PAS
 app.post('/api/public/mitra-register', async (req, res, next) => {
   try {
     const nama_lengkap = sanitizeStr(req.body.nama_lengkap, 150);
     const lembaga_instansi = sanitizeStr(req.body.lembaga_instansi, 160);
+    const peran_asesor = sanitizeStr(req.body.peran_asesor, 100) || 'Mitra Pembina Spiritual';
     const bidang_keahlian = sanitizeStr(req.body.bidang_keahlian, 150);
     const email = sanitizeStr(req.body.email, 150)?.toLowerCase();
     const no_hp = sanitizeStr(req.body.no_hp, 30);
@@ -633,16 +652,30 @@ app.post('/api/public/mitra-register', async (req, res, next) => {
       });
     }
 
-    const [result] = await pool.query(
-      `INSERT INTO mitra_registrations (nama_lengkap, lembaga_instansi, bidang_keahlian, email, no_hp, alamat, status)
-       VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
-      [nama_lengkap, lembaga_instansi, bidang_keahlian, email, no_hp, alamat]
-    );
+    let insertId;
+    try {
+      const [result] = await pool.query(
+        `INSERT INTO mitra_registrations (nama_lengkap, lembaga_instansi, peran_asesor, bidang_keahlian, email, no_hp, alamat, status)
+         VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`,
+        [nama_lengkap, lembaga_instansi, peran_asesor, bidang_keahlian, email, no_hp, alamat]
+      );
+      insertId = result.insertId;
+    } catch (_insErr) {
+      // Fallback if peran_asesor column is missing in legacy schema
+      const bkWithPeran = bidang_keahlian ? `[Peran: ${peran_asesor}] ${bidang_keahlian}` : `[Peran: ${peran_asesor}]`;
+      const [result] = await pool.query(
+        `INSERT INTO mitra_registrations (nama_lengkap, lembaga_instansi, bidang_keahlian, email, no_hp, alamat, status)
+         VALUES (?, ?, ?, ?, ?, ?, 'pending')`,
+        [nama_lengkap, lembaga_instansi, bkWithPeran, email, no_hp, alamat]
+      );
+      insertId = result.insertId;
+    }
 
+    const isWaliPas = peran_asesor.toLowerCase().includes('wali pas');
     return res.status(201).json({
       success: true,
-      message: 'Registrasi Mitra berhasil dikirim. Menunggu persetujuan Admin Lapas Ciamis.',
-      data: { id: result.insertId, nama_lengkap, email, status: 'pending' },
+      message: `Registrasi ${isWaliPas ? 'Wali PAS' : 'Mitra'} berhasil dikirim. Menunggu persetujuan Admin Lapas Ciamis.`,
+      data: { id: insertId, nama_lengkap, email, peran_asesor, status: 'pending' },
     });
   } catch (err) {
     return next(err);
@@ -997,7 +1030,7 @@ app.get('/api/mitra', authenticate, async (req, res, next) => {
 
     const [[countRow]] = await pool.query(`SELECT COUNT(*) AS total FROM mitra_registrations m ${whereSql}`, params);
     const [rows] = await pool.query(
-      `SELECT m.*, u.status AS user_status
+      `SELECT m.*, u.status AS user_status, u.role AS user_role
        FROM mitra_registrations m
        LEFT JOIN users u ON u.id = m.user_id
        ${whereSql}
@@ -1006,7 +1039,30 @@ app.get('/api/mitra', authenticate, async (req, res, next) => {
       [...params, limit, offset]
     );
 
-    return paginatedResponse(res, rows, countRow.total, page, limit);
+    const formattedRows = rows.map((r) => {
+      let peran = r.peran_asesor;
+      if (!peran) {
+        if (r.bidang_keahlian && r.bidang_keahlian.includes('[Peran:')) {
+          const m = r.bidang_keahlian.match(/\[Peran:\s*([^\]]+)\]/);
+          if (m) peran = m[1].trim();
+        } else if (r.catatan_admin && r.catatan_admin.includes('[Peran:')) {
+          const m = r.catatan_admin.match(/\[Peran:\s*([^\]]+)\]/);
+          if (m) peran = m[1].trim();
+        } else if (r.user_role === 'wali_pas') {
+          peran = 'Wali PAS Pembina';
+        } else {
+          peran = 'Mitra Pembina Spiritual';
+        }
+      }
+      const isWaliPas = String(peran).toLowerCase().includes('wali pas') || r.user_role === 'wali_pas';
+      return {
+        ...r,
+        peran_asesor: peran,
+        role: r.user_role || (isWaliPas ? 'wali_pas' : 'mitra'),
+      };
+    });
+
+    return paginatedResponse(res, formattedRows, countRow.total, page, limit);
   } catch (err) {
     return next(err);
   }
@@ -1016,6 +1072,7 @@ app.post('/api/mitra', authenticate, authorize('admin', 'mitra'), async (req, re
   try {
     const nama_lengkap = sanitizeStr(req.body.nama_lengkap, 150);
     const lembaga_instansi = sanitizeStr(req.body.lembaga_instansi, 160);
+    const peran_asesor = sanitizeStr(req.body.peran_asesor, 100) || 'Mitra Pembina Spiritual';
     const bidang_keahlian = sanitizeStr(req.body.bidang_keahlian, 150);
     const email = sanitizeStr(req.body.email, 150)?.toLowerCase();
     const no_hp = sanitizeStr(req.body.no_hp, 30);
@@ -1024,6 +1081,10 @@ app.post('/api/mitra', authenticate, authorize('admin', 'mitra'), async (req, re
       ? req.body.status
       : 'pending';
     const catatan_admin = sanitizeStr(req.body.catatan_admin, 500);
+
+    const isWaliPas = (req.body.role === 'wali_pas') || peran_asesor.toLowerCase().includes('wali pas');
+    const targetRole = req.body.role ? sanitizeStr(req.body.role, 30) : (isWaliPas ? 'wali_pas' : 'mitra');
+    const targetJabatan = targetRole === 'wali_pas' ? 'Wali PAS Pembina' : (bidang_keahlian || 'Mitra Pembina Spiritual');
 
     if (!nama_lengkap || !lembaga_instansi || !bidang_keahlian || !email || !no_hp) {
       return res.status(400).json({ success: false, message: 'Semua field wajib mitra harus diisi' });
@@ -1034,26 +1095,41 @@ app.post('/api/mitra', authenticate, authorize('admin', 'mitra'), async (req, re
       const [[existingUser]] = await pool.query(`SELECT id FROM users WHERE email = ?`, [email]);
       if (existingUser) {
         userId = existingUser.id;
-        await pool.query(`UPDATE users SET status = 'aktif' WHERE id = ?`, [userId]);
+        await pool.query(
+          `UPDATE users SET nama=?, role=?, instansi=?, jabatan=?, no_hp=?, status='aktif' WHERE id=?`,
+          [nama_lengkap, targetRole, lembaga_instansi, targetJabatan, no_hp, userId]
+        );
       } else {
         const hash = await bcrypt.hash(String(req.body.password || 'sipasti123'), 10);
         const [uRes] = await pool.query(
           `INSERT INTO users (nama, email, password_hash, role, instansi, jabatan, no_hp, status)
-           VALUES (?, ?, ?, 'mitra', ?, ?, ?, 'aktif')`,
-          [nama_lengkap, email, hash, lembaga_instansi, bidang_keahlian, no_hp]
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'aktif')`,
+          [nama_lengkap, email, hash, targetRole, lembaga_instansi, targetJabatan, no_hp]
         );
         userId = uRes.insertId;
       }
     }
 
-    const [result] = await pool.query(
-      `INSERT INTO mitra_registrations (user_id, nama_lengkap, lembaga_instansi, bidang_keahlian, email, no_hp, alamat, status, catatan_admin)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [userId, nama_lengkap, lembaga_instansi, bidang_keahlian, email, no_hp, alamat, status, catatan_admin]
-    );
+    let result;
+    try {
+      const [resInsert] = await pool.query(
+        `INSERT INTO mitra_registrations (user_id, nama_lengkap, lembaga_instansi, peran_asesor, bidang_keahlian, email, no_hp, alamat, status, catatan_admin)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [userId, nama_lengkap, lembaga_instansi, peran_asesor, bidang_keahlian, email, no_hp, alamat, status, catatan_admin]
+      );
+      result = resInsert;
+    } catch (_insErr) {
+      const bkWithPeran = bidang_keahlian ? `[Peran: ${peran_asesor}] ${bidang_keahlian}` : `[Peran: ${peran_asesor}]`;
+      const [resInsert] = await pool.query(
+        `INSERT INTO mitra_registrations (user_id, nama_lengkap, lembaga_instansi, bidang_keahlian, email, no_hp, alamat, status, catatan_admin)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [userId, nama_lengkap, lembaga_instansi, bkWithPeran, email, no_hp, alamat, status, catatan_admin]
+      );
+      result = resInsert;
+    }
 
     const [[created]] = await pool.query(`SELECT * FROM mitra_registrations WHERE id = ?`, [result.insertId]);
-    return res.status(201).json({ success: true, message: 'Data mitra berhasil disimpan', data: created });
+    return res.status(201).json({ success: true, message: 'Data registrasi berhasil disimpan', data: created });
   } catch (err) {
     return next(err);
   }
@@ -1067,6 +1143,7 @@ app.put('/api/mitra/:id', authenticate, authorize('admin', 'mitra'), async (req,
 
     const nama_lengkap = sanitizeStr(req.body.nama_lengkap, 150) || existing.nama_lengkap;
     const lembaga_instansi = sanitizeStr(req.body.lembaga_instansi, 160) || existing.lembaga_instansi;
+    const peran_asesor = sanitizeStr(req.body.peran_asesor, 100) || existing.peran_asesor || 'Mitra Pembina Spiritual';
     const bidang_keahlian = sanitizeStr(req.body.bidang_keahlian, 150) || existing.bidang_keahlian;
     const email = sanitizeStr(req.body.email, 150)?.toLowerCase() || existing.email;
     const no_hp = sanitizeStr(req.body.no_hp, 30) || existing.no_hp;
@@ -1076,24 +1153,35 @@ app.put('/api/mitra/:id', authenticate, authorize('admin', 'mitra'), async (req,
       : existing.status;
     const catatan_admin = sanitizeStr(req.body.catatan_admin, 500);
 
+    const isWaliPas = (req.body.role === 'wali_pas') ||
+      (peran_asesor && String(peran_asesor).toLowerCase().includes('wali pas')) ||
+      (existing.bidang_keahlian && existing.bidang_keahlian.toLowerCase().includes('wali pas')) ||
+      (existing.catatan_admin && existing.catatan_admin.toLowerCase().includes('wali pas'));
+
+    const targetRole = req.body.role ? sanitizeStr(req.body.role, 30) : (isWaliPas ? 'wali_pas' : 'mitra');
+    const targetJabatan = targetRole === 'wali_pas' ? 'Wali PAS Pembina' : (bidang_keahlian || 'Mitra Pembina Spiritual');
+
     let userId = existing.user_id;
     if (status === 'disetujui') {
       if (userId) {
         await pool.query(
-          `UPDATE users SET nama=?, instansi=?, jabatan=?, no_hp=?, status='aktif' WHERE id=?`,
-          [nama_lengkap, lembaga_instansi, bidang_keahlian, no_hp, userId]
+          `UPDATE users SET nama=?, role=?, instansi=?, jabatan=?, no_hp=?, status='aktif' WHERE id=?`,
+          [nama_lengkap, targetRole, lembaga_instansi, targetJabatan, no_hp, userId]
         );
       } else {
         const [[existingUser]] = await pool.query(`SELECT id FROM users WHERE email = ?`, [email]);
         if (existingUser) {
           userId = existingUser.id;
-          await pool.query(`UPDATE users SET status = 'aktif' WHERE id = ?`, [userId]);
+          await pool.query(
+            `UPDATE users SET nama=?, role=?, instansi=?, jabatan=?, no_hp=?, status='aktif' WHERE id=?`,
+            [nama_lengkap, targetRole, lembaga_instansi, targetJabatan, no_hp, userId]
+          );
         } else {
           const hash = await bcrypt.hash('sipasti123', 10);
           const [uRes] = await pool.query(
             `INSERT INTO users (nama, email, password_hash, role, instansi, jabatan, no_hp, status)
-             VALUES (?, ?, ?, 'mitra', ?, ?, ?, 'aktif')`,
-            [nama_lengkap, email, hash, lembaga_instansi, bidang_keahlian, no_hp]
+             VALUES (?, ?, ?, ?, ?, ?, ?, 'aktif')`,
+            [nama_lengkap, email, hash, targetRole, lembaga_instansi, targetJabatan, no_hp]
           );
           userId = uRes.insertId;
         }
@@ -1102,15 +1190,28 @@ app.put('/api/mitra/:id', authenticate, authorize('admin', 'mitra'), async (req,
       await pool.query(`UPDATE users SET status = 'nonaktif' WHERE id = ?`, [userId]);
     }
 
-    await pool.query(
-      `UPDATE mitra_registrations
-       SET user_id=?, nama_lengkap=?, lembaga_instansi=?, bidang_keahlian=?, email=?, no_hp=?, alamat=?, status=?, catatan_admin=?
-       WHERE id=?`,
-      [userId, nama_lengkap, lembaga_instansi, bidang_keahlian, email, no_hp, alamat, status, catatan_admin, id]
-    );
+    try {
+      await pool.query(
+        `UPDATE mitra_registrations
+         SET user_id=?, nama_lengkap=?, lembaga_instansi=?, peran_asesor=?, bidang_keahlian=?, email=?, no_hp=?, alamat=?, status=?, catatan_admin=?
+         WHERE id=?`,
+        [userId, nama_lengkap, lembaga_instansi, peran_asesor, bidang_keahlian, email, no_hp, alamat, status, catatan_admin, id]
+      );
+    } catch (_uErr) {
+      await pool.query(
+        `UPDATE mitra_registrations
+         SET user_id=?, nama_lengkap=?, lembaga_instansi=?, bidang_keahlian=?, email=?, no_hp=?, alamat=?, status=?, catatan_admin=?
+         WHERE id=?`,
+        [userId, nama_lengkap, lembaga_instansi, bidang_keahlian, email, no_hp, alamat, status, catatan_admin, id]
+      );
+    }
 
     const [[updated]] = await pool.query(`SELECT * FROM mitra_registrations WHERE id = ?`, [id]);
-    return res.json({ success: true, message: 'Data mitra berhasil diperbarui', data: updated });
+    return res.json({
+      success: true,
+      message: `Data pendaftaran berhasil diperbarui (Role akun: ${targetRole === 'wali_pas' ? 'Wali PAS' : 'Mitra Keagamaan'})`,
+      data: { ...updated, role: targetRole, peran_asesor },
+    });
   } catch (err) {
     return next(err);
   }
