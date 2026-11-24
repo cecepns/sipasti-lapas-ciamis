@@ -31,6 +31,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { INSTRUMEN_INFO, REKOMENDASI_RULES } from '@/utils/formatters';
+import bukuPanduanPdf from '@/assets/BUKU_PANDUAN_PENGGUNAAN_SISTEM.pdf';
 
 const CHAPTERS = [
   { id: 'konsep', label: '1. Rumus SPPN & PPKS', icon: BookOpen },
@@ -124,16 +125,28 @@ export function PanduanPage({ isPublic = false }) {
             </p>
           </div>
 
-          <a
-            href="/sop-sipasti.pdf"
-            download="SOP SISTEM PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI (SI PASTI).pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-800 transition-colors shrink-0"
-          >
-            <FileDown className="h-4 w-4" />
-            Unduh Dokumen SOP Resmi (PDF)
-          </a>
+          <div className="flex flex-wrap items-center gap-2">
+            <a
+              href={bukuPanduanPdf || '/buku-panduan-sipasti.pdf'}
+              download="BUKU_PANDUAN_PENGGUNAAN_SISTEM.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-xs hover:bg-emerald-800 transition-colors shrink-0"
+            >
+              <FileDown className="h-4 w-4" />
+              Unduh Buku Panduan Sistem (PDF)
+            </a>
+            <a
+              href="/sop-sipasti.pdf"
+              download="SOP SISTEM PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI (SI PASTI).pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white border border-slate-200 px-3.5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-xs hover:bg-slate-50 hover:text-emerald-700 transition-colors shrink-0"
+            >
+              <FileText className="h-4 w-4 text-emerald-700" />
+              Unduh Dokumen SOP (PDF)
+            </a>
+          </div>
         </div>
 
         {/* Chapter Navigation */}
@@ -408,16 +421,28 @@ export function PanduanPage({ isPublic = false }) {
                   </div>
                 </div>
 
-                <a
-                  href="/sop-sipasti.pdf"
-                  download="SOP SISTEM PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI (SI PASTI).pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-amber-700 transition-colors shrink-0 w-full sm:w-auto"
-                >
-                  <FileDown className="h-4 w-4" />
-                  Unduh Dokumen SOP Resmi (PDF)
-                </a>
+                <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                  <a
+                    href={bukuPanduanPdf || '/buku-panduan-sipasti.pdf'}
+                    download="BUKU_PANDUAN_PENGGUNAAN_SISTEM.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-700 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-emerald-800 transition-colors shrink-0 flex-1 sm:flex-none"
+                  >
+                    <FileDown className="h-4 w-4" />
+                    Unduh Buku Panduan Sistem (PDF)
+                  </a>
+                  <a
+                    href="/sop-sipasti.pdf"
+                    download="SOP SISTEM PENILAIAN AKTIVITAS SPIRITUAL TERINTEGRASI (SI PASTI).pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm hover:bg-amber-700 transition-colors shrink-0 flex-1 sm:flex-none"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Unduh Dokumen SOP (PDF)
+                  </a>
+                </div>
               </div>
 
               {/* Step 1: Penilaian SPPN & PPKS */}
